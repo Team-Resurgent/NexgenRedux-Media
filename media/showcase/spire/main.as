@@ -11,6 +11,7 @@ class SpireScreen : Screen
     Sound@ turnSound = Assets::sound("global:sound/move.wav");
     Sound@ clearSound = Assets::sound("global:sound/win.wav");
     Sound@ lost = Assets::sound("global:sound/lose.wav");
+    Sound@ music = Assets::sound("global:music/climb.ogg");
 
     // Each shape as places, across and up: two to five blocks.
     array<array<Vec2>> shapes = {
@@ -43,6 +44,7 @@ class SpireScreen : Screen
 
     void onEnter()
     {
+        music.playMusic(0.5f, 0.8f);
         Space::sky(Color(0.05f, 0.04f, 0.14f), Color(0.3f, 0.16f, 0.36f));
         Space::sun(Vec3(0.5f, 0.6f, 0.8f), Color(0.95f, 0.9f, 0.85f));
         Space::ambient(Color(0.4f, 0.4f, 0.5f), Color(0.26f, 0.2f, 0.28f));

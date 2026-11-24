@@ -7,7 +7,7 @@ class CracktroScreen : Screen
     Font@ font = Assets::font("global:freesans.sfn", 44);
     Font@ logo = Assets::font("global:freesans.sfn", 110);
 
-    Sound@ tune = Assets::sound("asset:chip.ogg");
+    Sound@ tune = Assets::sound("global:music/chip.ogg");
     float beat = 0;
 
     string message = "HELLO WORLD ... THIS SCROLLER IS ONE STRING, DRAWN A LETTER AT A TIME WITH EVERY LETTER ON ITS OWN SINE WAVE ... "

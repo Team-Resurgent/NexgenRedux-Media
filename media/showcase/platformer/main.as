@@ -126,11 +126,14 @@ class PlatformerScreen : Screen
     float t = 0;
     Vec2 camera;
 
+    Sound@ music = Assets::sound("global:music/chip.ogg");
+
     void onEnter()
     {
         @game = this;
         Scene::load("asset:scene.json");
         camera = Scene::find("hero").position;
+        music.playMusic(0.45f, 0.6f);
     }
     void onExit() { @game = null; }
 
