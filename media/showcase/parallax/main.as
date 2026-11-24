@@ -16,7 +16,7 @@ class ParallaxScreen : Screen
 
     void update(float dt)
     {
-        Vec2 move = Input::move();
+        Vec2 move = Input::move;
         speed = clamp(speed + move.x * 260 * dt, 40, 700);
         position.y = clamp(position.y + move.y * 320 * dt, 80, 640);
         position.x = lerp(position.x, 220 + speed * 0.5f, 0.05f);
@@ -43,10 +43,10 @@ class ParallaxScreen : Screen
         c.push();
         c.translate(position.x, position.y);
         c.rotate(90 + bank);
-        c.setBlend(BlendAdd);
+        c.blend = BlendAdd;
         float flame = 26 + speed * 0.06f + random(0, 10);
         c.triangle(Vec2(-14, 44), Vec2(14, 44), Vec2(0, 44 + flame), Color(0.4f, 0.7f, 1, 0.9f), Color(0.4f, 0.7f, 1, 0.9f), Color(0.1f, 0.2f, 1, 0));
-        c.setBlend(BlendAlpha);
+        c.blend = BlendAlpha;
         c.image(ship, -55, -48, 110, 95);
         c.pop();
 

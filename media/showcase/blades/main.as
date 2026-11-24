@@ -162,7 +162,7 @@ class BladesScreen : Screen
     {
         Page@ p = pages[uint(index)];
         float right = rightOf(float(index) + 1, c.width) - 10;
-        c.setAlpha(shown);
+        c.alpha = shown;
         c.text(big, p.title, x + 22, 74, White);
         c.rect(x + 22, 132, 420, 2, Color(1, 1, 1, 0.5f));
         float mine = index == chosen ? rowAt : float(p.chosen);
@@ -200,13 +200,13 @@ class BladesScreen : Screen
             }
             string about = p.about[uint(p.chosen)];
             if (about == "")
-                about = formatInt(int(App::freeKilobytes() / 1024)) + " MB free.";
+                about = formatInt(int(App::freeKilobytes / 1024)) + " MB free.";
             c.text(small, about, mx, 432, p.deep, AlignCenter);
         }
         c.circle(x + 40, 594, 15, Color(0.25f, 0.7f, 0.2f));
         c.text(small, "A", x + 40, 594 - small.measure("A").y * 0.5f, White, AlignCenter);
         c.text(small, "Select", x + 64, 594 - small.measure("A").y * 0.5f, White);
         c.text(small, "Left, right: blades     Up, down: choose", right - 24, 594 - small.measure("A").y * 0.5f, Color(1, 1, 1, 0.8f), AlignRight);
-        c.setAlpha(1);
+        c.alpha = 1;
     }
 }

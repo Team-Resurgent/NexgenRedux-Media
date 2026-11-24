@@ -12,12 +12,12 @@ class Player : Behaviour
 
     void update(float dt)
     {
-        Vec2 move = Input::move();
+        Vec2 move = Input::move;
         entity.position += move * 420 * dt;
         entity.position = Vec2(clamp(entity.x, 60, 1220), clamp(entity.y, 120, 670));
         entity.rotation = lerp(entity.rotation, move.x * 14, 0.2f);
         safe -= dt;
-        entity.alpha = safe > 0 && sin(App::time() * 30) > 0 ? 0.3f : 1.0f;
+        entity.alpha = safe > 0 && sin(App::time * 30) > 0 ? 0.3f : 1.0f;
 
         reload -= dt;
         if (Input::held("fire") && reload <= 0)
@@ -204,7 +204,7 @@ class ShooterScreen : Screen
                 wait(1.5f);
                 banner = "";
             }
-            while (Scene::count(EnemyGroup) > 0) nextUpdate();
+            while (Scene::countIn(EnemyGroup) > 0) nextUpdate();
             winSound.play(0.4f);
             wait(0.6f);
         }

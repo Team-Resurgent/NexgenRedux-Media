@@ -104,7 +104,7 @@ class RallyScreen : Screen
 
     void update(float dt)
     {
-        float move = Input::move().y;
+        float move = Input::move.y;
         meSpeed = lerp(meSpeed, move * 640, 0.25f);
         me = clamp(me + meSpeed * dt, 120, 600);
         charge = Input::held("fire") ? clamp(charge + dt * 1.2f, 0, 1) : clamp(charge - dt * 2, 0, 1);
@@ -212,10 +212,10 @@ class RallyScreen : Screen
         for (uint i = 0; i < stars.length(); i++)
         {
             Star@ s = stars[i];
-            float size = clamp(s.born * 3, 0, 1) * (14 + sin(App::time() * 4 + float(i)) * 2);
+            float size = clamp(s.born * 3, 0, 1) * (14 + sin(App::time * 4 + float(i)) * 2);
             c.push();
             c.translate(s.at.x, s.at.y);
-            c.rotate(App::time() * 60);
+            c.rotate(App::time * 60);
             c.circle(0, 0, size * 1.6f, Color(1, 0.9f, 0.4f, 0.15f));
             for (int k = 0; k < 4; k++)
             {
@@ -225,14 +225,14 @@ class RallyScreen : Screen
             c.pop();
         }
 
-        c.setBlend(BlendAdd);
+        c.blend = BlendAdd;
         for (uint i = 0; i < trail.length(); i++)
         {
             float p = float(i) / float(trail.length());
             Vec2 t = trail[(at + i) % trail.length()];
             c.circle(t.x, t.y, 4 + p * 12, fade(lastMine ? Color(0.3f, 0.7f, 1) : Color(1, 0.45f, 0.35f), p * 0.35f));
         }
-        c.setBlend(BlendAlpha);
+        c.blend = BlendAlpha;
         if (!over) c.circle(ball.x, ball.y, 14, White);
 
         c.roundRect(64, me - 60, 22, 120, 11, Color(0.35f, 0.7f, 1));

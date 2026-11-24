@@ -129,7 +129,7 @@ class CoroutinesScreen : Screen
     {
         float j = a.jump.value;
         float up = 4 * j * (1 - j) * 120;
-        float step = a.x.done ? 0 : abs(sin(App::time() * 12)) * 8;
+        float step = a.x.done ? 0 : abs(sin(App::time * 12)) * 8;
         float x = a.x.value, y = 560 - up - step;
         c.push();
         c.translate(x, 562);

@@ -62,9 +62,9 @@ class SwarmScreen : Screen
         c.rect(0, 0, 1280, 720, Color(0.03f, 0.08f, 0.13f));
         Scene::draw(c);
         c.roundRect(30, 24, 520, 112, 12, Color(0, 0, 0, 0.7f));
-        c.text(font, formatInt(all.length()) + " entities in " + formatInt(App::draws()) + " draws", 50, 34);
-        c.text(font, formatInt(Scene::pairs()) + " pairs compared, collision " + (collide ? "on" : "off"), 50, 64, collide ? Green : Gray);
-        c.text(font, formatInt(int(App::fps() + 0.5f)) + " frames a second", 50, 94, App::fps() > 55 ? Green : Orange);
+        c.text(font, formatInt(all.length()) + " entities in " + formatInt(App::draws) + " draws", 50, 34);
+        c.text(font, formatInt(Scene::pairs) + " pairs compared, collision " + (collide ? "on" : "off"), 50, 64, collide ? Green : Gray);
+        c.text(font, formatInt(int(App::fps + 0.5f)) + " frames a second", 50, 94, App::fps > 55 ? Green : Orange);
         c.text(font, "Up and down: how many    Accept: collision", 1250, 684, Yellow, AlignRight);
     }
 }

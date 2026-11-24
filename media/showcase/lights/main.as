@@ -70,7 +70,7 @@ class LightsScreen : Screen
 
     void update(float dt)
     {
-        around += (Input::move().x * 1.5f + 0.1f) * dt;
+        around += (Input::move.x * 1.5f + 0.1f) * dt;
         if (Input::pressed("accept"))
             moon = !moon;
         Space::sun(Vec3(0.5f, 0.7f, -0.5f), moon ? Color(0.25f, 0.28f, 0.4f) : Color(0, 0, 0));

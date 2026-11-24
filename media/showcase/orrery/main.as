@@ -61,9 +61,9 @@ class OrreryScreen : Screen
 
     void update(float dt)
     {
-        speed = clamp(speed + Input::move().x * dt * 2, -3, 4);
+        speed = clamp(speed + Input::move.x * dt * 2, -3, 4);
         for (uint i = 0; i < arms.length(); i++) arms[i].rotation += speeds[i] * speed * dt;
-        float t = App::time();
+        float t = App::time;
         for (uint i = 0; i < joints.length(); i++) joints[i].rotation = sin(t * (0.5f + float(i) * 0.3f) + float(i)) * 38;
         sun.scale = Vec2(1 + sin(t * 2) * 0.04f, 1 + sin(t * 2) * 0.04f);
     }
@@ -72,13 +72,13 @@ class OrreryScreen : Screen
     {
         c.design(1280, 720);
         c.gradient(0, 0, 1280, 720, Color(0.03f, 0.04f, 0.1f), Color(0.06f, 0.05f, 0.12f));
-        c.setBlend(BlendAdd);
+        c.blend = BlendAdd;
         c.glow(430, 360, 240, Color(1, 0.7f, 0.3f, 0.35f));
-        c.setBlend(BlendAlpha);
+        c.blend = BlendAlpha;
         array<float> rings = { 90, 140, 205, 290 };
         for (uint i = 0; i < rings.length(); i++) c.ring(430, 360, rings[i], 1.5f, Color(1, 1, 1, 0.12f));
         Scene::draw(c);
-        c.text(font, formatInt(Scene::count()) + " entities", 30, 24, Gray);
+        c.text(font, formatInt(Scene::count) + " entities", 30, 24, Gray);
         c.text(font, "Left and right: speed", 1250, 684, Yellow, AlignRight);
     }
 }

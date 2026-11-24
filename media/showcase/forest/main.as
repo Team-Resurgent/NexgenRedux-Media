@@ -16,7 +16,7 @@ class ForestScreen : Screen
     {
         Space::land(5, 256, 1.6f, 30, 0.4f);
         Space::landColors(Color(0.3f, 0.42f, 0.2f), Color(0.3f, 0.45f, 0.2f), Color(0.5f, 0.5f, 0.45f), Color(0.42f, 0.38f, 0.33f), -10, 24);
-        trees = App::platform() == "Original Xbox" ? 500 : 2000;
+        trees = App::platform == "Original Xbox" ? 500 : 2000;
         for (uint i = 0; i < trees; i++)
         {
             float x = random(-190, 190), z = random(-190, 190);
@@ -35,8 +35,8 @@ class ForestScreen : Screen
 
     void update(float dt)
     {
-        yaw -= Input::move().x * 1.2f * dt + sin(App::time() * 0.2f) * 0.1f * dt;
-        speed += (12 - Input::move().y * 14 - speed) * clamp(dt * 2, 0, 1);
+        yaw -= Input::move.x * 1.2f * dt + sin(App::time * 0.2f) * 0.1f * dt;
+        speed += (12 - Input::move.y * 14 - speed) * clamp(dt * 2, 0, 1);
         if (Input::pressed("accept"))
             above = !above;
         eye += Vec3(-sin(yaw), 0, -cos(yaw)) * speed * dt;
@@ -57,11 +57,11 @@ class ForestScreen : Screen
         Space::draw(c);
         c.roundRect(24, 22, 330, 172, 16, Color(0, 0, 0, 0.45f));
         c.text(font, formatInt(int(trees)) + " trees", 44, 32);
-        c.text(font, formatInt(int(Space::drawn())) + " drawn, " + formatInt(int(Space::hidden())) + " out of sight", 44, 60);
-        c.text(font, formatInt(int(Space::triangles())) + " triangles", 44, 88);
+        c.text(font, formatInt(int(Space::drawn)) + " drawn, " + formatInt(int(Space::hidden)) + " out of sight", 44, 60);
+        c.text(font, formatInt(int(Space::triangles)) + " triangles", 44, 88);
         for (uint i = 0; i < 3; i++)
         {
-            float part = Space::drawn() > 0 ? float(Space::drawnAt(i)) / float(Space::drawn()) : 0.0f;
+            float part = Space::drawn > 0 ? float(Space::drawnAt(i)) / float(Space::drawn) : 0.0f;
             c.text(font, "level " + formatInt(int(i)), 44, 118 + float(i) * 23);
             c.roundRect(130, 126 + float(i) * 23, 4 + 200 * part, 12, 4, hsv(0.33f - float(i) * 0.14f, 0.7f, 0.95f));
         }

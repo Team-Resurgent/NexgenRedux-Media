@@ -296,7 +296,7 @@ class SpireScreen : Screen
                 put(ghost[i], x, float(floorAt) + form[i].y, fade(tone(color), 0.35f), 1);
             }
         }
-        Space::camera(Vec3(0, 10 + sin(App::time() * 40) * shake * 0.2f, 18), Vec3(0, 6.2f, 0), 56);
+        Space::camera(Vec3(0, 10 + sin(App::time * 40) * shake * 0.2f, 18), Vec3(0, 6.2f, 0), 56);
     }
 
     void draw(Canvas@ c)

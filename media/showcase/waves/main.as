@@ -22,7 +22,7 @@ class WavesScreen : Screen
     void update(float dt)
     {
         t += dt;
-        velocity = velocity + Input::move() * (600 * dt);
+        velocity = velocity + Input::move * (600 * dt);
         velocity = velocity * (1 - 1.8f * dt);
         position = position + velocity * dt;
         position.x = clamp(position.x, 80, 1200);
@@ -36,9 +36,9 @@ class WavesScreen : Screen
     {
         c.design(1280, 720);
         c.tile(water, 0, 0, 1280, 720, 320, 320, sin(t * 0.4f) * 30, t * 40);
-        c.setBlend(BlendAdd);
+        c.blend = BlendAdd;
         c.tile(water, 0, 0, 1280, 720, 460, 460, -t * 24, t * 16, Color(1, 1, 1, 0.25f));
-        c.setBlend(BlendAlpha);
+        c.blend = BlendAlpha;
 
         c.push();
         c.translate(position.x, position.y);

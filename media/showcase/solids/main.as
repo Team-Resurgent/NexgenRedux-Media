@@ -60,12 +60,12 @@ class SolidsScreen : Screen
 
     void update(float dt)
     {
-        around += (Input::move().x * 1.6f + 0.15f) * dt;
-        lean = clamp(lean - Input::move().y * dt, 0.1f, 1.2f);
+        around += (Input::move.x * 1.6f + 0.15f) * dt;
+        lean = clamp(lean - Input::move.y * dt, 0.1f, 1.2f);
         if (Input::pressed("accept"))
             night = !night;
 
-        float t = App::time();
+        float t = App::time;
         for (uint i = 0; i < things.length(); i++)
         {
             if (i <= 6)
@@ -105,6 +105,6 @@ class SolidsScreen : Screen
         Space::draw(c);
         c.roundRect(20, 660, c.width - 40, 42, 12, Color(0, 0, 0, 0.45f));
         c.text(font, "Look around with the stick or arrows. Accept: " + (night ? "day" : "night"), 40, 668);
-        c.text(font, formatInt(int(Space::triangles())) + " triangles", c.width - 40, 668, White, AlignRight);
+        c.text(font, formatInt(int(Space::triangles)) + " triangles", c.width - 40, 668, White, AlignRight);
     }
 }

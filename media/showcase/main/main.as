@@ -31,7 +31,7 @@ class MainScreen : Screen
 
     void onEnter()
     {
-        for (uint i = 0; i < Screens::count(); i++)
+        for (uint i = 0; i < Screens::count; i++)
         {
             if (Screens::id(i) != "main")
                 tiles.insertLast(i);
@@ -52,10 +52,10 @@ class MainScreen : Screen
         if (Input::repeated("up") && chosen >= columns) chosen -= columns;
 
         // The mouse takes over only when it moves.
-        Vec2 mouse = Input::mouse();
+        Vec2 mouse = Input::mouse;
         bool down = Input::mouseDown(0);
         int under = tileAt(mouse);
-        if (Input::hasMouse() && mouse != lastMouse && under >= 0)
+        if (Input::hasMouse && mouse != lastMouse && under >= 0)
             chosen = uint(under);
         lastMouse = mouse;
         bool clicked = down && !mouseWasDown && under >= 0;
@@ -111,13 +111,13 @@ class MainScreen : Screen
         c.gradient(0, 0, screenW, 720, Color(0.07f, 0.09f, 0.16f), Color(0.03f, 0.03f, 0.06f));
         for (uint i = 0; i < 5; i++)
         {
-            float t = App::time() * 0.15f + float(i) * 1.3f;
+            float t = App::time * 0.15f + float(i) * 1.3f;
             c.circle(screenW * 0.5f + sin(t) * 620, 360 + cos(t * 1.3f) * 330, 160, fade(hsv(0.55f + float(i) * 0.05f, 0.7f, 0.9f), 0.05f));
         }
 
         c.text(title, "Nexgen", left, 46);
         c.text(small, "A showcase of the engine. Every tile is one script.", left + 4, 116, Color(0.6f, 0.68f, 0.8f));
-        c.text(small, App::platform() + "  |  " + App::gpu() + "  |  " + formatInt(int(App::fps() + 0.5f)) + " fps", screenW - left, 66, Color(0.6f, 0.68f, 0.8f), AlignRight);
+        c.text(small, App::platform + "  |  " + App::gpu + "  |  " + formatInt(int(App::fps + 0.5f)) + " fps", screenW - left, 66, Color(0.6f, 0.68f, 0.8f), AlignRight);
 
         c.push();
         c.clip(0, top - 14, screenW, 720 - top - 34);
@@ -133,7 +133,7 @@ class MainScreen : Screen
         c.pop();
 
         c.rect(0, 676, screenW, 44, Color(0.02f, 0.02f, 0.05f, 0.8f));
-        string help = Input::usingPad() ? "A  open     Start  menu     Hold Back  menu from anywhere" : "Enter  open     Arrows  move     Escape  menu from anywhere";
+        string help = Input::usingPad ? "A  open     Start  menu     Hold Back  menu from anywhere" : "Enter  open     Arrows  move     Escape  menu from anywhere";
         c.text(small, help, screenW * 0.5f, 686, Color(0.65f, 0.72f, 0.85f), AlignCenter);
     }
 
@@ -141,11 +141,11 @@ class MainScreen : Screen
     {
         Color accent = colorOf(Screens::category(screen));
         c.push();
-        c.setAlpha(appear);
+        c.alpha = appear;
         c.translate(x + tileW / 2, y + tileH / 2);
         if (chosen)
         {
-            float pulse = 1.03f + 0.01f * sin(App::time() * 5);
+            float pulse = 1.03f + 0.01f * sin(App::time * 5);
             c.scale(pulse, pulse);
             c.roundRect(-tileW / 2 - 4, -tileH / 2 - 4, tileW + 8, tileH + 8, 18, accent);
         }

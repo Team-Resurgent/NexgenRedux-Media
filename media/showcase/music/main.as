@@ -28,7 +28,7 @@ class MusicScreen : Screen
         if (Input::pressed("accept"))
         {
             paused = !paused;
-            voice.setPaused(paused);
+            voice.paused = paused;
         }
         float low = 0;
         for (uint i = 0; i < 4; i++) low += Audio::spectrum(i) / 4;
@@ -47,10 +47,10 @@ class MusicScreen : Screen
         c.gradient(0, 0, 1280, 720, Color(0.02f, 0.02f, 0.06f), Color(0.1f, 0.03f, 0.16f));
 
         // Rings that swell with the low notes.
-        c.setBlend(BlendAdd);
+        c.blend = BlendAdd;
         for (int i = 4; i > 0; i--)
             c.circle(640, 290, 120 + float(i) * 34 * (0.4f + beat), fade(hsv(0.6f + float(i) * 0.06f, 0.8f, 0.7f), 0.10f + beat * 0.08f));
-        c.setBlend(BlendAlpha);
+        c.blend = BlendAlpha;
 
         c.push();
         c.translate(640, 290);
@@ -82,7 +82,7 @@ class MusicScreen : Screen
         c.text(big, titles[playing], 60, 30);
         float length = tunes[playing].seconds;
         c.text(font, clock(voice.position) + (length > 0 ? " / " + clock(length) : "") + (paused ? "   paused" : ""), 62, 90, Color(0.7f, 0.75f, 0.9f));
-        c.text(font, Input::usingPad() ? "Left and right: change tune    A: pause" : "Left and right: change tune    Enter: pause", 640, 672, Color(0.7f, 0.75f, 0.9f), AlignCenter);
+        c.text(font, Input::usingPad ? "Left and right: change tune    A: pause" : "Left and right: change tune    Enter: pause", 640, 672, Color(0.7f, 0.75f, 0.9f), AlignCenter);
     }
 
     string clock(float t)

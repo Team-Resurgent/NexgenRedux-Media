@@ -61,7 +61,7 @@ class SoundsScreen : Screen
             beat = !beat;
             beatStep = 0;
         }
-        levels[at] = Audio::level();
+        levels[at] = Audio::level;
         at = (at + 1) % levels.length();
     }
 
@@ -81,8 +81,8 @@ class SoundsScreen : Screen
         }
 
         c.roundRect(780, 50, 450, 130, 14, Color(0.09f, 0.09f, 0.15f));
-        c.text(big, formatInt(Audio::voices()) + " of " + formatInt(Audio::voiceLimit()), 1005, 66, Green, AlignCenter);
-        c.text(font, "voices, through " + Audio::output(), 1005, 128, Gray, AlignCenter);
+        c.text(big, formatInt(Audio::voices) + " of " + formatInt(Audio::voiceLimit), 1005, 66, Green, AlignCenter);
+        c.text(font, "voices, through " + Audio::output, 1005, 128, Gray, AlignCenter);
 
         c.roundRect(780, 200, 450, 150, 14, Color(0.09f, 0.09f, 0.15f));
         for (uint i = 0; i + 1 < levels.length(); i++)

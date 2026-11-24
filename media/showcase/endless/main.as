@@ -21,7 +21,7 @@ class EndlessScreen : Screen
 
     void onEnter()
     {
-        Space::endlessLand(77, 2, 40, 0.5f, App::platform() == "Original Xbox" ? 3 : 5);
+        Space::endlessLand(77, 2, 40, 0.5f, App::platform == "Original Xbox" ? 3 : 5);
         Space::landColors(Color(0.78f, 0.72f, 0.52f), Color(0.35f, 0.5f, 0.23f), Color(0.9f, 0.92f, 0.95f), Color(0.45f, 0.41f, 0.37f), 0.5f, 27);
         Space::water(0, Color(0.14f, 0.38f, 0.52f, 0.85f));
         Space::flatten(0, -30, 26, 4);
@@ -42,7 +42,7 @@ class EndlessScreen : Screen
 
     void fill(int x, int z)
     {
-        float size = Space::regionSize();
+        float size = Space::regionSize;
         for (int n = 0; n < 16; n++)
         {
             float px = (float(x) + chance(x, z, n)) * size, pz = (float(z) + chance(x, z, n + 100)) * size;
@@ -89,10 +89,10 @@ class EndlessScreen : Screen
         for (uint i = 0; i < ages.length(); i++)
             ages[i] += dt;
 
-        float stick = Input::move().x + sin(App::time() * 0.23f) * 0.2f;
+        float stick = Input::move.x + sin(App::time * 0.23f) * 0.2f;
         bank += (stick - bank) * clamp(dt * 3, 0, 1);
         yaw -= bank * 0.9f * dt;
-        speed += (18 - Input::move().y * 22 - speed) * clamp(dt * 2, 0, 1);
+        speed += (18 - Input::move.y * 22 - speed) * clamp(dt * 2, 0, 1);
         Vec3 ahead(-sin(yaw), 0, -cos(yaw));
         eye += ahead * speed * dt;
         flown += abs(speed) * dt;
@@ -117,15 +117,15 @@ class EndlessScreen : Screen
         Space::draw(c);
         c.roundRect(24, 22, 300, 118, 16, Color(0, 0, 0, 0.45f));
         c.text(font, formatInt(int(flown)) + " metres flown", 44, 32);
-        c.text(font, formatInt(int(Space::regions())) + " regions, " + formatInt(int(Space::regionsWaiting())) + " to come", 44, 60);
-        c.text(font, formatInt(int(Scene::count())) + " things, " + formatInt(int(Space::drawn())) + " drawn", 44, 88);
+        c.text(font, formatInt(int(Space::regions)) + " regions, " + formatInt(int(Space::regionsWaiting)) + " to come", 44, 60);
+        c.text(font, formatInt(int(Scene::count)) + " things, " + formatInt(int(Space::drawn)) + " drawn", 44, 88);
         if (map)
         {
-            float mx = c.width - 150, my = 150, scale = 20 / Space::regionSize();
+            float mx = c.width - 150, my = 150, scale = 20 / Space::regionSize;
             c.circle(mx, my, 128, Color(0, 0, 0, 0.45f));
             for (uint i = 0; i < xs.length(); i++)
             {
-                float fx = (float(xs[i]) * Space::regionSize() - eye.x) * scale, fz = (float(zs[i]) * Space::regionSize() - eye.z) * scale;
+                float fx = (float(xs[i]) * Space::regionSize - eye.x) * scale, fz = (float(zs[i]) * Space::regionSize - eye.z) * scale;
                 float fresh = clamp(1 - ages[i], 0, 1);
                 if (fx * fx + fz * fz < 118 * 118)
                     c.rect(mx + fx + 1, my + fz + 1, 18, 18, lerp(Color(0.35f, 0.6f, 0.4f, 0.7f), Color(1, 0.9f, 0.4f), fresh));

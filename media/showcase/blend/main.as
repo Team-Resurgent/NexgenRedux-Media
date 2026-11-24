@@ -47,7 +47,7 @@ class BlendScreen : Screen
     void lights(Canvas@ c, float x, float y, Blend mode, const string &in label)
     {
         c.push();
-        c.setBlend(mode);
+        c.blend = mode;
         for (int i = 0; i < 3; i++)
         {
             float a = t + float(i) * 2.0944f;
@@ -71,7 +71,7 @@ class BlendScreen : Screen
         // Fire.
         c.push();
         c.translate(1080, 560);
-        c.setBlend(BlendAdd);
+        c.blend = BlendAdd;
         for (uint i = 0; i < sparks.length(); i++)
         {
             Particle@ p = sparks[i];
@@ -86,11 +86,11 @@ class BlendScreen : Screen
         for (int i = 0; i < 10; i++)
         {
             c.push();
-            c.setAlpha(float(i + 1) / 10);
+            c.alpha = float(i + 1) / 10;
             c.roundRect(70 + float(i) * 78, 440, 66, 120, 10, Blue);
             c.pop();
             c.text(font, formatInt((i + 1) * 10) + "%", 103 + float(i) * 78, 570, Gray, AlignCenter);
         }
-        c.text(font, "setAlpha", 460, 620, White, AlignCenter);
+        c.text(font, "alpha", 460, 620, White, AlignCenter);
     }
 }

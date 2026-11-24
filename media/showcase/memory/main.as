@@ -58,7 +58,7 @@ class MemoryScreen : Screen
         if (clock > 0.05f)
         {
             clock = 0;
-            history[at] = float(App::scriptKilobytes());
+            history[at] = float(App::scriptKilobytes);
             at = (at + 1) % history.length();
         }
     }
@@ -67,17 +67,17 @@ class MemoryScreen : Screen
     {
         c.design(1280, 720);
         c.rect(0, 0, 1280, 720, Color(0.04f, 0.04f, 0.07f));
-        c.setBlend(BlendAdd);
+        c.blend = BlendAdd;
         for (uint i = 0; i < sparks.length(); i++)
         {
             Spark@ s = sparks[i];
             c.rect(s.at.x - 3, s.at.y - 3, 6, 6, fade(hsv(s.life * 0.12f, 0.9f, 1), clamp(s.life, 0, 1)));
         }
-        c.setBlend(BlendAlpha);
+        c.blend = BlendAlpha;
 
         c.text(big, formatInt(made), 60, 40, White);
         c.text(font, "objects made so far", 62, 100, Gray);
-        c.text(big, formatInt(App::scriptKilobytes()) + " KB", 1220, 40, Green, AlignRight);
+        c.text(big, formatInt(App::scriptKilobytes) + " KB", 1220, 40, Green, AlignRight);
         c.text(font, "script memory now", 1220, 100, Gray, AlignRight);
 
         float most = 1;

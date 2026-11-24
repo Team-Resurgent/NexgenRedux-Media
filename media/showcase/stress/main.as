@@ -56,8 +56,8 @@ class StressScreen : Screen
             c.image(sprite, x[i] - 22, y[i] - 20, 44, 40);
 
         c.roundRect(30, 24, 420, 112, 12, Color(0, 0, 0, 0.7f));
-        c.text(font, formatInt(count) + " sprites in " + formatInt(App::draws()) + " draws", 50, 36);
-        c.text(font, formatInt(int(App::fps() + 0.5f)) + " frames a second", 50, 66, App::fps() > 55 ? Green : Orange);
+        c.text(font, formatInt(count) + " sprites in " + formatInt(App::draws) + " draws", 50, 36);
+        c.text(font, formatInt(int(App::fps + 0.5f)) + " frames a second", 50, 66, App::fps > 55 ? Green : Orange);
         c.text(font, "Up and down to change", 50, 96, Gray);
     }
 }

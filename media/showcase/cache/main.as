@@ -32,15 +32,15 @@ class CacheScreen : Screen
     {
         c.design(1280, 720);
         c.rect(0, 0, 1280, 720, Color(0.05f, 0.06f, 0.1f));
-        number(c, 50, 40, Assets::inUse(), "in use", Green);
-        number(c, 350, 40, Assets::warm(), "kept warm", Orange);
-        number(c, 650, 40, Assets::loads(), "files read", Blue);
-        number(c, 950, 40, Assets::evictions(), "unloaded for room", Red);
-        number(c, 50, 190, Assets::hits(), "requests without reading", Purple);
+        number(c, 50, 40, Assets::inUse, "in use", Green);
+        number(c, 350, 40, Assets::warm, "kept warm", Orange);
+        number(c, 650, 40, Assets::loads, "files read", Blue);
+        number(c, 950, 40, Assets::evictions, "unloaded for room", Red);
+        number(c, 50, 190, Assets::hits, "requests without reading", Purple);
         number(c, 350, 190, asked, "asked by this screen", Gray);
 
-        float used = float(Assets::textureKilobytes());
-        float budget = float(Assets::budgetKilobytes());
+        float used = float(Assets::textureKilobytes);
+        float budget = float(Assets::budgetKilobytes);
         c.text(font, "Budget", 660, 196, White);
         c.text(font, formatInt(int(used)) + " of " + formatInt(int(budget)) + " KB", 1230, 196, White, AlignRight);
         c.roundRect(660, 240, 570, 26, 13, Color(0.15f, 0.18f, 0.26f));
@@ -50,6 +50,6 @@ class CacheScreen : Screen
         c.paragraph(font, "Each file is loaded once and shared by everyone who asks for it. Letting go of it doesn't unload it: it stays warm, "
             "so going back to a screen is instant. Only when the budget is full is anything unloaded, starting with what was used longest ago.",
             60, 370, 1160, Color(0.85f, 0.88f, 0.95f));
-        c.text(font, Input::usingPad() ? "A  unload everything that isn't in use" : "Enter  unload everything that isn't in use", 60, 620, Yellow);
+        c.text(font, Input::usingPad ? "A  unload everything that isn't in use" : "Enter  unload everything that isn't in use", 60, 620, Yellow);
     }
 }

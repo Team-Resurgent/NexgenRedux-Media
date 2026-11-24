@@ -11,7 +11,7 @@ class PhysicsScreen : Screen
 
     void onEnter()
     {
-        Scene::setGravity(Vec2(0, 1400));
+        Scene::gravity = Vec2(0, 1400);
         block(640, 700, 1280, 40, 0, Color(0.2f, 0.24f, 0.32f)).wall = true;
         block(-10, 360, 40, 760, 0, Color(0.2f, 0.24f, 0.32f)).wall = true;
         block(1290, 360, 40, 760, 0, Color(0.2f, 0.24f, 0.32f)).wall = true;
@@ -73,12 +73,12 @@ class PhysicsScreen : Screen
 
     void update(float dt)
     {
-        cursor += Input::move() * 600 * dt;
-        Vec2 mouse = Input::mouse();
-        if (Input::hasMouse() && mouse != lastMouse) cursor = mouse;
+        cursor += Input::move * 600 * dt;
+        Vec2 mouse = Input::mouse;
+        if (Input::hasMouse && mouse != lastMouse) cursor = mouse;
         lastMouse = mouse;
         cursor = Vec2(clamp(cursor.x, 40, 1240), clamp(cursor.y, 20, 660));
-        if (Input::repeated("accept") && Scene::count() < 260)
+        if (Input::repeated("accept") && Scene::count < 260)
         {
             pop.play(0.4f, (cursor.x - 640) / 640, random(0.8f, 1.3f));
             if (random() < 0.5f) round(cursor.x, cursor.y, random(14, 30), 1, hsv(random(), 0.6f, 1));
@@ -105,7 +105,7 @@ class PhysicsScreen : Screen
         c.circle(600, 70, 9, Gray);
         Scene::draw(c);
         c.ring(cursor.x, cursor.y, 14, 3, White);
-        c.text(font, formatInt(Scene::count()) + " bodies, " + formatInt(Scene::contacts()) + " contacts", 40, 20, Gray);
+        c.text(font, formatInt(Scene::count) + " bodies, " + formatInt(Scene::contacts) + " contacts", 40, 20, Gray);
         c.text(font, "Accept: drop    Alternate: blast    Cancel: start again", 1240, 20, Yellow, AlignRight);
     }
 }

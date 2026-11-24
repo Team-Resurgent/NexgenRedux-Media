@@ -141,7 +141,7 @@ class ExploreScreen : Screen
         }
 
         // What grows. Fewer where there is less memory.
-        int many = App::platform() == "Original Xbox" ? 1 : 3;
+        int many = App::platform == "Original Xbox" ? 1 : 3;
         for (int i = 0; i < 130 * many; i++)
         {
             Vec3 p;
@@ -239,7 +239,7 @@ class ExploreScreen : Screen
 
     void walk(float dt)
     {
-        Vec2 stick = Input::move();
+        Vec2 stick = Input::move;
         Vec3 ahead(-sin(yaw), 0, -cos(yaw));
         Vec3 side(cos(yaw), 0, -sin(yaw));
         Vec3 way = side * stick.x - ahead * stick.y;
@@ -294,7 +294,7 @@ class ExploreScreen : Screen
         Vec2 turn = Input::padRight(0);
         yaw -= turn.x * 2.4f * dt;
         lean = clamp(lean - turn.y * 1.4f * dt, -0.1f, 1.1f);
-        Vec2 mouse = Input::mouse();
+        Vec2 mouse = Input::mouse;
         if (Input::mouseDown(1) && wasDown)
         {
             yaw -= (mouse.x - mouseWas.x) * 0.006f;
@@ -346,7 +346,7 @@ class ExploreScreen : Screen
         Space::ambient(lerp(Color(0.1f, 0.13f, 0.22f), Color(0.42f, 0.48f, 0.56f), day), lerp(Color(0.05f, 0.05f, 0.08f), Color(0.26f, 0.24f, 0.2f), day));
         for (uint i = 0; i < lamps.length(); i++)
         {
-            float glow = darkness * (0.93f + sin(App::time() * 9 + float(i) * 2) * 0.07f);
+            float glow = darkness * (0.93f + sin(App::time * 9 + float(i) * 2) * 0.07f);
             lamps[i].color = Color(1, 0.75f, 0.35f, glow * 0.7f);
             lamps[i].light(Color(1.5f * glow, 1.0f * glow, 0.5f * glow), 11);
         }
@@ -375,10 +375,10 @@ class ExploreScreen : Screen
         float help = clamp(7 - shown, 0, 1);
         if (help > 0)
         {
-            c.setAlpha(help);
+            c.alpha = help;
             c.roundRect(c.width * 0.5f - 400, 640, 800, 48, 14, Color(0, 0, 0, 0.45f));
-            c.text(font, Input::usingPad() ? "Left stick: walk    Right stick: look    A: jump    X: go slowly" : "Arrows: walk    Right button: look    Space: jump    Shift: go slowly", c.width * 0.5f, 650, White, AlignCenter);
-            c.setAlpha(1);
+            c.text(font, Input::usingPad ? "Left stick: walk    Right stick: look    A: jump    X: go slowly" : "Arrows: walk    Right button: look    Space: jump    Shift: go slowly", c.width * 0.5f, 650, White, AlignCenter);
+            c.alpha = 1;
         }
     }
 }

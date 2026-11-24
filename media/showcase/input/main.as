@@ -17,9 +17,9 @@ class InputScreen : Screen
             if (Input::pressed(actions[i]))
                 glow[i] = 1;
         }
-        if (Input::hasMouse())
+        if (Input::hasMouse)
         {
-            trail.insertLast(Input::mouse());
+            trail.insertLast(Input::mouse);
             if (trail.length() > 24)
                 trail.removeAt(0);
         }
@@ -72,7 +72,7 @@ class InputScreen : Screen
             light(c, 40 + float(i) * 122, 60, 112, actions[i], Input::held(actions[i]), glow[i]);
 
         c.roundRect(1040, 20, 200, 110, 12, Color(0.09f, 0.11f, 0.17f));
-        Vec2 move = Input::move();
+        Vec2 move = Input::move;
         c.ring(1140, 75, 46, 2, Gray);
         c.line(1140, 75, 1140 + move.x * 44, 75 + move.y * 44, 4, Blue);
         c.circle(1140 + move.x * 44, 75 + move.y * 44, 8, Blue);
@@ -87,6 +87,6 @@ class InputScreen : Screen
             c.roundRect(130 + float(i) * 56, 586, 48, 40, 8, Input::mouseDown(i) ? Green : Color(0.15f, 0.18f, 0.26f));
         for (uint i = 0; i < trail.length(); i++)
             c.circle(trail[i].x, trail[i].y, 2 + float(i) * 0.4f, fade(Yellow, float(i) / 24));
-        c.text(small, "Last used: " + (Input::usingPad() ? "gamepad" : "keyboard or mouse") + ".   Start, Escape, or holding Back opens the menu.", 40, 670, Gray);
+        c.text(small, "Last used: " + (Input::usingPad ? "gamepad" : "keyboard or mouse") + ".   Start, Escape, or holding Back opens the menu.", 40, 670, Gray);
     }
 }

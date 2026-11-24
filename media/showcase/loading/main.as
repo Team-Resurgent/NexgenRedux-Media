@@ -46,7 +46,7 @@ class LoadingScreen : Screen
 
     void draw(Canvas@ c)
     {
-        float now = App::time();
+        float now = App::time;
         float took = (now - lastDraw) * 1000;
         lastDraw = now;
         frames[at] = took;
@@ -70,7 +70,7 @@ class LoadingScreen : Screen
             float a = now * 2.4f + float(i) * 0.5236f;
             c.circle(1040 + cos(a) * 110, 200 + sin(a) * 110, 14, hsv(float(i) / 12, 0.6f, 1));
         }
-        c.text(font, formatInt(Assets::pending()) + " on their way", 1040, 186, White, AlignCenter);
+        c.text(font, formatInt(Assets::pending) + " on their way", 1040, 186, White, AlignCenter);
 
         c.text(font, "Frame time", 860, 390, Color(0.7f, 0.76f, 0.88f));
         c.text(font, "longest " + formatInt(int(worst + 0.5f)) + " ms", 1230, 390, Yellow, AlignRight);
@@ -80,6 +80,6 @@ class LoadingScreen : Screen
             float ms = clamp(frames[(at + i) % frames.length()], 0, 60);
             c.rect(860 + float(i) * 2.3f, 555 - ms * 2, 2, ms * 2, ms > 25 ? Red : Green);
         }
-        c.text(font, Input::usingPad() ? "A  load them again" : "Enter  load them again", 60, 650, Yellow);
+        c.text(font, Input::usingPad ? "A  load them again" : "Enter  load them again", 60, 650, Yellow);
     }
 }

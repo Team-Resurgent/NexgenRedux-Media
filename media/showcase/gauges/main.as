@@ -13,7 +13,7 @@ class GaugesScreen : Screen
     {
         t += dt;
         shown = lerp(shown, 1, 0.04f);
-        history[at] = App::fps();
+        history[at] = App::fps;
         at = (at + 1) % history.length();
     }
 
@@ -48,15 +48,15 @@ class GaugesScreen : Screen
         c.design(1280, 720);
         c.gradient(0, 0, 1280, 720, Color(0.06f, 0.08f, 0.13f), Color(0.03f, 0.04f, 0.07f));
 
-        dial(c, 190, 190, App::fps(), 120, "frames a second", Green);
-        dial(c, 500, 190, float(App::draws()), 100, "draw calls", Blue);
-        dial(c, 810, 190, float(Assets::inUse() + Assets::warm()), 40, "assets loaded", Purple);
+        dial(c, 190, 190, App::fps, 120, "frames a second", Green);
+        dial(c, 500, 190, float(App::draws), 100, "draw calls", Blue);
+        dial(c, 810, 190, float(Assets::inUse + Assets::warm), 40, "assets loaded", Purple);
         dial(c, 1100, 190, 50 + 50 * sin(t), 100, "a sine wave", Orange);
 
-        meter(c, 370, float(App::memoryKilobytes()), 8192, "Engine memory", Blue);
-        meter(c, 440, float(App::scriptKilobytes()), 4096, "Scripts", Purple);
-        meter(c, 510, float(Assets::textureKilobytes()), float(Assets::budgetKilobytes()), "Images and fonts, of their budget", Green);
-        meter(c, 580, float(Assets::soundKilobytes()), float(Assets::soundBudgetKilobytes()), "Sounds, of their budget", Orange);
+        meter(c, 370, float(App::memoryKilobytes), 8192, "Engine memory", Blue);
+        meter(c, 440, float(App::scriptKilobytes), 4096, "Scripts", Purple);
+        meter(c, 510, float(Assets::textureKilobytes), float(Assets::budgetKilobytes), "Images and fonts, of their budget", Green);
+        meter(c, 580, float(Assets::soundKilobytes), float(Assets::soundBudgetKilobytes), "Sounds, of their budget", Orange);
 
         // Frame rate over the last two seconds.
         c.roundRect(660, 370, 560, 270, 14, Color(0.09f, 0.11f, 0.17f));

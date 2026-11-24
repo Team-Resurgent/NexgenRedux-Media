@@ -227,7 +227,7 @@ class DashboardScreen : Screen
         heart.place = Vec3(0, 0, -3);
         heart.color = hsv(tint, 0.85f, (0.2f + pulse * 0.1f + flash * 0.25f) * come);
         // Behind the orb that is chosen.
-        Vec3 wanted = pods[uint(chosen)].outward(Vec3(0.08f, -1.42f, 5.2f));
+        Vec3 wanted = pods[uint(chosen)].toSpace(Vec3(0.08f, -1.42f, 5.2f));
         halo.place = lerp(halo.place, wanted, clamp(dt * 12, 0, 1));
         float size = 6.5f + pulse * 1.2f + flash * 3;
         halo.size = Vec3(size, size, size);
@@ -250,7 +250,7 @@ class DashboardScreen : Screen
         {
             // Along the panel that each arm holds out, in the middle of it and at its angle.
             Vec2 a, b;
-            if (menu > 0 && Space::toScreen(pods[i].outward(Vec3(4.1f, -2.48f, 7.3f)), a) && Space::toScreen(pods[i].outward(Vec3(16, -2.48f, 7.3f)), b))
+            if (menu > 0 && Space::toScreen(pods[i].toSpace(Vec3(4.1f, -2.48f, 7.3f)), a) && Space::toScreen(pods[i].toSpace(Vec3(16, -2.48f, 7.3f)), b))
             {
                 c.push();
                 c.translate(a.x, a.y);
@@ -259,12 +259,12 @@ class DashboardScreen : Screen
                 c.pop();
             }
         }
-        c.setAlpha(menu);
+        c.alpha = menu;
         c.text(font, "Up, down: choose     Accept: open     Alternate: colour", wide * 0.5f, 672, hsv(tint, 0.3f, 0.7f), AlignCenter);
         float page = smooth(clamp(inside * 2 - 1, 0, 1));
         if (page > 0)
         {
-            c.setAlpha(page);
+            c.alpha = page;
             float x = wide - 860 + (1 - page) * 120;
             c.roundRect(x, 130, 760, 440, 26, Color(0, 0, 0, 0.86f));
             Color edge = hsv(tint, 0.8f, 0.8f);
@@ -276,7 +276,7 @@ class DashboardScreen : Screen
             if (chosen == 0)
             {
                 names = { "Used by the engine", "Used by scripts", "Left on this machine" };
-                values = { formatInt(int(App::memoryKilobytes())) + " KB", formatInt(int(App::scriptKilobytes())) + " KB", formatInt(int(App::freeKilobytes() / 1024)) + " MB" };
+                values = { formatInt(int(App::memoryKilobytes)) + " KB", formatInt(int(App::scriptKilobytes)) + " KB", formatInt(int(App::freeKilobytes / 1024)) + " MB" };
             }
             else if (chosen == 1)
             {
@@ -287,12 +287,12 @@ class DashboardScreen : Screen
             else if (chosen == 2)
             {
                 names = { "Colour", "Screen", "Controls" };
-                values = { formatInt(int(hue + 1)) + " of 4", formatInt(int(c.width)) + " x " + formatInt(int(c.height)), Input::usingPad() ? "Gamepad" : "Keyboard" };
+                values = { formatInt(int(hue + 1)) + " of 4", formatInt(int(c.width)) + " x " + formatInt(int(c.height)), Input::usingPad ? "Gamepad" : "Keyboard" };
             }
             else
             {
                 names = { "Platform", "Graphics", "Speed", "Triangles" };
-                values = { App::platform(), App::gpu(), formatInt(int(App::fps() + 0.5f)) + " frames a second", formatInt(int(Space::triangles())) };
+                values = { App::platform, App::gpu, formatInt(int(App::fps + 0.5f)) + " frames a second", formatInt(int(Space::triangles)) };
             }
             for (uint i = 0; i < names.length(); i++)
             {
@@ -304,6 +304,6 @@ class DashboardScreen : Screen
                     c.roundRect(x + 40 + float(i) * 28.5f, 520 - 14, 18, 14 + 50 * (0.5f + 0.5f * sin(turn * 3 + float(i) * 0.7f) * sin(turn * 1.7f + float(i))), 4, fade(edge, 0.8f));
             c.text(font, "Cancel: back", x + 380, 586, hsv(tint, 0.3f, 0.7f), AlignCenter);
         }
-        c.setAlpha(1);
+        c.alpha = 1;
     }
 }

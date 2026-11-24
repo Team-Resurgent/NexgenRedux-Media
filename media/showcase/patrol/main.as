@@ -154,7 +154,7 @@ class PatrolScreen : Screen
 
     void player(float dt)
     {
-        Vec2 move = Input::move();
+        Vec2 move = Input::move;
         px = clamp(px + move.x * 420 * dt, 50, 1230);
         py = clamp(py + move.y * 420 * dt, 120, 680);
         tilt = lerp(tilt, move.x, 0.15f);
@@ -269,10 +269,10 @@ class PatrolScreen : Screen
         c.push();
         c.translate(x, y);
         c.scale(1 - abs(tilt) * 0.2f, 1);
-        c.setBlend(BlendAdd);
+        c.blend = BlendAdd;
         float f = random(18, 34);
         c.triangle(Vec2(-9, 22), Vec2(9, 22), Vec2(0, 22 + f), Orange, Orange, fade(Red, 0));
-        c.setBlend(BlendAlpha);
+        c.blend = BlendAlpha;
         Color hull(0.75f, 0.82f, 0.92f);
         Color dark(0.35f, 0.45f, 0.62f);
         c.triangle(Vec2(0, -34), Vec2(40, 24), Vec2(0, 12), hull, dark, hull);
@@ -320,7 +320,7 @@ class PatrolScreen : Screen
         if (state == 1 && (safe <= 0 || int(t * 12) % 2 == 0))
             drawShip(c, px, py);
 
-        c.setBlend(BlendAdd);
+        c.blend = BlendAdd;
         for (uint i = 0; i < shots.length(); i++)
         {
             Shot@ s = shots[i];
@@ -344,13 +344,13 @@ class PatrolScreen : Screen
         for (int i = 0; i < lives; i++)
             c.triangle(Vec2(1236 - i * 34, 22), Vec2(1248 - i * 34, 48), Vec2(1224 - i * 34, 48), White, Blue, Blue);
 
-        string accept = Input::usingPad() ? "A" : "Enter";
+        string accept = Input::usingPad ? "A" : "Enter";
         if (state == 1 && banner > 0)
             c.text(big, "Wave " + formatInt(wave), 640, 250, fade(White, clamp(banner, 0, 1)), AlignCenter);
         if (state == 0)
         {
             c.text(big, "SKY PATROL", 640, 220, hsv(t * 0.1f, 0.4f, 1), AlignCenter);
-            c.text(font, "Arrows or stick to move, hold " + (Input::usingPad() ? "A" : "Space") + " to fire", 640, 340, Color(0.8f, 0.85f, 0.95f), AlignCenter);
+            c.text(font, "Arrows or stick to move, hold " + (Input::usingPad ? "A" : "Space") + " to fire", 640, 340, Color(0.8f, 0.85f, 0.95f), AlignCenter);
             c.text(font, accept + " to start", 640, 420, fade(Yellow, 0.6f + 0.4f * sin(t * 4)), AlignCenter);
             drawShip(c, 640, 560 + sin(t * 2) * 10);
         }

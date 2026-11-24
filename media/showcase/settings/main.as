@@ -16,14 +16,14 @@ class SettingsScreen : Screen
 
     float volume(uint i)
     {
-        if (i == 0) return Audio::masterVolume();
+        if (i == 0) return Audio::masterVolume;
         return Audio::volume(i == 1 ? BusEffects : BusMusic);
     }
 
     void setVolume(uint i, float v)
     {
         v = clamp(v, 0, 1);
-        if (i == 0) Audio::setMasterVolume(v);
+        if (i == 0) Audio::masterVolume = v;
         else Audio::setVolume(i == 1 ? BusEffects : BusMusic, v);
         move.play(0.8f);
     }
@@ -32,7 +32,7 @@ class SettingsScreen : Screen
     {
         if (waiting)
         {
-            if (!Input::listening())
+            if (!Input::listening)
             {
                 waiting = false;
                 accept.play(0.7f);
@@ -84,7 +84,7 @@ class SettingsScreen : Screen
                 string action = actions[i - 3];
                 c.text(font, action, 80, y);
                 if (waiting && i == chosen)
-                    c.text(font, "press a key or button...", 420, y, fade(Yellow, 0.6f + 0.4f * sin(App::time() * 8)));
+                    c.text(font, "press a key or button...", 420, y, fade(Yellow, 0.6f + 0.4f * sin(App::time * 8)));
                 else
                 {
                     c.text(font, Input::keys(action), 420, y, Color(0.75f, 0.85f, 1));

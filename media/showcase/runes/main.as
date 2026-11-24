@@ -274,7 +274,7 @@ class RunesScreen : Screen
             if (runes[i] !is null) drawRune(c, runes[i]);
         c.pop();
 
-        float pulse = 4 + sin(App::time() * 6);
+        float pulse = 4 + sin(App::time * 6);
         float x = Left + cursorX.value * Cell, y = Top + cursorY.value * Cell;
         c.rectLine(x - 2, y - 2, Cell * 2 + 4, Cell * 2 + 4, pulse, busy ? Gray : White);
 
@@ -290,7 +290,7 @@ class RunesScreen : Screen
         c.text(font, "Best", 1080, 220, Gray);
         c.text(big, formatInt(best), 1080, 246, White);
         c.paragraph(font, "Turn four runes at a time. Four or more of one kind that touch will vanish; chains score more and give moves back.", 730, 350, 480, Color(0.75f, 0.8f, 0.9f));
-        c.text(font, Input::usingPad() ? "A  turn right     X  turn left" : "Enter  turn right     Shift  turn left", 730, 500, Yellow);
+        c.text(font, Input::usingPad ? "A  turn right     X  turn left" : "Enter  turn right     Shift  turn left", 730, 500, Yellow);
         if (banner != "")
         {
             c.push();

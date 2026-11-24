@@ -86,9 +86,9 @@ class TumbleScreen : Screen
 
     void update(float dt)
     {
-        aim += Vec2(Input::move().x, -Input::move().y) * dt * 0.6f;
-        Vec2 mouse = Input::mouse();
-        if (Input::hasMouse() && mouse != mouseWas)
+        aim += Vec2(Input::move.x, -Input::move.y) * dt * 0.6f;
+        Vec2 mouse = Input::mouse;
+        if (Input::hasMouse && mouse != mouseWas)
             aim = Vec2((mouse.x - 640) / 640 * 0.6f, (400 - mouse.y) / 400 * 0.4f);
         mouseWas = mouse;
         aim = Vec2(clamp(aim.x, -0.6f, 0.6f), clamp(aim.y, -0.1f, 0.5f));
@@ -145,7 +145,7 @@ class TumbleScreen : Screen
                 }
             }
         }
-        around = sin(App::time() * 0.15f) * 0.25f;
+        around = sin(App::time * 0.15f) * 0.25f;
         Space::camera(eye(), Vec3(0, 1.6f, 0), 55);
     }
 
@@ -170,6 +170,6 @@ class TumbleScreen : Screen
         }
         c.roundRect(20, 660, c.width - 40, 42, 12, Color(0, 0, 0, 0.45f));
         c.text(font, "Fire: throw     Alternate: next (" + kinds[kind] + ")     Cancel: build it again", 40, 668);
-        c.text(font, formatInt(int(Space::contacts())) + " contacts", c.width - 40, 668, White, AlignRight);
+        c.text(font, formatInt(int(Space::contacts)) + " contacts", c.width - 40, 668, White, AlignRight);
     }
 }

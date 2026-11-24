@@ -99,7 +99,7 @@ class SplitScreen : Screen
         }
         for (uint i = 0; i < 2; i++)
         {
-            Vec2 stick = Input::move();
+            Vec2 stick = Input::move;
             bool jump = Input::pressed("accept");
             Vec3 side(cos(yaws[i]), 0, -sin(yaws[i]));
             Vec3 ahead(-sin(yaws[i]), 0, -cos(yaws[i]));

@@ -21,7 +21,7 @@ class ParticlesScreen : Screen
         chosen = which;
         for (uint i = 0; i < emitters.length(); i++) emitters[i].destroy();
         emitters.resize(0);
-        Scene::setGravity(Vec2(0, 600));
+        Scene::gravity = Vec2(0, 600);
         if (which == 0)
         {
             emitters.insertLast(Scene::spawn("campfire", Vec2(640, 560)));
@@ -68,14 +68,14 @@ class ParticlesScreen : Screen
         if (chosen < 3) c.rect(0, 620, 1280, 100, chosen == 2 ? Color(0.75f, 0.8f, 0.9f) : Color(0.08f, 0.09f, 0.1f));
         if (chosen == 0)
         {
-            c.setBlend(BlendAdd);
+            c.blend = BlendAdd;
             c.glow(640, 560, 320 + sin(t * 12) * 14, Color(1, 0.5f, 0.15f, 0.25f));
-            c.setBlend(BlendAlpha);
+            c.blend = BlendAlpha;
             for (int i = 0; i < 3; i++) c.line(580 + float(i) * 20, 625, 660 + float(i) * 15, 600, 14, Color(0.25f, 0.15f, 0.1f));
         }
         Scene::draw(c);
         c.text(big, names[chosen], 640, 30, White, AlignCenter);
-        c.text(font, formatInt(Scene::particles()) + " particles in " + formatInt(App::draws()) + " draws", 640, 84, Gray, AlignCenter);
+        c.text(font, formatInt(Scene::particles) + " particles in " + formatInt(App::draws) + " draws", 640, 84, Gray, AlignCenter);
         c.text(font, "Left and right: another", 1250, 684, Yellow, AlignRight);
     }
 }

@@ -79,7 +79,7 @@ class WireframeScreen : Screen
     void update(float dt)
     {
         t += dt;
-        Vec2 move = Input::move();
+        Vec2 move = Input::move;
         spin += dt * (0.7f + move.x * 3);
         if (Input::pressed("accept"))
         {
@@ -118,7 +118,7 @@ class WireframeScreen : Screen
             float depth = 620 / (4 + p.z);
             seen[i] = Vec3(640 + p.x * depth, 320 - p.y * depth, p.z);
         }
-        c.setBlend(BlendAdd);
+        c.blend = BlendAdd;
         for (uint i = 0; i < edges.length(); i += 2)
         {
             Vec3 a = seen[edges[i]];
@@ -126,7 +126,7 @@ class WireframeScreen : Screen
             float near = clamp(0.6f - (a.z + b.z) * 0.2f, 0.12f, 1);
             c.line(a.x, a.y, b.x, b.y, 1.5f + near * 2, fade(hsv(0.45f + a.z * 0.06f, 0.7f, 1), near));
         }
-        c.setBlend(BlendAlpha);
-        c.text(font, Input::usingPad() ? "A  next shape      Left and right  spin" : "Enter  next shape      Left and right  spin", 640, 670, Color(0.7f, 0.85f, 0.9f), AlignCenter);
+        c.blend = BlendAlpha;
+        c.text(font, Input::usingPad ? "A  next shape      Left and right  spin" : "Enter  next shape      Left and right  spin", 640, 670, Color(0.7f, 0.85f, 0.9f), AlignCenter);
     }
 }

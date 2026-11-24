@@ -83,9 +83,9 @@ class ReboundScreen : Screen
     void update(float dt)
     {
         Vec2 before = mine;
-        mine += Vec2(Input::move().x, -Input::move().y) * 8 * dt;
-        Vec2 mouse = Input::mouse();
-        if (Input::hasMouse() && mouse != mouseWas)
+        mine += Vec2(Input::move.x, -Input::move.y) * 8 * dt;
+        Vec2 mouse = Input::mouse;
+        if (Input::hasMouse && mouse != mouseWas)
             mine = Vec2((mouse.x - 640) / 100, (360 - mouse.y) / 100);
         mouseWas = mouse;
         mine = Vec2(clamp(mine.x, -room.x + half.x, room.x - half.x), clamp(mine.y, -room.y + half.y, room.y - half.y));

@@ -20,7 +20,7 @@ class Hero : Behaviour
 
     void update(float dt)
     {
-        float move = Input::move().x;
+        float move = Input::move.x;
         Vec2 v = entity.velocity;
         v.x = lerp(v.x, move * 290, entity.onGround ? 0.2f : 0.1f);
         // Jumping still works just after leaving a ledge, and just before landing.
@@ -52,7 +52,7 @@ class Hero : Behaviour
         squash = lerp(squash, 0, 0.18f);
         entity.scale = Vec2(1 + squash, 1 - squash);
         if (move != 0) eyes.position = Vec2(move > 0 ? 6.0f : -6.0f, -8);
-        if (entity.y > Scene::mapSize().y + 100) hurt();
+        if (entity.y > Scene::mapSize.y + 100) hurt();
     }
 
     void hurt()
@@ -98,7 +98,7 @@ class Walker : Behaviour
         // Turns back at an edge.
         if (entity.onGround && Scene::tile(entity.position + Vec2(way > 0 ? 18.0f : -18.0f, 26)) == 0) way = -way;
         entity.velocity = Vec2(way, entity.velocity.y);
-        entity.rotation = sin(App::time() * 8) * 6;
+        entity.rotation = sin(App::time * 8) * 6;
     }
 }
 
@@ -150,7 +150,7 @@ class PlatformerScreen : Screen
         if (!done) t += dt;
         else if (Input::pressed("accept")) Screens::replace("platformer");
         Entity@ hero = Scene::find("hero");
-        Vec2 size = Scene::mapSize();
+        Vec2 size = Scene::mapSize;
         Vec2 want = Vec2(clamp(hero.x + hero.velocity.x * 0.35f, 640 / 1.4f, size.x - 640 / 1.4f), clamp(hero.y - 30, -1000, size.y - 360 / 1.4f));
         camera = camera + (want - camera) * 0.08f;
     }

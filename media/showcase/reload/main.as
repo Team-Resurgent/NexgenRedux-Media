@@ -1,7 +1,7 @@
 // Run the showcase with --dev, then change anything in this file and save it. The screen restarts by
 // itself. A mistake shows as an error, and mending it carries on.
 
-const string Message = "Change me!";
+const string Note = "Change me!";
 const Color Back = Color(0.1f, 0.16f, 0.2f);
 const uint Petals = 9;
 
@@ -20,7 +20,7 @@ class ReloadScreen : Screen
         c.push();
         c.translate(640, 270);
         c.scale(arrive.value, arrive.value);
-        c.rotate(App::time() * 20);
+        c.rotate(App::time * 20);
         for (uint i = 0; i < Petals; i++)
         {
             c.rotate(360.0f / float(Petals));
@@ -28,9 +28,9 @@ class ReloadScreen : Screen
         }
         c.circle(0, 0, 60, White);
         c.pop();
-        c.text(big, Message, 640, 440, White, AlignCenter);
+        c.text(big, Note, 640, 440, White, AlignCenter);
         c.text(font, "media/showcase/reload/main.as", 640, 530, Color(0.75f, 0.85f, 0.9f), AlignCenter);
-        c.text(font, App::development() ? "Watching for changes. Reloaded " + formatInt(App::reloads()) + " times." : "Start the showcase with --dev to watch for changes.", 640, 580, Yellow, AlignCenter);
+        c.text(font, App::development ? "Watching for changes. Reloaded " + formatInt(App::reloads) + " times." : "Start the showcase with --dev to watch for changes.", 640, 580, Yellow, AlignCenter);
         c.text(font, "Images reload too, where they are, without restarting anything.", 640, 620, Color(0.75f, 0.85f, 0.9f), AlignCenter);
     }
 }

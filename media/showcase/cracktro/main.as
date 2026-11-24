@@ -63,7 +63,7 @@ class CracktroScreen : Screen
         }
 
         // Raster bars.
-        c.setBlend(BlendAdd);
+        c.blend = BlendAdd;
         for (int i = 0; i < 9; i++)
         {
             float y = 330 + sin(t * 1.4f + float(i) * 0.35f) * 190;
@@ -73,7 +73,7 @@ class CracktroScreen : Screen
             c.gradient(0, y - thick, 1280, thick, fade(bar, 0), bar);
             c.gradient(0, y, 1280, thick, bar, fade(bar, 0));
         }
-        c.setBlend(BlendAlpha);
+        c.blend = BlendAlpha;
 
         c.push();
         c.translate(640, 112);
@@ -92,7 +92,7 @@ class CracktroScreen : Screen
             float s = 1.6f + sin(a) * 0.5f;
             c.scale(s, s);
             c.rotate(sin(t * 2 + float(i)) * 12);
-            c.setFilter(FilterNearest);
+            c.filter = FilterNearest;
             c.sprite(sheet, 16, 16, (frame + uint(i) * 40) % 255, -32, -32, 64, 64);
             c.pop();
         }

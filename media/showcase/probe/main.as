@@ -57,9 +57,9 @@ class ProbeScreen : Screen
     void update(float dt)
     {
         turn += dt * 0.6f;
-        at += Input::move() * 420 * dt;
-        Vec2 mouse = Input::mouse();
-        if (Input::hasMouse() && mouse != lastMouse) at = mouse;
+        at += Input::move * 420 * dt;
+        Vec2 mouse = Input::mouse;
+        if (Input::hasMouse && mouse != lastMouse) at = mouse;
         lastMouse = mouse;
         at = Vec2(clamp(at.x, 20, 1260), clamp(at.y, 20, 700));
     }
