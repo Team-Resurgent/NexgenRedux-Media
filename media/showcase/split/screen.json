@@ -1,0 +1,7 @@
+{
+  "title": "Split screen",
+  "description": "Two robots, two cameras, one world",
+  "category": "3D",
+  "order": 196,
+  "demo": "wait:1 up:2 right+up:1 up:1.5 left+up:1 up:2 accept right+up:1.5 up:2"
+}

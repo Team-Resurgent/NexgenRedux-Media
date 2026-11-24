@@ -1,0 +1,7 @@
+{
+  "title": "Spire",
+  "description": "A falling block game round a tower",
+  "category": "Games",
+  "order": 155,
+  "demo": "wait:1 left:0.3 accept fire wait:0.5 right:0.5 fire wait:0.5 left:0.8 accept fire wait:0.5 right:0.2 fire wait:0.5 left:0.5 fire wait:0.5 right:0.9 accept fire wait:0.5"
+}

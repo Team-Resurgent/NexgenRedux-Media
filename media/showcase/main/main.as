@@ -100,6 +100,7 @@ class MainScreen : Screen
         if (category == "Games") return Red;
         if (category == "Sound") return Yellow;
         if (category == "Scene") return Color(0.35f, 0.85f, 0.85f);
+        if (category == "3D") return Color(1, 0.45f, 0.7f);
         return Gray;
     }
 
@@ -124,6 +125,8 @@ class MainScreen : Screen
         {
             float x = left + float(i % columns) * (tileW + gap);
             float y = top + float(i / columns) * (tileH + gap) - scroll;
+            if (y > 720 || y + tileH < top - 40)
+                continue;
             float appear = smooth(shown * 2 - float(i) * 0.06f);
             drawTile(c, tiles[i], x, y + (1 - appear) * 40, i == chosen, appear);
         }

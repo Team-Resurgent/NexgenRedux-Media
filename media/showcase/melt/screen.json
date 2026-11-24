@@ -1,0 +1,7 @@
+{
+  "title": "Ray marching",
+  "description": "Shapes by their distance, melting together",
+  "category": "3D",
+  "order": 193,
+  "demo": "wait:3 right:1 accept wait:3 accept wait:3 accept wait:2"
+}

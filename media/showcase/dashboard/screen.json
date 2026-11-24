@@ -1,0 +1,7 @@
+{
+  "title": "Dashboard",
+  "description": "A console menu made of 3D models",
+  "category": "Interface",
+  "order": 126,
+  "demo": "wait:1.5 down wait:0.9 down wait:0.9 accept wait:2 cancel wait:0.8 down wait:0.8 alternate wait:1.2 up wait:0.8 alternate wait:1.2 up wait:0.8"
+}

@@ -1,0 +1,7 @@
+{
+  "title": "Solids",
+  "description": "Meshes, materials, lights and shadows",
+  "category": "3D",
+  "order": 190,
+  "demo": "wait:3 right:1.5 left:1 accept wait:2 accept wait:2"
+}

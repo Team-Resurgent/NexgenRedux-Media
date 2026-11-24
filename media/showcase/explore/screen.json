@@ -1,0 +1,7 @@
+{
+  "title": "Island",
+  "description": "A world to walk about in, from day to night",
+  "category": "3D",
+  "order": 189,
+  "demo": "wait:1 up:3 right+up:1 up:1.2 accept up:1 left+up:1.5 up:2 accept up:1.5 right+up:1 up:3 fire wait:1 up:2"
+}

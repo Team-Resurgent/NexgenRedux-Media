@@ -1,0 +1,22 @@
+// A village, to be put anywhere.
+{
+  "entities": [
+    {"model": "global:model/house.glb", "place": [0.0, 0, 13.0], "onLand": true, "angles": 180},
+    {"model": "global:model/lantern.glb", "place": [4.71, 0, 6.46], "onLand": true},
+    {"glow": 1.6, "color": "#ffc060a0", "place": [4.71, 2.9, 6.46], "onLand": true, "light": [1, 0.7, 0.3], "range": 8},
+    {"model": "global:model/house.glb", "place": [12.36, 0, 4.02], "onLand": true, "angles": 252},
+    {"model": "global:model/lantern.glb", "place": [7.6, 0, -2.48], "onLand": true},
+    {"glow": 1.6, "color": "#ffc060a0", "place": [7.6, 2.9, -2.48], "onLand": true, "light": [1, 0.7, 0.3], "range": 8},
+    {"model": "global:model/house.glb", "place": [7.64, 0, -10.52], "onLand": true, "angles": 324},
+    {"model": "global:model/lantern.glb", "place": [-0.01, 0, -8.0], "onLand": true},
+    {"glow": 1.6, "color": "#ffc060a0", "place": [-0.01, 2.9, -8.0], "onLand": true, "light": [1, 0.7, 0.3], "range": 8},
+    {"model": "global:model/house.glb", "place": [-7.64, 0, -10.52], "onLand": true, "angles": 396},
+    {"model": "global:model/lantern.glb", "place": [-7.61, 0, -2.46], "onLand": true},
+    {"glow": 1.6, "color": "#ffc060a0", "place": [-7.61, 2.9, -2.46], "onLand": true, "light": [1, 0.7, 0.3], "range": 8},
+    {"model": "global:model/house.glb", "place": [-12.36, 0, 4.02], "onLand": true, "angles": 468},
+    {"model": "global:model/lantern.glb", "place": [-4.69, 0, 6.48], "onLand": true},
+    {"glow": 1.6, "color": "#ffc060a0", "place": [-4.69, 2.9, 6.48], "onLand": true, "light": [1, 0.7, 0.3], "range": 8},
+    {"model": "global:model/well.glb", "place": [0, 0, 0], "onLand": true},
+    {"shape": "box", "color": "#b08048", "place": [3, 0.5, 1], "onLand": true, "angles": 30}
+  ]
+}

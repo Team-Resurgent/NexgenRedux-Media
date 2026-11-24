@@ -1,0 +1,7 @@
+{
+  "title": "Models",
+  "description": "glTF models, animation and levels of detail",
+  "category": "3D",
+  "order": 192,
+  "demo": "wait:1 up wait:1 up wait:1 up wait:1 up wait:1.5 right wait:1.2 right wait:1.2 down:0.1 right wait:1.2 right wait:1 fire:1 wait:1"
+}

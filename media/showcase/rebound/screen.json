@@ -1,0 +1,7 @@
+{
+  "title": "Rebound",
+  "description": "A ball, two bats and a tunnel",
+  "category": "Games",
+  "order": 156,
+  "demo": "wait:0.5 accept right:0.3 left:0.5 up:0.2 right:0.4 down:0.3 left:0.3 right:0.3 up:0.4 left:0.2 down:0.2 right:0.2"
+}

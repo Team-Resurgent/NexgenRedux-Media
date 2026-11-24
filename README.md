@@ -17,6 +17,11 @@ Everything that the [Nexgen Redux](https://github.com/Team-Resurgent/NexgenRedux
 [demos page](https://team-resurgent.github.io/NexgenRedux-Docs/demos.html).
 
 <p align="center">
+  <img src="screenshots/explore.png" alt="Island" width="32%">
+  <img src="screenshots/dashboard.png" alt="Dashboard" width="32%">
+  <img src="screenshots/blades.png" alt="Blades" width="32%">
+</p>
+<p align="center">
   <img src="screenshots/shooter.png" alt="Shooter" width="32%">
   <img src="screenshots/platformer.png" alt="Platformer" width="32%">
   <img src="screenshots/physics.png" alt="Physics" width="32%">
@@ -34,12 +39,13 @@ Everything that the [Nexgen Redux](https://github.com/Team-Resurgent/NexgenRedux
 | `media/showcase/<name>/screen.json` | A demo's title, description and place in the menu, and what to press when it is shown off |
 | `media/showcase/<name>/main.as` | Its script |
 | `media/showcase/<name>/asset` | Its own pictures, sounds and scene files |
-| `media/global` | Fonts and sounds that demos share |
+| `media/global` | Fonts, sounds and models that demos share |
 
 Add a folder and it appears in the menu. How to write one is in the
 [guide](https://team-resurgent.github.io/NexgenRedux-Docs/guide.html).
 
-The sounds, music and test pictures are made by `engine/tools/make_media.py` in NexgenRedux.
+The sounds, music and test pictures are made by `engine/tools/make_media.py` in NexgenRedux, and the models by `make_models.py`.
+The Dashboard's models and the Blades' pictures are from the first engine's skins.
 
 ## Related repositories
 

@@ -1,0 +1,7 @@
+{
+  "title": "Forest",
+  "description": "Two thousand trees: culling and levels of detail",
+  "category": "3D",
+  "order": 195,
+  "demo": "wait:2 up:2 right:1 up:2 left:1 accept wait:1.5 accept up:2"
+}
