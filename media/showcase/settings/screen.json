@@ -1,0 +1,7 @@
+{
+  "title": "Settings",
+  "description": "Volumes and controls, remembered next time",
+  "category": "Interface",
+  "order": 125,
+  "demo": "down wait:0.3 left:0.5 right:0.7 down wait:0.3 down wait:0.3 down wait:0.3 down wait:0.5"
+}

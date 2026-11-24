@@ -1,0 +1,7 @@
+{
+  "title": "Particles",
+  "description": "Fire, rain, fountains and fireworks",
+  "category": "Scene",
+  "order": 186,
+  "demo": "wait:2 right wait:2 right wait:2 right wait:3 right wait:2"
+}

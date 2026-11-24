@@ -1,0 +1,7 @@
+{
+  "title": "Physics",
+  "description": "Stacks, chains, a seesaw and a wrecking ball",
+  "category": "Scene",
+  "order": 182,
+  "demo": "wait:1.5 right:0.5 accept wait:0.6 accept wait:0.6 left:0.7 fire:0.3 accept wait:1 alternate wait:2"
+}

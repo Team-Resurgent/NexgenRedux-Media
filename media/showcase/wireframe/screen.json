@@ -1,0 +1,7 @@
+{
+  "title": "Wireframe",
+  "description": "A 3D shape drawn with 2D lines",
+  "category": "Effects",
+  "order": 90,
+  "demo": "right:1.2 accept wait:1 left:1 accept wait:1"
+}

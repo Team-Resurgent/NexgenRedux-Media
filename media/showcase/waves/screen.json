@@ -1,0 +1,7 @@
+{
+  "title": "Sprite animation",
+  "description": "Frame animation and tiled water; steer the ship",
+  "category": "Sprites",
+  "order": 50,
+  "demo": "right:0.6 up:0.8 left:0.8"
+}

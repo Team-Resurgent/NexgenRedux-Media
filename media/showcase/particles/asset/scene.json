@@ -1,0 +1,21 @@
+{
+  "particles": {
+    "fire":   { "life": [0.5, 1.1], "speed": [60, 190], "angle": -90, "spread": 34, "size": [70, 6], "color": "#ff8020b0", "colorEnd": "#ff100000", "gravity": -0.2, "radius": 26, "layer": 2 },
+    "smoke":  { "life": [1.6, 2.8], "speed": [40, 90], "angle": -90, "spread": 30, "size": [40, 170], "color": "#50505030", "colorEnd": "#20202000", "blend": "alpha", "radius": 20, "layer": 1 },
+    "ember":  { "life": [0.8, 2.2], "speed": [80, 260], "angle": -90, "spread": 70, "size": [6, 2], "color": "#ffd060", "gravity": -0.1, "drag": 0.6, "radius": 20, "layer": 3 },
+    "water":  { "life": [1.0, 1.5], "speed": [560, 660], "angle": -90, "spread": 22, "size": [16, 8], "color": "#60b0ffc0", "colorEnd": "#3060ff20", "gravity": 1.6, "layer": 2 },
+    "flake":  { "life": [6, 9], "speed": [60, 120], "angle": 80, "spread": 60, "size": [8, 8], "color": "#ffffffe0", "colorEnd": "#ffffffc0", "blend": "alpha", "radius": 50, "layer": 2 },
+    "red":    { "life": [0.7, 1.5], "speed": [20, 420], "size": [13, 2], "color": "#ff5050", "gravity": 0.5, "drag": 1.4, "layer": 2 },
+    "green":  { "life": [0.7, 1.5], "speed": [300, 360], "size": [13, 2], "color": "#50ff80", "gravity": 0.5, "drag": 1.6, "layer": 2 },
+    "gold":   { "life": [1.0, 2.2], "speed": [20, 300], "size": [10, 2], "color": "#ffd050", "gravity": 0.9, "drag": 1.4, "layer": 2 },
+    "trail":  { "life": [0.8, 2.0], "speed": [4, 40], "size": [26, 2], "color": "#8060ff90", "colorEnd": "#20a0ff00", "radius": 8, "layer": 2 }
+  },
+  "prefabs": {
+    "campfire": { "emitter": "fire", "rate": 130 },
+    "smoke":    { "emitter": "smoke", "rate": 16 },
+    "embers":   { "emitter": "ember", "rate": 26 },
+    "fountain": { "emitter": "water", "rate": 420 },
+    "snow":     { "emitter": "flake", "rate": 6 },
+    "star":     { "emitter": "trail", "rate": 120 }
+  }
+}

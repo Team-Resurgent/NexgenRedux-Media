@@ -1,0 +1,7 @@
+{
+  "title": "Loading",
+  "description": "Twelve pictures arrive without a dropped frame",
+  "category": "Engine",
+  "order": 132,
+  "demo": "wait:2.5 accept"
+}

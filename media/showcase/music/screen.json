@@ -1,0 +1,7 @@
+{
+  "title": "Music",
+  "description": "A tune, and what it looks like",
+  "category": "Sound",
+  "order": 170,
+  "demo": "wait:4 right wait:4"
+}

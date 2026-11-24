@@ -1,0 +1,29 @@
+{
+  "groups": ["player", "enemy", "shot", "bullet", "power"],
+
+  "particles": {
+    "fire":   { "life": [0.3, 0.9], "speed": [30, 320], "size": [34, 4], "color": "#ffb040", "colorEnd": "#ff200000", "drag": 1.5, "layer": 6 },
+    "smoke":  { "life": [0.7, 1.4], "speed": [10, 90], "size": [30, 90], "color": "#60606088", "colorEnd": "#30303000", "blend": "alpha", "layer": 5 },
+    "spark":  { "life": [0.1, 0.3], "speed": [60, 240], "angle": -90, "spread": 140, "size": [12, 2], "color": "#fff0a0", "layer": 6 },
+    "pickup": { "life": [0.3, 0.7], "speed": [60, 260], "size": [16, 2], "color": "#60ff90", "layer": 6 },
+    "engine": { "life": [0.15, 0.35], "speed": [160, 260], "angle": 90, "spread": 14, "size": [20, 3], "color": "#50a0ff", "colorEnd": "#2040ff00", "radius": 3, "layer": 1 },
+    "glow":   { "life": [0.2, 0.2], "speed": [0, 0], "size": [44, 20], "color": "#40ff8060", "layer": 1 }
+  },
+
+  "prefabs": {
+    "player": {
+      "name": "player", "image": "asset:plane.png", "layer": 3, "circle": 26, "group": "player", "hits": ["enemy", "bullet", "power"], "behaviour": "Player",
+      "children": [
+        { "position": [-16, 34], "emitter": "engine", "rate": 70 },
+        { "position": [16, 34], "emitter": "engine", "rate": 70 }
+      ]
+    },
+    "shot":   { "image": "asset:shot.png", "layer": 2, "box": [10, 26], "group": "shot", "hits": ["enemy"], "lifetime": 1, "behaviour": "Shot" },
+    "bullet": { "image": "asset:bullet.png", "layer": 4, "circle": 7, "group": "bullet", "lifetime": 4 },
+    "power":  { "disc": 14, "color": "#60ff90", "layer": 4, "circle": 24, "group": "power", "velocity": [0, 120], "lifetime": 7, "behaviour": "PowerUp", "emitter": "glow", "rate": 30 },
+
+    "enemy":  { "image": "asset:enemy.png", "layer": 3, "circle": 36, "group": "enemy", "velocity": [0, 95], "behaviour": "Enemy" },
+    "diver":  { "base": "enemy", "image": "asset:fish.png", "rotation": 180, "velocity": [0, 300], "behaviour": "Diver" },
+    "boss":   { "base": "enemy", "image": "asset:boss.png", "scale": 3, "circle": 34, "behaviour": "Boss" }
+  }
+}

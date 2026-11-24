@@ -1,0 +1,7 @@
+{
+  "title": "Hierarchy",
+  "description": "Things that move with other things",
+  "category": "Scene",
+  "order": 184,
+  "demo": "wait:3 right:1 wait:2 left:1.5"
+}

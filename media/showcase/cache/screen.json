@@ -1,0 +1,7 @@
+{
+  "title": "Asset cache",
+  "description": "What is loaded, kept warm and reused",
+  "category": "Engine",
+  "order": 130,
+  "demo": "wait:2 accept wait:2"
+}

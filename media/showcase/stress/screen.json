@@ -1,0 +1,7 @@
+{
+  "title": "Stress test",
+  "description": "How many sprites until it slows down?",
+  "category": "Sprites",
+  "order": 70,
+  "demo": "up wait:0.4 up wait:0.4 up wait:0.4 up wait:0.4 up wait:1"
+}

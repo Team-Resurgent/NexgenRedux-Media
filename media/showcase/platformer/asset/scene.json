@@ -1,0 +1,42 @@
+{
+  "groups": ["hero", "coin", "enemy", "spike", "goal"],
+  "gravity": 1700,
+
+  "particles": {
+    "dust":  { "life": [0.2, 0.5], "speed": [20, 90], "angle": -90, "spread": 180, "size": [10, 22], "color": "#ffffff70", "blend": "alpha", "layer": 5 },
+    "poof":  { "life": [0.3, 0.7], "speed": [40, 220], "size": [18, 3], "color": "#ffffff", "blend": "alpha", "gravity": 0.3, "layer": 7 },
+    "shine": { "life": [0.3, 0.8], "speed": [40, 200], "size": [14, 2], "color": "#ffe060", "layer": 7 }
+  },
+
+  "prefabs": {
+    "hero":   { "name": "hero", "rect": [28, 36], "color": "#e8574a", "layer": 5, "box": [26, 36], "group": "hero", "hits": ["coin", "enemy", "spike", "goal"], "solid": true, "gravity": 1, "behaviour": "Hero" },
+    "walker": { "rect": [30, 26], "color": "#7a4ba8", "layer": 4, "box": [28, 26], "group": "enemy", "solid": true, "gravity": 1, "behaviour": "Walker",
+                "children": [ { "rect": [5, 6], "position": [-6, -4], "layer": 5 }, { "rect": [5, 6], "position": [6, -4], "layer": 5 } ] },
+    "coin":   { "name": "coin", "disc": 9, "color": "#ffd23c", "layer": 3, "circle": 12, "group": "coin", "behaviour": "Spin" },
+    "spike":  { "rect": [22, 22], "rotation": 45, "position": [0, 10], "color": "#c8ccd4", "layer": -12, "box": [16, 16], "group": "spike" },
+    "goal":   { "name": "goal", "rect": [6, 96], "color": "#f0f0f0", "layer": 2, "box": [20, 96], "group": "goal",
+                "children": [ { "rect": [46, 28], "position": [26, -32], "color": "#3cc46a", "layer": 2 } ] }
+  },
+
+  "map": {
+    "tile": 32, "layer": 0, "solid": [1, 2], "platforms": [3],
+    "colors": { "1": "#5b3a24", "2": "#5fa83c", "3": "#a8763e" },
+    "legend": { "#": 1, "g": 2, "=": 3, "o": "coin", "w": "walker", "^": "spike", "H": "hero", "F": "goal" },
+    "rows": [
+      "                                                                                                      ",
+      "                                                                                                      ",
+      "                                               o o o                                                  ",
+      "                                              =======                            o                    ",
+      "                                                                                ===         o o       ",
+      "                         o                o o                                              =====      ",
+      "                        ===              =====              gg                                        ",
+      "                 o o                                   gg   ##              ===                     F ",
+      "                =====         w                        ##   ##    o o               w                 ",
+      "        o                  ggggggg       w      gg     ##   ##   gggg      o   ggggggggg          ggggg",
+      "  H    ===     w           #######   ggggggggg  ##     ##   ##   ####     ggg  #########     w    #####",
+      "gggggggggggggggggg  ggg ^^ #######   #########  ## ^^^ ## ^ ## ^ #### ^^^ ###  #########  gggggggg#####",
+      "##################  ### gg #######   #########  ## ggg ## g ## g #### ggg ###  #########  #############",
+      "##################  ### ## #######   #########  ## ### ## # ## # #### ### ###  #########  #############"
+    ]
+  }
+}

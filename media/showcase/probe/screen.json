@@ -1,0 +1,7 @@
+{
+  "title": "Queries",
+  "description": "Rays, nearest things and what is touching",
+  "category": "Scene",
+  "order": 187,
+  "demo": "right:0.8 down:0.5 left:1.4 up:0.6 right:0.9"
+}

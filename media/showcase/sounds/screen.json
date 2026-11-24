@@ -1,0 +1,7 @@
+{
+  "title": "Sounds",
+  "description": "Pads, pitch, panning and many voices",
+  "category": "Sound",
+  "order": 160,
+  "demo": "cancel wait:2 right wait:0.2 accept wait:0.4 down wait:0.2 accept wait:0.4 right wait:0.2 accept wait:0.4 down wait:0.2 accept wait:0.6"
+}

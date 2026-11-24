@@ -1,0 +1,7 @@
+{
+  "title": "Shooter",
+  "description": "Waves, bosses and power-ups from prefabs",
+  "category": "Games",
+  "order": 151,
+  "demo": "right+fire:0.7 left+fire:1.2 right+fire:0.9 up+fire:0.3 left+fire:0.6 down+fire:0.3"
+}

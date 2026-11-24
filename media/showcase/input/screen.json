@@ -1,0 +1,7 @@
+{
+  "title": "Input",
+  "description": "Everything you press, live, on every device",
+  "category": "Interface",
+  "order": 120,
+  "demo": "up:0.3 right:0.3 down:0.3 left:0.3 accept:0.2 fire:0.3 alternate:0.3"
+}

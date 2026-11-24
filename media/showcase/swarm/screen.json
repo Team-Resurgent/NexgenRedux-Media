@@ -1,0 +1,7 @@
+{
+  "title": "Swarm",
+  "description": "How many entities, moving and colliding, until it slows down?",
+  "category": "Scene",
+  "order": 188,
+  "demo": "up up up wait:2 up up up up wait:2"
+}

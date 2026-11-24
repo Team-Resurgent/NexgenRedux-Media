@@ -1,0 +1,7 @@
+{
+  "title": "Parallax",
+  "description": "Scrolling layers that fit any screen size",
+  "category": "Sprites",
+  "order": 60,
+  "demo": "right:1 up:0.5 right:1 down:0.6"
+}

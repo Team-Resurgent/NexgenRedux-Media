@@ -1,0 +1,7 @@
+{
+  "title": "Rune shift",
+  "description": "Turn squares of runes to join four of a colour",
+  "category": "Games",
+  "order": 154,
+  "demo": "wait:1.2 accept wait:1 right wait:0.3 accept wait:1 down wait:0.3 alternate wait:1 left wait:0.2 left wait:0.2 accept wait:1 up wait:0.2 accept wait:1"
+}
