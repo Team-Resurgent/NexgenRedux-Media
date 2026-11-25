@@ -56,7 +56,7 @@ class LauncherScreen : Screen
         {
             uint n = files[i].length();
             if (n > 4 && (files[i].substr(n - 4) == ".xbe" || files[i].substr(n - 4) == ".XBE"))
-                found(name == "" ? files[i] : name, folder + "\\" + files[i]);
+                found(name == "" ? files[i] : name, folder + (name == "" ? "" : "\\") + files[i]);
         }
     }
 
