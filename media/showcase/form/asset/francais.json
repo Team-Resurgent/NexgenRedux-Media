@@ -1,0 +1,23 @@
+{
+  "title": "À propos de vous",
+  "name": "Nom",
+  "nameHint": "Comment vous appelez-vous ?",
+  "missing": "Il faut un nom",
+  "drink": "À boire",
+  "tea": "Thé",
+  "coffee": "Café",
+  "water": "Eau",
+  "pets": "Animaux",
+  "news": "Recevoir des nouvelles",
+  "photo": "Utiliser ma photo",
+  "promise": "Rien ne part d'ici. Ce n'est qu'un exemple de formulaire : la page est un fichier, et chaque langue un autre.",
+  "clear": "Effacer",
+  "send": "Envoyer",
+  "thanks": "Merci",
+  "fine": "D'accord",
+  "cleared": "Effacé",
+  "Done": "Fini",
+  "Space": "Espace",
+  "Shift": "Maj",
+  "Delete": "Effacer"
+}

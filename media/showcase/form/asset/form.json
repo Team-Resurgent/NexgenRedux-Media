@@ -1,0 +1,24 @@
+{
+  "column": [
+    { "row": [
+      { "label": "@title", "style": "title", "grow": 1 },
+      { "choice": ["English", "Français", "Deutsch"], "id": "language", "change": "onLanguage" }
+    ] },
+    { "column": [
+      { "row": [ { "label": "@name", "grow": 1 }, { "field": "Sam", "hint": "@nameHint", "id": "name", "width": 420, "change": "onCheck" } ] },
+      { "label": "@missing", "style": "warning", "id": "missing", "visible": false },
+      { "row": [ { "label": "@drink", "grow": 1 }, { "choice": ["@tea", "@coffee", "@water"], "id": "drink", "width": 420 } ] },
+      { "row": [ { "label": "@pets", "grow": 1 }, { "label": "2", "id": "pets", "style": "small" }, { "slider": 2, "low": 0, "high": 10, "step": 1, "width": 420, "change": "onPets" } ] },
+      { "toggle": "@news", "checked": true },
+      { "toggle": "@photo" },
+      { "line": true },
+      { "paragraph": "@promise", "style": "small" }
+    ], "style": "panel", "grow": 1 },
+    { "row": [
+      { "space": true },
+      { "button": "@clear", "click": "onClear", "minWidth": 200 },
+      { "button": "@send", "id": "send", "click": "onSend", "minWidth": 200 }
+    ] }
+  ],
+  "padding": 44, "gap": 18, "grow": 1
+}

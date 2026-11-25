@@ -1,0 +1,9 @@
+{
+  "styles": {
+    "title": { "size": 60 },
+    "small": { "size": 18, "text": "#a6b2c8" },
+    "tile": { "base": "plain", "size": 29, "text": "$strong" },
+    "row": { "back": "#1c2133", "radius": 14, "padding": [16, 14], "gap": 12, "line": "#00000000", "lineWidth": 4,
+             "focused": { "back": "#2b3652", "line": "$accent", "lineWidth": 4, "scale": 1.025 } }
+  }
+}

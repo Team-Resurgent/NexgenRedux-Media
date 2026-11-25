@@ -1,0 +1,8 @@
+{
+  "title": "Form",
+  "description": "A page from a file, in three languages",
+  "category": "Interface",
+  "order": 118,
+  "demo": "wait:1 down wait:0.3 down wait:0.3 right wait:0.3 down wait:0.3 right:0.5 down wait:0.3 accept wait:0.4 up:1 wait:0.2 right wait:0.8 right wait:1 left wait:0.6 left wait:0.4 down:1.4 wait:0.3 accept wait:1.4 accept wait:0.6",
+  "seconds": 20
+}

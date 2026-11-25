@@ -1,0 +1,8 @@
+{
+  "title": "Inventory",
+  "description": "A game's menu, with a 3D view in it",
+  "category": "Interface",
+  "order": 119,
+  "demo": "wait:1 right wait:0.4 right wait:0.4 down wait:0.4 left wait:0.4 accept wait:0.9 down wait:0.4 accept wait:0.9 right:0.5 wait:0.3 accept wait:0.8",
+  "seconds": 12
+}

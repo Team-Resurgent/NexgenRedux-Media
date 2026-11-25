@@ -1,0 +1,23 @@
+{
+  "title": "About you",
+  "name": "Name",
+  "nameHint": "What you are called",
+  "missing": "A name is needed",
+  "drink": "To drink",
+  "tea": "Tea",
+  "coffee": "Coffee",
+  "water": "Water",
+  "pets": "Pets",
+  "news": "Send me news",
+  "photo": "Use my picture",
+  "promise": "Nothing here goes anywhere. It is only to show a form: the page is one file, and each language another.",
+  "clear": "Clear",
+  "send": "Send",
+  "thanks": "Thank you",
+  "fine": "Fine",
+  "cleared": "Cleared",
+  "Done": "Done",
+  "Space": "Space",
+  "Shift": "Shift",
+  "Delete": "Delete"
+}

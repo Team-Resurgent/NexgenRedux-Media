@@ -1,0 +1,20 @@
+{
+  // ...or change everything.
+  "colors": {
+    "accent": "#ff2fb0", "strong": "#ffffff", "text": "#7ff7ff", "dim": "#5f7fb8",
+    "panel": "#12002680", "control": "#1c0038", "raised": "#2b0058", "track": "#30106a"
+  },
+  "styles": {
+    "title": { "size": 52, "text": "#ff2fb0" },
+    "panel": { "radius": 0, "line": "#7ff7ff60", "lineWidth": 2 },
+    "control": { "radius": 0, "line": "#7ff7ff", "lineWidth": 1.5, "focused": { "line": "#ffe14d", "text": "#ffe14d", "lineWidth": 3 } },
+    "button": { "base": "control", "align": "center", "focused": { "back": "#ff2fb0", "text": "#ffffff", "scale": 1.06 } },
+    "toggle": { "base": "control" }, "slider": { "base": "control" }, "choice": { "base": "control", "align": "center" }, "field": { "base": "control" },
+    "quiet": { "base": "control", "back": "#00000000", "align": "center" },
+    "tab": { "base": "quiet", "text": "$dim", "lineWidth": 0, "checked": { "text": "#ffe14d", "lineWidth": 2 } },
+    "dialog": { "base": "panel", "back": "#12002ef0", "padding": 32, "gap": 20, "minWidth": 420 },
+    "menu": { "base": "panel", "back": "#12002ef0", "padding": 8, "gap": 4 },
+    "key": { "base": "button", "padding": [4, 8], "minHeight": 48 },
+    "keyboard": { "base": "panel", "back": "#12002ef0", "padding": 20, "gap": 8 }
+  }
+}

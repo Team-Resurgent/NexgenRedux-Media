@@ -1,0 +1,23 @@
+{
+  "title": "Über dich",
+  "name": "Name",
+  "nameHint": "Wie heißt du?",
+  "missing": "Ein Name fehlt",
+  "drink": "Getränk",
+  "tea": "Tee",
+  "coffee": "Kaffee",
+  "water": "Wasser",
+  "pets": "Haustiere",
+  "news": "Neuigkeiten schicken",
+  "photo": "Mein Bild verwenden",
+  "promise": "Nichts davon wird verschickt. Es zeigt nur ein Formular: Die Seite ist eine Datei und jede Sprache eine weitere.",
+  "clear": "Löschen",
+  "send": "Senden",
+  "thanks": "Danke",
+  "fine": "Gut",
+  "cleared": "Gelöscht",
+  "Done": "Fertig",
+  "Space": "Leer",
+  "Shift": "Umschalt",
+  "Delete": "Löschen"
+}

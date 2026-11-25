@@ -1,0 +1,12 @@
+{
+  // A theme may be only a few colours...
+  "colors": {
+    "accent": "#b8452c", "strong": "#2a2420", "text": "#3c342d", "dim": "#7d7265",
+    "panel": "#fffdf7", "control": "#efe9dc", "raised": "#f6f1e6", "track": "#d8cfbd", "shade": "#2a242090"
+  },
+  "styles": {
+    "button": { "base": "control", "align": "center", "radius": 4, "focused": { "back": "$accent", "text": "#ffffff", "lineWidth": 0 } },
+    "row": { "back": "#00000008", "focused": { "text": "#ffffff" } },
+    "line": { "line": "#00000022" }
+  }
+}
