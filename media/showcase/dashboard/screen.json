@@ -3,5 +3,6 @@
   "description": "A console menu made of 3D models",
   "category": "Interface",
   "order": 126,
-  "demo": "wait:1.5 down wait:0.9 down wait:0.9 accept wait:2 cancel wait:0.8 down wait:0.8 alternate wait:1.2 up wait:0.8 alternate wait:1.2 up wait:0.8"
+  "demo": "wait:2.5 accept wait:2.4 cancel wait:1 down wait:0.7 accept wait:2.6 cancel wait:1 down wait:0.7 accept wait:1.8 cancel wait:1 down wait:0.7 accept wait:3.4 cancel wait:1 alternate wait:1.2 alternate wait:1.2 alternate wait:1.2 up wait:0.7 up wait:0.7 alternate wait:2",
+  "seconds": 27
 }

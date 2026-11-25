@@ -3,5 +3,6 @@
   "description": "A console menu of curved blades",
   "category": "Interface",
   "order": 127,
-  "demo": "wait:1 down wait:0.5 down wait:0.6 right wait:1 down wait:0.6 right wait:1 right wait:1 down wait:0.5 left wait:0.8 left wait:0.8 left wait:0.8 right wait:1"
+  "demo": "wait:1.4 down wait:0.5 down wait:0.8 right wait:1.2 down wait:0.5 down wait:0.8 right wait:1.2 down wait:0.5 down wait:0.5 down wait:0.8 left wait:1 left wait:1 left wait:1.2 down wait:0.5 down wait:0.8 left wait:1.2 down wait:0.8 right wait:0.7 right wait:0.7 right wait:0.7 right wait:0.9 left wait:0.5 left wait:1.5",
+  "seconds": 22
 }

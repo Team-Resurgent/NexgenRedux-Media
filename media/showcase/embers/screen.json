@@ -1,0 +1,8 @@
+{
+  "title": "Embers",
+  "description": "Fire, smoke, snow and sparks in space",
+  "category": "3D",
+  "order": 198,
+  "demo": "wait:2 right wait:2 accept wait:1 accept wait:1 right wait:2 right wait:2 right wait:2",
+  "seconds": 15
+}

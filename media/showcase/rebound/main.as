@@ -169,6 +169,7 @@ class ReboundScreen : Screen
     {
         c.design(1280, 720);
         Space::draw(c);
+        c.bloom(0.5f, 0.7f);
         c.text(big, formatInt(score[0]), 560, 20, Color(0.5f, 0.85f, 1), AlignCenter);
         c.text(big, formatInt(score[1]), 720, 20, Color(1, 0.55f, 0.5f), AlignCenter);
         if (finished)

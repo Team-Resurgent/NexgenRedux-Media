@@ -65,6 +65,7 @@ class MeltScreen : Screen
     {
         c.designHeight(720);
         Space::draw(c);
+        c.bloom(0.3f, 0.8f);
         c.roundRect(20, 660, c.width - 40, 42, 12, Color(0, 0, 0, 0.45f));
         c.text(font, "Left, right: look around     Accept: next     " + kinds[kind], 40, 668);
     }

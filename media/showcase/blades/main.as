@@ -41,7 +41,7 @@ class BladesScreen : Screen
     array<Page@> pages = {
         Page("market", 0.09f, 0.85f, { "Game store", "New arrivals", "Themes", "Memberships" }, { "Everything there is to play.", "What came in this week.", "Change how all this looks.", "Yours lasts until spring." }),
         Page("live", 0.07f, 0.9f, { "Sign in", "Friends", "Messages", "Players met" }, { "Nobody is signed in.", "Three of them are playing.", "One is unread.", "The last fifty." }),
-        Page("games", 0.27f, 0.85f, { "Play disc", "Collection", "Achievements", "Demos" }, { "There is a disc in the tray.", "Forty-four scenes.", "Twelve of thirty.", "Try them for nothing." }),
+        Page("games", 0.27f, 0.85f, { "Play disc", "Collection", "Achievements", "Demos" }, { "There is a disc in the tray.", "Fifty-two scenes.", "Twelve of thirty.", "Try them for nothing." }),
         Page("media", 0.56f, 0.8f, { "Music", "Pictures", "Videos", "Tray" }, { "From this console, or another.", "Six folders.", "None yet.", "Open it." }),
         Page("system", 0.62f, 0.35f, { "Console", "Family", "Memory", "Network", "Startup" }, { "Screen, sound and language.", "Who may play what.", "", "Not connected.", "Where it begins." })
     };
@@ -53,6 +53,7 @@ class BladesScreen : Screen
     void update(float dt)
     {
         time += dt;
+        pages[4].about[3] = Net::address == "" ? "Not connected." : "Connected.";
         int before = chosen;
         if (Input::repeated("right") && chosen + 1 < int(pages.length()))
             chosen++;

@@ -303,6 +303,7 @@ class SpireScreen : Screen
     {
         c.designHeight(720);
         Space::draw(c);
+        c.bloom(0.45f, 0.7f);
         c.text(big, formatInt(score), 60, 60);
         c.text(font, formatInt(rings) + " rings", 62, 130, Color(0.8f, 0.8f, 0.95f));
         c.text(font, "Next", c.width - 150, 60, Color(0.8f, 0.8f, 0.95f), AlignCenter);

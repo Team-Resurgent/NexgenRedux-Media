@@ -103,6 +103,8 @@ class SolidsScreen : Screen
     {
         c.designHeight(720);
         Space::draw(c);
+        if (night)
+            c.bloom(0.5f, 0.6f);
         c.roundRect(20, 660, c.width - 40, 42, 12, Color(0, 0, 0, 0.45f));
         c.text(font, "Look around with the stick or arrows. Accept: " + (night ? "day" : "night"), 40, 668);
         c.text(font, formatInt(int(Space::triangles)) + " triangles", c.width - 40, 668, White, AlignRight);

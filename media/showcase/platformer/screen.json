@@ -3,5 +3,6 @@
   "description": "A level drawn with letters in a text file",
   "category": "Games",
   "order": 153,
-  "demo": "right:1 accept+right:0.5 right:0.6 accept+right:0.4 right:0.8 accept+right:0.5 left:0.4 right:1.2 accept+right:0.5"
+  "demo": "right:1 accept+right:0.5 right:0.6 accept+right:0.4 right:0.8 accept+right:0.5 left:0.4 right:1.2 accept+right:0.5",
+  "seconds": 13
 }

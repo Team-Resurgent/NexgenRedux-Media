@@ -1,0 +1,8 @@
+{
+  "title": "Cover flow",
+  "description": "Cases in space, with covers that stream in as you go",
+  "category": "Interface",
+  "order": 128,
+  "demo": "wait:1 right wait:0.4 right wait:0.4 right wait:0.8 accept wait:2.2 accept wait:1 right:0.9 wait:0.6 left wait:0.5 left wait:0.8 accept wait:2 accept wait:0.6",
+  "seconds": 15
+}

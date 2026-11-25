@@ -1,0 +1,8 @@
+{
+  "title": "Skimmer",
+  "description": "A race through gates over land without end",
+  "category": "Games",
+  "order": 157,
+  "demo": "wait:3.2 up:2 up+fire:1 up:1.5 up+right:0.25 up+fire:1.4 up:1.5 up+left:0.25 up:1.5 up+fire:1.5 up:2",
+  "seconds": 19
+}

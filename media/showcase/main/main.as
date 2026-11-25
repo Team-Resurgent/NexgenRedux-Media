@@ -101,6 +101,7 @@ class MainScreen : Screen
         if (category == "Sound") return Yellow;
         if (category == "Scene") return Color(0.35f, 0.85f, 0.85f);
         if (category == "3D") return Color(1, 0.45f, 0.7f);
+        if (category == "Network") return Color(0.55f, 0.6f, 1);
         return Gray;
     }
 

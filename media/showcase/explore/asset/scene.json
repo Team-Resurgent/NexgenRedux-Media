@@ -1,0 +1,12 @@
+{
+  "particles": {
+    "chimney": { "life": [4, 6], "speed": [0.5, 0.9], "size": [0.5, 2.4], "spread": 16, "radius": 0.15, "color": "#d0d0d444", "colorEnd": "#d0d0d400", "blend": "alpha", "gravity": -0.02, "fadeIn": 0.2, "spin": 20 },
+    "flame": { "life": [0.35, 0.8], "speed": [0.6, 1.7], "size": [0.75, 0.1], "spread": 28, "radius": 0.28, "color": "#ff9a3070", "colorEnd": "#ff200000", "gravity": -0.12, "fadeIn": 0.15 },
+    "spark": { "life": [0.8, 2], "speed": [1, 2.8], "size": [0.06, 0.02], "spread": 40, "radius": 0.2, "color": "#ffc060ff", "colorEnd": "#ff400000", "gravity": -0.06, "drag": 0.6 },
+    "smoke": { "life": [2.5, 4], "speed": [0.6, 1], "size": [0.5, 2], "spread": 24, "radius": 0.2, "color": "#70707030", "colorEnd": "#60606000", "blend": "alpha", "gravity": -0.03, "fadeIn": 0.25, "spin": 30 },
+    "dust": { "life": [0.5, 0.9], "speed": [0.3, 1], "size": [0.25, 0.8], "spread": 120, "radius": 0.15, "color": "#b8a88060", "colorEnd": "#b8a88000", "blend": "alpha", "gravity": -0.02, "drag": 2, "fadeIn": 0.1 },
+    "drops": { "life": [0.5, 1], "speed": [2, 5], "size": [0.2, 0.1], "spread": 80, "radius": 0.3, "color": "#d8f0ffa0", "colorEnd": "#d8f0ff00", "blend": "alpha", "gravity": 1 },
+    "foam": { "life": [0.6, 1.1], "speed": [0.2, 0.6], "size": [0.4, 1.1], "spread": 160, "radius": 0.3, "color": "#e8f6ff50", "colorEnd": "#e8f6ff00", "blend": "alpha", "drag": 1, "fadeIn": 0.2 },
+    "shard": { "life": [0.4, 1], "speed": [2, 6], "size": [0.4, 0.08], "spread": 180, "color": "#60e0ffff", "colorEnd": "#2060ff00", "gravity": 0.6, "drag": 0.8 }
+  }
+}

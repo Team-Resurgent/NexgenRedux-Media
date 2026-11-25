@@ -1,0 +1,17 @@
+{
+  "particles": {
+    "flame": { "life": [0.4, 0.9], "speed": [0.6, 1.8], "size": [0.85, 0.1], "spread": 30, "radius": 0.32, "color": "#ff9a3080", "colorEnd": "#ff200000", "gravity": -0.12, "fadeIn": 0.15 },
+    "spark": { "life": [0.8, 2.2], "speed": [1, 3.2], "size": [0.07, 0.02], "spread": 40, "radius": 0.2, "color": "#ffc060ff", "colorEnd": "#ff400000", "gravity": -0.06, "drag": 0.6 },
+    "smoke": { "life": [2.5, 4], "speed": [0.5, 1], "size": [0.6, 2.6], "spread": 24, "radius": 0.2, "color": "#90909038", "colorEnd": "#60606000", "blend": "alpha", "gravity": -0.03, "fadeIn": 0.25, "spin": 30 },
+    "fireball": { "life": [0.3, 0.8], "speed": [0.5, 4], "size": [1.6, 0.3], "spread": 360, "color": "#ffb04090", "colorEnd": "#ff200000", "drag": 3 },
+    "ash": { "life": [1.4, 2.8], "speed": [0.4, 2], "size": [0.9, 3], "spread": 360, "color": "#50505050", "colorEnd": "#30303000", "blend": "alpha", "gravity": -0.05, "drag": 1.5, "fadeIn": 0.1, "spin": 60 },
+    "shrapnel": { "life": [0.5, 1.4], "speed": [4, 11], "size": [0.12, 0.02], "spread": 360, "color": "#ffe0a0ff", "colorEnd": "#ff600000", "gravity": 1, "drag": 0.6 },
+    "drop": { "life": [1.2, 1.5], "speed": [5.6, 6.6], "size": [0.14, 0.26], "spread": 10, "color": "#a0e0ff70", "colorEnd": "#60b0ff00", "gravity": 1 },
+    "jet": { "life": [0.8, 1], "speed": [3.6, 4.2], "size": [0.12, 0.24], "spread": 8, "color": "#b0e8ff60", "colorEnd": "#60b0ff00", "gravity": 1 },
+    "snow": { "life": [7, 9], "speed": [0.1, 0.5], "size": [0.09, 0.09], "spread": 360, "radius": 3, "color": "#ffffffe0", "colorEnd": "#ffffff00", "blend": "alpha", "gravity": 0.06, "drag": 0.5, "fadeIn": 0.1 },
+    "star1": { "life": [1, 2.2], "speed": [3, 7], "size": [0.26, 0.06], "spread": 360, "color": "#ff5040ff", "colorEnd": "#ff200000", "gravity": 0.25, "drag": 1.1 },
+    "star2": { "life": [1, 2.2], "speed": [3, 7], "size": [0.26, 0.06], "spread": 360, "color": "#50ff80ff", "colorEnd": "#20ff4000", "gravity": 0.25, "drag": 1.1 },
+    "star3": { "life": [1, 2.2], "speed": [3, 7], "size": [0.26, 0.06], "spread": 360, "color": "#60a0ffff", "colorEnd": "#2040ff00", "gravity": 0.25, "drag": 1.1 },
+    "star4": { "life": [1.4, 2.8], "speed": [6, 6.6], "size": [0.22, 0.05], "spread": 360, "color": "#ffd060ff", "colorEnd": "#ff800000", "gravity": 0.3, "drag": 1.3 }
+  }
+}

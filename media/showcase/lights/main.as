@@ -83,6 +83,7 @@ class LightsScreen : Screen
     {
         c.designHeight(720);
         Space::draw(c);
+        c.bloom(0.55f, 0.65f);
         c.roundRect(20, 660, c.width - 40, 42, 12, Color(0, 0, 0, 0.45f));
         c.text(font, "Left, right: look around     Accept: " + (moon ? "hide the moon" : "bring out the moon"), 40, 668);
     }

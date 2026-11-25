@@ -27,14 +27,7 @@ class Crystal : Behaviour
     {
         found++;
         chime.play(0.7f);
-        for (int i = 0; i < 10; i++)
-        {
-            Entity@ spark = Space::spawn(entity.place + Vec3(0, 0.7f, 0));
-            spark.glow(random(0.2f, 0.5f), Color(0.4f, 0.9f, 1));
-            spark.motion = Vec3(random(-3, 3), random(1, 5), random(-3, 3));
-            spark.gravity = 0.8f;
-            spark.lifetime = random(0.4f, 0.9f);
-        }
+        Space::burst("shard", entity.place + Vec3(0, 0.7f, 0), 40);
         entity.destroy();
     }
 }
@@ -64,6 +57,12 @@ class ExploreScreen : Screen
     Font@ font = Assets::font("global:freesans.sfn", 24);
     Font@ big = Assets::font("global:freesans.sfn", 44);
     Sound@ jump = Assets::sound("global:sound/whoosh.wav");
+    Sound@ fire = Assets::sound("global:sound/fire.wav");
+    Sound@ step = Assets::sound("global:sound/step.wav");
+    Sound@ splash = Assets::sound("global:sound/splash.wav");
+    Sound@ waves = Assets::sound("global:sound/waves.wav");
+    Voice sea;
+    Model@ campfire = Assets::model("global:model/campfire.glb");
     Model@ robot = Assets::model("global:model/robot.glb");
     array<Model@> trees = { Assets::model("global:model/pine.glb"), Assets::model("global:model/oak.glb") };
     Model@ bush = Assets::model("global:model/bush.glb");
@@ -75,6 +74,9 @@ class ExploreScreen : Screen
     Model@ mushroom = Assets::model("global:model/mushroom.glb");
 
     Entity@ hero;
+    Entity@ camp;
+    float strode = 0;           // since the last step
+    bool wet = false;
     array<Entity@> lamps;
     float yaw = 0.5f;           // of the camera, round the robot
     float lean = 0.28f;
@@ -93,6 +95,8 @@ class ExploreScreen : Screen
     void onEnter()
     {
         found = 0;
+        Scene::load("asset:scene.json");
+        sea = waves.play(0, 0, 1, true);
         Space::land(21, 192, 1.5f, 34, 0.45f, true);
         Space::landColors(Color(0.8f, 0.73f, 0.52f), Color(0.36f, 0.53f, 0.24f), Color(0.55f, 0.53f, 0.48f), Color(0.45f, 0.4f, 0.35f), 0.6f, 17);
         Space::water(0, Color(0.16f, 0.42f, 0.55f, 0.78f));
@@ -110,8 +114,11 @@ class ExploreScreen : Screen
             Vec3 p(sin(a) * 15, 0, cos(a) * 15);
             p.y = Space::height(p.x, p.z);
             float turn = a * 57.3f + 180;
-            place(house, p, turn, 1);
+            Entity@ home = place(house, p, turn, 1);
             wall(p, Vec3(6.3f, 8, 5.3f), turn);
+            // Someone is in, in most of them.
+            if (i != 3)
+                Space::spawn(home.toSpace(Vec3(1.8f, 6.1f, -0.9f))).emit("chimney", 5);
         }
         for (int i = 0; i < 5; i++)
         {
@@ -126,6 +133,17 @@ class ExploreScreen : Screen
             lamp.glow(2.2f, Color(1, 0.75f, 0.35f, 0.6f));
             lamps.insertLast(lamp);
         }
+        // A fire, that can be heard from some way off.
+        Vec3 hearth(-4.6f, Space::height(-4.6f, 3.4f), 3.4f);
+        @camp = place(campfire, hearth, 20, 1);
+        camp.sphere(0.7f, 2);
+        camp.wall = true;
+        Entity@ flame = Space::spawn(hearth + Vec3(0, 0.25f, 0));
+        flame.emit("flame", 50);
+        flame.sound(fire, 0.9f, 18);
+        Space::spawn(hearth + Vec3(0, 0.5f, 0)).emit("spark", 9);
+        Space::spawn(hearth + Vec3(0, 1.2f, 0)).emit("smoke", 7);
+
         // Crates to push over.
         for (int i = 0; i < 10; i++)
         {
@@ -251,6 +269,14 @@ class ExploreScreen : Screen
         motion.z += (wanted.z - motion.z) * clamp(grip, 0, 1);
 
         bool swimming = hero.place.y < -0.75f;
+        bool paddling = hero.place.y < 0.05f;
+        if (paddling && !wet && motion.y < -2)
+        {
+            splash.playAt(hero.place, 0.8f, 40);
+            Space::burst("drops", Vec3(hero.place.x, 0.05f, hero.place.z), 50);
+        }
+        wet = paddling;
+        sea.fade(clamp(0.5f - look.y * 0.035f, 0, 0.5f), 0.1f);
         if (swimming)
         {
             motion.y += (clamp((-0.8f - hero.place.y) * 3, -1, 2) - motion.y) * clamp(8 * dt, 0, 1);
@@ -265,6 +291,15 @@ class ExploreScreen : Screen
         hero.motion = motion;
 
         float going = Vec3(motion.x, 0, motion.z).length();
+        strode += going * dt;
+        if (strode > (going > 4 ? 1.5f : 0.9f) && (hero.onGround || paddling))
+        {
+            strode = 0;
+            Vec3 foot = hero.place;
+            foot.y = paddling ? 0.05f : foot.y + 0.1f;
+            Space::burst(paddling ? "foam" : "dust", foot, going > 4 ? 5 : 2);
+            (paddling ? splash : step).play(paddling ? 0.12f : 0.3f, 0, random(0.85f, 1.15f));
+        }
         if (way.length() > 0.1f)
         {
             hero.face(way, clamp(12 * dt, 0, 1));
@@ -344,6 +379,8 @@ class ExploreScreen : Screen
             up = Vec3(-cos(a) * 0.6f, 0.8f, 0.3f);   // the moon
         Space::sun(up, light);
         Space::ambient(lerp(Color(0.1f, 0.13f, 0.22f), Color(0.42f, 0.48f, 0.56f), day), lerp(Color(0.05f, 0.05f, 0.08f), Color(0.26f, 0.24f, 0.2f), day));
+        float t = App::time;
+        camp.light(Color(1.8f, 0.9f, 0.35f), (4 + darkness * 5) * (1 + sin(t * 11) * 0.05f + sin(t * 17.3f) * 0.04f));
         for (uint i = 0; i < lamps.length(); i++)
         {
             float glow = darkness * (0.93f + sin(App::time * 9 + float(i) * 2) * 0.07f);
@@ -356,6 +393,7 @@ class ExploreScreen : Screen
     {
         c.designHeight(720);
         Space::draw(c);
+        c.bloom(0.2f + darkness * 0.5f, 0.85f - darkness * 0.2f);
 
         c.roundRect(24, 22, 236, 62, 16, Color(0, 0, 0, 0.4f));
         c.circle(54, 53, 12, Color(0.35f, 0.9f, 1));

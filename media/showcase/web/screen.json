@@ -1,0 +1,8 @@
+{
+  "title": "Web",
+  "description": "Pages and pictures over https",
+  "category": "Network",
+  "order": 201,
+  "demo": "wait:1 accept wait:3 down wait:0.5 accept wait:3",
+  "seconds": 11
+}

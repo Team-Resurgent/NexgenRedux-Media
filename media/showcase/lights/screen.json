@@ -3,5 +3,6 @@
   "description": "Sixteen lights in the dark",
   "category": "3D",
   "order": 194,
-  "demo": "wait:2 right:1.5 accept wait:3 left:1 accept wait:2"
+  "demo": "wait:2 right:1.5 accept wait:3 left:1 accept wait:2",
+  "seconds": 10
 }

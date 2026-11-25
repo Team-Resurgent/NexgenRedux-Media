@@ -1,0 +1,7 @@
+{
+  "title": "Together",
+  "description": "Draw with others on the same network",
+  "category": "Network",
+  "order": 200,
+  "demo": "wait:1 left:0.5 up:0.3 fire+right:0.9 fire+down:0.35 fire+left+down:0.2 fire+left:0.7 fire+up:0.45 fire+right:0.5 fire+right+down:0.4 fire+right+up:0.6 wait:1"
+}

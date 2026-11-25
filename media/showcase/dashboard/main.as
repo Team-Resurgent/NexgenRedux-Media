@@ -22,6 +22,22 @@ class DashboardScreen : Screen
     Model@ selectModel = Assets::model("asset:select.glb");
 
     array<string> items = { "Memory", "Music", "Settings", "System" };
+    array<int> readings = { -1, -1, -1 };       // of the console: processor, board, fan
+    uint driveSize = 0, driveFree = 0;
+    float read = 0;
+
+    string degrees(int value) { return value < 0 ? "-" : formatInt(value) + " C"; }
+
+    void readConsole(float dt)
+    {
+        read -= dt;
+        if (read > 0 || !Xbox::available)
+            return;
+        read = 1;
+        readings = { Xbox::cpuTemperature, Xbox::boardTemperature, Xbox::fan };
+        driveSize = Xbox::driveSize("E");
+        driveFree = Xbox::driveFree("E");
+    }
     array<float> hues = { 0.31f, 0.58f, 0.08f, 0.78f };
     Entity@ cell;
     Entity@ root;
@@ -130,6 +146,7 @@ class DashboardScreen : Screen
 
     void update(float dt)
     {
+        readConsole(dt);
         int before = chosen;
         if (!opened && Input::repeated("down") && chosen + 1 < int(items.length()))
             chosen++;
@@ -239,6 +256,7 @@ class DashboardScreen : Screen
         c.designHeight(720);
         wide = c.width;
         Space::draw(c);
+        c.bloom(0.22f, 0.75f);
         // Darker towards the edges.
         for (int i = 0; i < 2; i++)
         {
@@ -291,8 +309,15 @@ class DashboardScreen : Screen
             }
             else
             {
-                names = { "Platform", "Graphics", "Speed", "Triangles" };
-                values = { App::platform, App::gpu, formatInt(int(App::fps + 0.5f)) + " frames a second", formatInt(int(Space::triangles)) };
+                // An original Xbox can say more about itself than the rest.
+                names = { "Platform", "Graphics", "Speed", "Triangles", "Network" };
+                values = { App::platform, App::gpu, formatInt(int(App::fps + 0.5f)) + " frames a second", formatInt(int(Space::triangles)), Net::address == "" ? "Not connected" : Net::address };
+                if (Xbox::available)
+                {
+                    names = { "Kernel", "Processor", "Board", "Fan", "Drive E", "Network" };
+                    values = { Xbox::text(XboxKernel) + ", " + Xbox::text(XboxHardware), degrees(readings[0]), degrees(readings[1]), readings[2] < 0 ? "-" : formatInt(readings[2]) + "%",
+                        formatInt(int(driveFree)) + " of " + formatInt(int(driveSize)) + " MB free", Net::address == "" ? "Not connected" : Net::address };
+                }
             }
             for (uint i = 0; i < names.length(); i++)
             {
