@@ -1,0 +1,18 @@
+{
+  "colors": { "panel": "#141a2ad8" },
+  "styles": {
+    "side": { "base": "panel", "padding": 12, "gap": 10, "radius": 14 },
+    "control": { "base": "control", "size": 20, "padding": [14, 7], "minHeight": 40, "radius": 9 },
+    "button": { "base": "button", "size": 20, "padding": [14, 7], "minHeight": 40, "radius": 9 },
+    "toggle": { "base": "control" },
+    "slider": { "base": "control", "minWidth": 120 },
+    "choice": { "base": "control", "align": "center", "minWidth": 100 },
+    "row": { "base": "row", "size": 20, "padding": [12, 6] },
+    "tab": { "base": "tab", "size": 20, "padding": [12, 6], "minHeight": 38 },
+    "plain": { "base": "plain", "size": 20 },
+    "cell": { "base": "control", "minWidth": 40, "padding": [8, 6], "size": 18 },
+    "swatch": { "base": "control", "padding": [6, 6], "minHeight": 34 },
+    "heading": { "base": "heading", "size": 26 },
+    "small": { "base": "small", "size": 17 }
+  }
+}

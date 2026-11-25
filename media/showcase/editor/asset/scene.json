@@ -1,0 +1,24 @@
+{
+  "ground": 1,
+  "hour": 0,
+  "entities": [
+    {"model": "global:model/house.glb", "place": [-7, 0, -4], "onLand": true, "angles": [0, 40, 0], "wall": true},
+    {"model": "global:model/house.glb", "place": [7.5, 0, -5], "onLand": true, "angles": [0, -35, 0], "wall": true},
+    {"model": "global:model/well.glb", "place": [0, 0, -6], "onLand": true, "angles": [0, 0, 0]},
+    {"model": "global:model/lantern.glb", "place": [-2.5, 0, -1], "onLand": true, "angles": [0, 0, 0]},
+    {"model": "global:model/lantern.glb", "place": [3, 0, -1], "onLand": true, "angles": [0, 0, 0]},
+    {"glow": 1.4, "color": "#ffc06099", "light": "#ffb34d", "range": 8, "place": [-2.5, 2.9, -1], "onLand": true},
+    {"glow": 1.4, "color": "#ffc06099", "light": "#ffb34d", "range": 8, "place": [3, 2.9, -1], "onLand": true},
+    {"model": "global:model/oak.glb", "place": [-11, 0, -9], "onLand": true, "angles": [0, 0, 0]},
+    {"model": "global:model/pine.glb", "place": [11, 0, -10], "onLand": true, "angles": [0, 0, 0]},
+    {"model": "global:model/pine.glb", "place": [14, 0, -7], "onLand": true, "angles": [0, 60, 0]},
+    {"model": "global:model/bush.glb", "place": [-3.5, 0, -8], "onLand": true, "angles": [0, 0, 0]},
+    {"model": "global:model/rock.glb", "place": [4.5, 0, 3], "onLand": true, "angles": [0, 30, 0]},
+    {"model": "global:model/mushroom.glb", "place": [5.5, 0, 1.8], "onLand": true, "angles": [0, 0, 0]},
+    {"model": "global:model/robot.glb", "place": [0.5, 0, 0], "onLand": true, "angles": [0, 20, 0]},
+    {"shape": "box", "color": "#f89e33", "place": [-3, 0.5, 3], "onLand": true, "mass": 2},
+    {"shape": "box", "color": "#4d7af2", "place": [-2, 0.5, 3], "onLand": true, "mass": 2},
+    {"shape": "box", "color": "#f2807a", "place": [-2.5, 1.5, 3], "onLand": true, "mass": 2},
+    {"shape": "sphere", "color": "#61bf5c", "place": [-0.5, 0.5, 3.5], "onLand": true, "mass": 2}
+  ]
+}
