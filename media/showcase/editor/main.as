@@ -154,6 +154,8 @@ class EditorScreen : Screen
         scene.toggle("Snap", true, WidgetEvent(this.onSnap));
         scene.button("As saved", WidgetEvent(this.onRevert));
         scene.button("Clear", WidgetEvent(this.onClear));
+        if (!App::development)
+            scene.button("Start again", WidgetEvent(this.onFresh));
 
         sides.space();
         Widget@ other = sides.panel();
@@ -294,6 +296,17 @@ class EditorScreen : Screen
             changed("revert");
             dirty = false;
             show();
+        }
+    }
+
+    // Back to what came with it.
+    void onFresh(Widget@ w) { Ui::dialog("Start again", "Go back to the first scene? What was saved is lost. Undo brings back what is here now.", array<string> = { "Start again", "Keep" }, WidgetAnswer(this.fresh)); }
+    void fresh(int answer)
+    {
+        if (answer == 0)
+        {
+            Assets::forget(file);
+            onRevert(null);
         }
     }
 
