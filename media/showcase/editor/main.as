@@ -69,6 +69,11 @@ class EditorScreen : Screen
         Kind("Caves", "Bend", "model", "cave-bend", Vec3(-2.6f, 0, -2.6f), Vec3(4, 3.6f, 4), 4),
         Kind("Caves", "Slope", "model", "cave-slope", Vec3(-2.6f, -5, -4), Vec3(2.6f, 3.6f, 4), 4),
         Kind("Caves", "Room", "model", "cave-room", Vec3(-8, 0, -8), Vec3(8, 4.9f, 8), 4),
+        Kind("Caves", "Fork", "model", "cave-fork", Vec3(-4.5f, 0, -4.5f), Vec3(4.5f, 4.9f, 4.5f), 4),
+        Kind("Caves", "Crossing", "model", "cave-cross", Vec3(-4.5f, 0, -4.5f), Vec3(4.5f, 4.9f, 4.5f), 4),
+        Kind("Caves", "Hall", "model", "cave-hall", Vec3(-8, 0, -8), Vec3(8, 4.9f, 8), 4),
+        Kind("Caves", "Rough tunnel", "model", "cave-tunnel-2", Vec3(-2.6f, 0, -4), Vec3(2.6f, 3.6f, 4), 4),
+        Kind("Caves", "Rough bend", "model", "cave-bend-2", Vec3(-2.6f, 0, -2.6f), Vec3(4, 3.6f, 4), 4),
         Kind("Caves", "End", "model", "cave-end", Vec3(-2.6f, 0, -1), Vec3(2.6f, 3.6f, 4), 4),
         Kind("Shapes", "Box", "shape", "box", Vec3(-0.5f, -0.5f, -0.5f), Vec3(0.5f, 0.5f, 0.5f), 1),
         Kind("Shapes", "Ball", "shape", "sphere", Vec3(-0.5f, -0.5f, -0.5f), Vec3(0.5f, 0.5f, 0.5f), 2),
@@ -282,7 +287,7 @@ class EditorScreen : Screen
         sides.align = PlaceStretch;
         Widget@ first = sides.panel();
         first.style = "side";
-        first.width = 286;
+        first.width = 310;
         @tabs = first.tabs();
         tabs.grow = 1;
         Widget@ add = tabs.tab("Add");
@@ -2850,7 +2855,7 @@ class EditorScreen : Screen
         }
     }
 
-    bool overView(const Vec2 &in p) { return p.y > 82 && p.x > 310 && p.x < wide - 308; }
+    bool overView(const Vec2 &in p) { return p.y > 82 && p.x > 334 && p.x < wide - 308; }
     float wide = 1280;
 
     void withMouse(bool pressed, float dt)

@@ -317,6 +317,17 @@ class Level
         if (at < 0)
             return list;
         string n = model.substr(uint(at) + 5);
+        if (n.findFirst("cross") == 0 || n.findFirst("fork") == 0 || n.findFirst("hall") == 0)
+        {
+            float far = n.findFirst("hall") == 0 ? 8.0f : 4.0f;
+            list.insertLast(Vec3(0, 0, far));
+            list.insertLast(Vec3(0, 0, -far));
+            if (n.findFirst("hall") != 0)
+                list.insertLast(Vec3(4, 0, 0));
+            if (n.findFirst("cross") == 0)
+                list.insertLast(Vec3(-4, 0, 0));
+            return list;
+        }
         bool big = n.findFirst("room") == 0, falls = n.findFirst("slope") == 0 || n.findFirst("mouth") == 0;
         list.insertLast(Vec3(0, 0, big ? 8 : 4));
         if (n.findFirst("bend") == 0)
