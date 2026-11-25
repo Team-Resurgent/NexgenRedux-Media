@@ -51,6 +51,7 @@ class EndlessScreen : Screen
                 continue;
             Entity@ e = Space::spawn(Vec3(px, y, pz));
             e.model(n % 5 == 0 ? rock : y > 13 ? pine : oak);
+            e.sway = n % 5 == 0 ? 0.0f : 0.02f;
             float big = 0.9f + chance(x, z, n + 200) * 0.9f;
             e.size = Vec3(big, big, big);
             e.angles = Vec3(0, chance(x, z, n + 300) * 360, 0);

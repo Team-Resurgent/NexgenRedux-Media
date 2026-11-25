@@ -670,6 +670,7 @@ class Level
                 float most = float(h["most"].number(100));
                 float t = clamp(number(name) / (most > 0 ? most : 1), 0, 1);
                 float bx = right ? x - 240 : x;
+                c.text(hudFont, label, bx + 2, y, Color(0, 0, 0, 0.55f));
                 c.text(hudFont, label, bx, y - 2, Color(1, 1, 1, 0.9f));
                 c.roundRect(bx, y + 24, 240, 14, 7, Color(0, 0, 0, 0.45f));
                 c.roundRect(bx + 2, y + 26, 236 * t, 10, 5, color);
@@ -679,6 +680,8 @@ class Level
             {
                 string value = text(name);
                 string shown = label + (label != "" && value != "" ? "  " : "") + value;
+                // A soft shadow, so it can be read over a bright sky.
+                c.text(kind == "big" ? hudBig : hudFont, shown, x + 2, y + 2, Color(0, 0, 0, 0.55f), right ? AlignRight : AlignLeft);
                 c.text(kind == "big" ? hudBig : hudFont, shown, x, y, color, right ? AlignRight : AlignLeft);
                 heights[uint(corner)] += kind == "big" ? 44 : 32;
             }

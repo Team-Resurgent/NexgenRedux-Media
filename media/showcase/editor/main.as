@@ -53,6 +53,7 @@ class EditorScreen : Screen
         Kind("Nature", "Pine", "model", "pine", Vec3(-1.7f, -0.4f, -1.8f), Vec3(1.7f, 6, 1.7f), 3, 0.3f),
         Kind("Nature", "Bush", "model", "bush", Vec3(-0.9f, -0.2f, -0.9f), Vec3(1, 0.8f, 0.6f)),
         Kind("Nature", "Rock", "model", "rock", Vec3(-1, -0.3f, -1), Vec3(1, 0.9f, 1.1f), 2),
+        Kind("Nature", "Grass", "model", "grass", Vec3(-0.25f, 0, -0.25f), Vec3(0.25f, 0.6f, 0.25f)),
         Kind("Nature", "Mushroom", "model", "mushroom", Vec3(-0.3f, -0.1f, -0.3f), Vec3(0.3f, 0.6f, 0.3f)),
         Kind("Nature", "Crystal", "model", "crystal", Vec3(-0.6f, -0.1f, -0.6f), Vec3(0.7f, 1.2f, 0.3f), 1),
         Kind("Nature", "Pool", "water", "", Vec3(-0.5f, -0.5f, -0.5f), Vec3(0.5f, 0.5f, 0.5f)),
@@ -1913,6 +1914,10 @@ class EditorScreen : Screen
         }
         if (k.collider > 0)
             setCollider(j, k.collider);
+        // Plants lean in the wind.
+        float sway = k.name == "oak" || k.name == "pine" ? 0.02f : k.name == "bush" ? 0.05f : k.name == "grass" ? 0.15f : 0.0f;
+        if (sway > 0)
+            j.set("sway", sway);
         if (k.group == "Roads")
         {
             // On a grid of 8 metres, the land flat under it; and on from the chosen one, where it is a road too.

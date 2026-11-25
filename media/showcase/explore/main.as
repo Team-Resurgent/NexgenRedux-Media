@@ -72,6 +72,7 @@ class ExploreScreen : Screen
     Model@ well = Assets::model("global:model/well.glb");
     Model@ crystal = Assets::model("global:model/crystal.glb");
     Model@ mushroom = Assets::model("global:model/mushroom.glb");
+    Model@ grass = Assets::model("global:model/grass.glb");
 
     Entity@ hero;
     Entity@ camp;
@@ -167,12 +168,13 @@ class ExploreScreen : Screen
             {
                 bool high = p.y > 7 + random(-2, 2);
                 Entity@ tree = place(trees[high ? 0 : 1], p, random(0, 360), random(0.8f, 1.5f));
+                tree.sway = 0.02f;
                 tree.capsule(0.3f, 4, 2);
                 tree.colliderAt = Vec3(0, 2, 0);
                 tree.wall = true;
             }
             if (i % 2 == 0 && spot(p, 0.8f, 16, 0.75f, 20))
-                place(bush, p, random(0, 360), random(0.6f, 1.2f));
+                place(bush, p, random(0, 360), random(0.6f, 1.2f)).sway = 0.05f;
             if (i % 4 == 0 && spot(p, -1, 25, 0.5f, 20))
             {
                 Entity@ stone = place(rock, p, random(0, 360), random(0.4f, 1.6f));
@@ -180,6 +182,10 @@ class ExploreScreen : Screen
                 stone.colliderAt = Vec3(0, 0.2f, 0);
                 stone.wall = true;
             }
+            // Grass, more of it near the village.
+            for (int g = 0; g < 3; g++)
+                if (spot(p, 0.6f, 12, 0.8f, 6, g == 0 ? 130 : 45))
+                    place(grass, p, random(0, 360), random(0.8f, 1.6f)).sway = 0.15f;
             if (i % 5 == 0 && spot(p, 1, 12, 0.85f, 18))
                 place(mushroom, p, random(0, 360), random(0.5f, 1.1f));
             if (i % 12 == 0 && spot(p, 1, 12, 0.8f, 10))

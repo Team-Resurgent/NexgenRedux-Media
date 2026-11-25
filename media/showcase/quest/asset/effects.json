@@ -1,0 +1,82 @@
+{
+  "particles": {
+    "flame": {
+      "life": [
+        0.35,
+        0.8
+      ],
+      "speed": [
+        0.6,
+        1.7
+      ],
+      "size": [
+        0.75,
+        0.1
+      ],
+      "spread": 28,
+      "radius": 0.28,
+      "color": "#ff9a3070",
+      "colorEnd": "#ff200000",
+      "gravity": -0.12,
+      "fadeIn": 0.15
+    },
+    "spark": {
+      "life": [
+        0.8,
+        2
+      ],
+      "speed": [
+        1,
+        2.8
+      ],
+      "size": [
+        0.06,
+        0.02
+      ],
+      "spread": 40,
+      "radius": 0.2,
+      "color": "#ffc060ff",
+      "colorEnd": "#ff400000",
+      "gravity": -0.06,
+      "drag": 0.6
+    },
+    "shard": {
+      "life": [
+        0.4,
+        1
+      ],
+      "speed": [
+        2,
+        6
+      ],
+      "size": [
+        0.4,
+        0.08
+      ],
+      "spread": 180,
+      "color": "#60e0ffff",
+      "colorEnd": "#2060ff00",
+      "gravity": 0.6,
+      "drag": 0.8
+    },
+    "gold": {
+      "life": [
+        0.4,
+        1
+      ],
+      "speed": [
+        2,
+        6
+      ],
+      "size": [
+        0.4,
+        0.08
+      ],
+      "spread": 180,
+      "color": "#ffe080ff",
+      "colorEnd": "#ff802000",
+      "gravity": 0.6,
+      "drag": 0.8
+    }
+  }
+}
