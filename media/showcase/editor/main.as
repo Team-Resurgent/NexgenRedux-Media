@@ -4,6 +4,8 @@ class Kind
 {
     string label, key, name;
     Vec3 low, high;
+    float size = 1;            // it starts at
+    Model@ own;                // until its size is known
     Kind(const string &in l, const string &in k, const string &in n, const Vec3 &in a, const Vec3 &in b)
     {
         label = l; key = k; name = n; low = a; high = b;
@@ -44,16 +46,27 @@ class EditorScreen : Screen
         Kind("Light", "glow", "", Vec3(-0.4f, -0.4f, -0.4f), Vec3(0.4f, 0.4f, 0.4f))
     };
     array<Model@> models;
+    uint builtIn = 0;          // how many kinds there are besides the player's own
+    Widget@ addList;
     array<Color> colors = { Color(1, 1, 1), Color(0.35f, 0.37f, 0.42f), Color(0.9f, 0.3f, 0.26f), Color(0.97f, 0.62f, 0.2f), Color(0.98f, 0.86f, 0.35f),
         Color(0.38f, 0.75f, 0.36f), Color(0.3f, 0.75f, 0.85f), Color(0.3f, 0.48f, 0.95f), Color(0.66f, 0.4f, 0.9f), Color(0.95f, 0.5f, 0.72f) };
     array<string> grounds = { "Flat", "Hills", "Island" };
     array<string> hours = { "Day", "Evening", "Night" };
+    array<string> brushes = { "Raise", "Lower", "Smooth", "Level", "Paint", "Wipe paint" };
     array<string> tools = { "Move", "Turn", "Size" };
 
     array<Thing@> things;
     array<Entity@> thrown;
     int chosen = -1, under = -1;
     int ground = 0, hour = 0, tool = 0;
+    int made = -1;             // the ground there is now
+    string landText;           // what was done to it by hand
+    int brush = 0;
+    float brushSize = 6, brushForce = 0.5f, levelTo = 0;
+    Color brushColor(0.55f, 0.42f, 0.28f);
+    int paintWith = 0;
+    bool stroking = false, hasSpot = false;
+    Vec3 spot;
     bool snap = true, playing = false, viewing = false, flying = false, dirty = false;
 
     // What there was, as text.
@@ -76,6 +89,10 @@ class EditorScreen : Screen
     Vec2 crossAt;
     float shownFor = 0;
 
+    Widget@ tabs;
+    Widget@ brushChoice;
+    array<Color> earths = { Color(0.55f, 0.42f, 0.28f), Color(0.78f, 0.7f, 0.48f), Color(0.36f, 0.52f, 0.28f), Color(0.2f, 0.36f, 0.2f), Color(0.45f, 0.42f, 0.4f),
+        Color(0.92f, 0.94f, 0.97f), Color(0.25f, 0.22f, 0.22f), Color(0.75f, 0.35f, 0.22f), Color(0.62f, 0.66f, 0.3f), Color(0.4f, 0.4f, 0.48f) };
     Widget@ last;
     Widget@ inspector;
     Widget@ nothing;
@@ -100,12 +117,14 @@ class EditorScreen : Screen
     {
         for (uint i = 0; i < kinds.length(); i++)
             models.insertLast(kinds[i].key == "model" ? Assets::model("global:model/" + kinds[i].name + ".glb") : null);
+        builtIn = kinds.length();
         most = App::freeKilobytes > 0 && App::freeKilobytes < 64000 ? 12 : 40;
     }
 
     void onEnter()
     {
         Ui::theme("asset:theme.json");
+        findOwn();
         build();
         Json j;
         string error;
@@ -139,11 +158,11 @@ class EditorScreen : Screen
         sides.align = PlaceStretch;
         Widget@ first = sides.panel();
         first.style = "side";
-        first.width = 216;
-        Widget@ tabs = first.tabs();
+        first.width = 240;
+        @tabs = first.tabs();
         tabs.grow = 1;
         Widget@ add = tabs.tab("Add");
-        Widget@ list = add.list(kinds.length(), 42, WidgetRow(this.fill));
+        Widget@ list = @addList = add.list(kinds.length(), 42, WidgetRow(this.fill));
         list.grow = 1;
         list.onClick(WidgetEvent(this.onAdd));
         Widget@ scene = tabs.tab("Scene");
@@ -156,6 +175,28 @@ class EditorScreen : Screen
         scene.button("Clear", WidgetEvent(this.onClear));
         if (!App::development)
             scene.button("Start again", WidgetEvent(this.onFresh));
+        scene.toggle("Wireframe", false, WidgetEvent(this.onLines));
+        Widget@ earth = tabs.tab("Land");
+        @brushChoice = earth.choice(brushes, 0, WidgetEvent(this.onBrush));
+        earth.label("Size", "small");
+        Widget@ wideOf = earth.slider(brushSize, 2, 24, WidgetEvent(this.onBrushSize));
+        wideOf.step = 1;
+        earth.label("Force", "small");
+        Widget@ force = earth.slider(brushForce, 0.1f, 1, WidgetEvent(this.onBrushForce));
+        force.step = 0.1f;
+        earth.label("Paint", "small");
+        Widget@ paints = earth.grid(5, 6);
+        for (uint i = 0; i < earths.length(); i++)
+        {
+            Widget@ b = paints.button("", WidgetEvent(this.onEarth));
+            b.style = "swatch";
+            b.tag = int(i);
+            Widget@ c = b.custom(WidgetDraw(this.earthSwatch));
+            c.height = 22;
+            c.grow = 1;
+        }
+        earth.button("As it was made", WidgetEvent(this.onLandFresh));
+        earth.paragraph("Hold on the land to change it.", "small");
 
         sides.space();
         Widget@ other = sides.panel();
@@ -208,6 +249,84 @@ class EditorScreen : Screen
         list.focus();
     }
 
+    // --- Models that the player brought ---
+
+    bool isModel(const string &in file)
+    {
+        array<string> endings = { ".glb", ".gltf", ".fbx", ".obj", ".stl", ".ply" };
+        for (uint i = 0; i < endings.length(); i++)
+            if (file.length() > endings[i].length() && file.substr(file.length() - endings[i].length()) == endings[i])
+                return true;
+        return false;
+    }
+
+    void findOwn()
+    {
+        array<string> folders = { "asset:model/", "own:" };
+        for (uint f = 0; f < folders.length(); f++)
+        {
+            array<string>@ files = Assets::list(folders[f]);
+            for (uint i = 0; i < files.length(); i++)
+                addOwn(folders[f] + files[i], files[i]);
+        }
+    }
+
+    void addOwn(const string &in path, const string &in file)
+    {
+        if (!isModel(file) || kinds.length() >= builtIn + 60)
+            return;
+        for (uint i = 0; i < kinds.length(); i++)
+            if (kinds[i].key == "own" && kinds[i].name == path)
+                return;
+        string label = file.substr(0, file.findLast("."));
+        kinds.insertLast(Kind(label.length() > 18 ? label.substr(0, 17) + "..." : label, "own", path, Vec3(-0.5f, -0.5f, -0.5f), Vec3(0.5f, 0.5f, 0.5f)));
+        @kinds[kinds.length() - 1].own = Assets::model(path);
+    }
+
+    // As they arrive: how big each is. Those made in other units are brought to a size that can be seen.
+    void measureOwn()
+    {
+        for (uint i = builtIn; i < kinds.length(); i++)
+        {
+            Kind@ k = kinds[i];
+            if (k.own is null || !(k.own.ready || k.own.failed))
+                continue;
+            if (!k.own.failed)
+            {
+                k.low = k.own.low;
+                k.high = k.own.high;
+                Vec3 s = k.high - k.low;
+                float longest = s.x > s.y ? s.x : s.y;
+                longest = s.z > longest ? s.z : longest;
+                if (longest > 15 || longest < 0.2f)
+                    k.size = 3 / (longest > 0.0001f ? longest : 1.0f);
+            }
+            else
+                Ui::toast(k.label + " can't be used: see the log");
+            models.insertLast(k.own);
+            @k.own = null;
+            for (uint n = 0; n < things.length(); n++)
+                if (kindOf(things[n].json) is k)
+                    make(n);
+        }
+    }
+
+    void takeDropped()
+    {
+        array<string>@ files = Assets::dropped();
+        uint had = kinds.length();
+        for (uint i = 0; i < files.length(); i++)
+            addOwn("own:" + files[i], files[i]);
+        if (kinds.length() == had)
+        {
+            if (files.length() > 0)
+                Ui::toast("Nothing new to add in that");
+            return;
+        }
+        addList.count = kinds.length();
+        Ui::toast(kinds[had].label + (kinds.length() > had + 1 ? " and others are" : " is") + " at the end of the list");
+    }
+
     void fill(Widget@ row, int i) { row.label(kinds[uint(i)].label); }
 
     void swatch(Canvas@ c, Widget@ w)
@@ -215,6 +334,16 @@ class EditorScreen : Screen
         Vec2 p = w.place, s = w.size;
         c.roundRect(p.x, p.y, s.x, s.y, 5, colors[uint(w.parent.tag)]);
     }
+
+    void earthSwatch(Canvas@ c, Widget@ w)
+    {
+        Vec2 p = w.place, s = w.size;
+        c.roundRect(p.x, p.y, s.x, s.y, 5, earths[uint(w.parent.tag)]);
+        if (w.parent.tag == paintWith)
+            c.circle(p.x + s.x * 0.5f, p.y + s.y * 0.5f, 4, White);
+    }
+
+    bool sculpting { get { return tabs.chosen == 2 && !playing; } }
 
     // What the panel says, from what is chosen.
     void show()
@@ -257,6 +386,24 @@ class EditorScreen : Screen
     void onPlay(Widget@ w) { play(true); }
     void onAdd(Widget@ w) { add(uint(w.chosen)); }
     void onGround(Widget@ w) { ground = w.chosen; land(); place(); changed("ground"); }
+    void onLines(Widget@ w) { Space::lines = w.checked; }
+    void onBrush(Widget@ w) { brush = w.chosen; }
+    void onBrushSize(Widget@ w) { brushSize = w.value; }
+    void onBrushForce(Widget@ w) { brushForce = w.value; }
+    void onEarth(Widget@ w)
+    {
+        paintWith = w.tag;
+        brushColor = earths[uint(w.tag)];
+        brush = 4;
+        brushChoice.chosen = 4;
+    }
+    void onLandFresh(Widget@ w)
+    {
+        landText = "";
+        Space::restoreLand("");
+        place();
+        changed("land");
+    }
     void onHour(Widget@ w) { hour = w.chosen; light(); changed("hour"); }
     void onCopy(Widget@ w) { copy(); }
     void onDelete(Widget@ w) { remove(); }
@@ -413,10 +560,10 @@ class EditorScreen : Screen
         for (uint i = 0; i < kinds.length(); i++)
         {
             Kind@ k = kinds[i];
-            if (k.key == "model" ? model == "global:model/" + k.name + ".glb" : k.key == "shape" && shape == k.name)
+            if (k.key == "own" ? model == k.name : k.key == "model" ? model == "global:model/" + k.name + ".glb" : k.key == "shape" && shape == k.name)
                 return k;
         }
-        return kinds[kinds.length() - 1];
+        return kinds[builtIn - 1];
     }
 
     Vec3 angles(Json@ j) { return j["angles"].isNumber ? Vec3(0, float(j["angles"].number()), 0) : j["angles"].vec3(); }
@@ -428,7 +575,7 @@ class EditorScreen : Screen
     }
     void resize(Json@ j, Vec3 s)
     {
-        s = Vec3(clamp(s.x, 0.05f, 40), clamp(s.y, 0.05f, 40), clamp(s.z, 0.05f, 40));
+        s = Vec3(clamp(s.x, 0.0005f, 400), clamp(s.y, 0.0005f, 400), clamp(s.z, 0.0005f, 400));
         if (j.has("glow"))
             j.set("glow", s.x);
         else
@@ -448,6 +595,8 @@ class EditorScreen : Screen
         Json all;
         all.set("ground", ground);
         all.set("hour", hour);
+        if (landText != "")
+            all.set("land", landText);
         Json list;
         for (uint i = 0; i < things.length(); i++)
             list.add(things[i].json);
@@ -466,6 +615,7 @@ class EditorScreen : Screen
         hour = int(clamp(float(all["hour"].number()), 0, 2));
         groundChoice.chosen = ground;
         hourChoice.chosen = hour;
+        landText = all["land"].text();
         land();
         light();
         Json@ list = all["entities"];
@@ -533,11 +683,24 @@ class EditorScreen : Screen
             put(things[i]);
     }
 
+    // Made only when it is another, as that takes a while; what was done by hand is put back each time.
     void land()
+    {
+        if (made != ground)
+            makeGround();
+        made = ground;
+        if (!Space::restoreLand(landText))
+        {
+            landText = "";
+            Space::restoreLand("");
+        }
+    }
+
+    void makeGround()
     {
         if (ground == 0)
         {
-            Space::land(1, 32, 4, 0.001f);
+            Space::land(1, 64, 2, 0.001f);
             Space::landColors(Color(0.42f, 0.56f, 0.34f), Color(0.42f, 0.56f, 0.34f), Color(0.42f, 0.56f, 0.34f), Color(0.4f, 0.4f, 0.4f), -1, 1);
         }
         else
@@ -646,6 +809,12 @@ class EditorScreen : Screen
         Json j;
         if (k.key == "model")
             j.set("model", "global:model/" + k.name + ".glb");
+        else if (k.key == "own")
+        {
+            j.set("model", k.name);
+            if (k.size != 1)
+                j.set("size", Vec3(k.size, k.size, k.size));
+        }
         else if (k.key == "shape")
         {
             j.set("shape", k.name);
@@ -658,7 +827,7 @@ class EditorScreen : Screen
             j.set("light", Color(1, 0.75f, 0.45f));
             j.set("range", 9);
         }
-        j.set("place", snapped(Vec3(p.x, k.key == "model" ? 0.0f : k.key == "shape" ? -k.low.y : 1.5f, p.z)));
+        j.set("place", snapped(Vec3(p.x, k.key == "model" ? 0.0f : k.key == "own" ? -k.low.y * k.size : k.key == "shape" ? -k.low.y : 1.5f, p.z)));
         j.set("onLand", true);
         things.insertLast(Thing(j));
         make(things.length() - 1);
@@ -787,6 +956,8 @@ class EditorScreen : Screen
     void update(float dt)
     {
         shownFor += dt;
+        measureOwn();
+        takeDropped();
         Vec2 m = Input::mouse;
         Vec2 moved = m - mouse;
         mouse = m;
@@ -850,7 +1021,7 @@ class EditorScreen : Screen
             enterView(true);
             return;
         }
-        withMouse(pressed);
+        withMouse(pressed, dt);
     }
 
     void enterView(bool on)
@@ -886,6 +1057,25 @@ class EditorScreen : Screen
     void inView(float dt)
     {
         Vec3 ahead = look();
+        if (sculpting)
+        {
+            if (Input::pressed("alternate") || tapped(5, "Tab"))
+            {
+                endStroke();
+                enterView(false);
+                return;
+            }
+            bool sooner = padTapped(0, 12), later = padTapped(1, 13);
+            if (Input::pressed("cancel") || sooner || later)
+            {
+                endStroke();
+                brush = (brush + (sooner ? 5 : 1)) % 6;
+                brushChoice.chosen = brush;
+            }
+            aim(ahead);
+            stroke(Input::held("accept"), dt);
+            return;
+        }
         under = carrying ? chosen : at(ahead);
         if (Input::pressed("alternate") || tapped(5, "Tab"))
         {
@@ -955,13 +1145,91 @@ class EditorScreen : Screen
         }
     }
 
-    bool overView(const Vec2 &in p) { return p.y > 82 && p.x > 240 && p.x < wide - 308; }
+    // --- The land ---
+
+    void aim(const Vec3 &in along)
+    {
+        hasSpot = onGround(eye, along, spot) && (spot - eye).length() < 120;
+    }
+
+    // While it is held down, it goes on.
+    void stroke(bool held, float dt)
+    {
+        if (!held || !hasSpot)
+        {
+            if (!held)
+                endStroke();
+            return;
+        }
+        if (!stroking)
+            levelTo = spot.y;
+        stroking = true;
+        float s = brushForce;
+        if (brush < 2)
+            Space::raise(spot.x, spot.z, brushSize, (brush == 0 ? 5 : -5) * s * dt);
+        else if (brush == 2)
+            Space::smooth(spot.x, spot.z, brushSize, clamp(s * dt * 25, 0, 1));
+        else if (brush == 3)
+            Space::level(spot.x, spot.z, brushSize, levelTo, clamp(s * dt * 8, 0, 1));
+        else
+            Space::paint(spot.x, spot.z, brushSize, brush == 4 ? brushColor : Color(0, 0, 0, 0), clamp(s * dt * 10, 0, 1));
+        // What is near goes with it.
+        for (uint i = 0; brush < 4 && i < things.length(); i++)
+        {
+            Vec3 d = things[i].json["place"].vec3() - spot;
+            if (d.x * d.x + d.z * d.z < (brushSize + 3) * (brushSize + 3))
+                put(things[i]);
+        }
+    }
+
+    void endStroke()
+    {
+        if (!stroking)
+            return;
+        stroking = false;
+        landText = Space::landEdits;
+        place();
+        changed("land");
+    }
+
+    void ring(Canvas@ c)
+    {
+        Vec2 from, to;
+        bool had = false;
+        Color color = brush == 4 ? brushColor : brush == 1 ? Color(1, 0.6f, 0.4f) : White;
+        for (int i = 0; i <= 40; i++)
+        {
+            float a = i * 0.15708f;
+            float x = spot.x + cos(a) * brushSize, z = spot.z + sin(a) * brushSize;
+            float y = Space::height(x, z);
+            bool has = y > -1000 && Space::toScreen(Vec3(x, y + 0.1f, z), to);
+            if (has && had)
+                c.line(from.x, from.y, to.x, to.y, stroking ? 3.5f : 2, color);
+            from = to;
+            had = has;
+        }
+    }
+
+    bool overView(const Vec2 &in p) { return p.y > 82 && p.x > 264 && p.x < wide - 308; }
     float wide = 1280;
 
-    void withMouse(bool pressed)
+    void withMouse(bool pressed, float dt)
     {
         if (!Input::hasMouse)
+        {
+            hasSpot = false;
             return;
+        }
+        if (sculpting)
+        {
+            hover = -1;
+            hasSpot = false;
+            if (overView(mouse))
+                aim(Space::ray(mouse));
+            if (stroking || pressed)
+                stroke(Input::mouseDown(0) && (stroking || overView(mouse)), dt);
+            return;
+        }
         if (dragging)
         {
             if (Input::mouseDown(0))
@@ -1148,9 +1416,11 @@ class EditorScreen : Screen
         Space::draw(c);
         if (!playing)
         {
-            if (viewing && under >= 0 && under != chosen && under < int(things.length()))
+            if (sculpting && hasSpot)
+                ring(c);
+            if (viewing && !sculpting && under >= 0 && under != chosen && under < int(things.length()))
                 box(c, things[uint(under)], Color(1, 1, 1, 0.5f));
-            if (chosen >= 0)
+            if (chosen >= 0 && !sculpting)
             {
                 box(c, things[uint(chosen)], Color(1, 0.75f, 0.25f, 0.9f));
                 if (!viewing)
@@ -1165,6 +1435,7 @@ class EditorScreen : Screen
             c.line(x, 349, x, 356, 2, Color(1, 1, 1, 0.8f));
             c.line(x, 364, x, 371, 2, Color(1, 1, 1, 0.8f));
             string text = playing ? "Accept throws a ball      Cancel goes back to editing"
+                : sculpting ? brushes[uint(brush)] + "      Hold Accept to change the land      Cancel or shoulders for another brush"
                 : carrying ? "Accept puts it down      Shoulders turn it      Cancel puts it back"
                 : "Accept takes what is in the middle      Alternate brings the panels back";
             Vec2 s = font.measure(text);
