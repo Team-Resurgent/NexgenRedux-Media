@@ -28,7 +28,7 @@ class Road
 {
     array<Vec3> points;
     float width = 7;
-    bool closed = true;
+    bool closed = false;
     Entity@ entity;
     array<Vec3> path;
 
@@ -105,6 +105,18 @@ class EditorScreen : Screen
     Font@ font = Assets::font("global:freesans.sfn", 20);
     string file = "asset:scene.json";
     array<Kind@> kinds = {
+        Kind("Platforms", "Platform", "model", "platform", Vec3(-2, 0, -2), Vec3(2, 0.53f, 2), 1),
+        Kind("Platforms", "Round one", "model", "platform-round", Vec3(-2, 0, -2), Vec3(2, 0.5f, 2), 1),
+        Kind("Platforms", "Moving one", "moving", "platform", Vec3(-2, 0, -2), Vec3(2, 0.53f, 2), 1),
+        Kind("Platforms", "Lift", "lift", "platform-round", Vec3(-2, 0, -2), Vec3(2, 0.5f, 2), 1),
+        Kind("Platforms", "Ramp", "model", "ramp", Vec3(-1.5f, 0, -2.5f), Vec3(1.5f, 2, 2.5f), 4),
+        Kind("Platforms", "Stairs", "model", "stairs", Vec3(-1.5f, 0, -2), Vec3(1.5f, 2, 2), 4),
+        Kind("Platforms", "Bridge", "model", "bridge", Vec3(-1.4f, -0.23f, -5), Vec3(1.4f, 1.1f, 5), 4),
+        Kind("Roads", "Straight", "model", "road-straight", Vec3(-4, 0, -4), Vec3(4, 0.12f, 4)),
+        Kind("Roads", "Corner", "model", "road-bend", Vec3(-4, 0, -4), Vec3(4, 0.12f, 4)),
+        Kind("Roads", "Junction", "model", "road-t", Vec3(-4, 0, -4), Vec3(4, 0.12f, 4)),
+        Kind("Roads", "Crossroads", "model", "road-cross", Vec3(-4, 0, -4), Vec3(4, 0.12f, 4)),
+        Kind("Roads", "Dead end", "model", "road-end", Vec3(-4, 0, -4), Vec3(4, 0.12f, 4)),
         Kind("Nature", "Oak", "model", "oak", Vec3(-1.8f, -0.4f, -1.9f), Vec3(2, 5.1f, 1.9f), 3, 0.35f),
         Kind("Nature", "Pine", "model", "pine", Vec3(-1.7f, -0.4f, -1.8f), Vec3(1.7f, 6, 1.7f), 3, 0.3f),
         Kind("Nature", "Bush", "model", "bush", Vec3(-0.9f, -0.2f, -0.9f), Vec3(1, 0.8f, 0.6f)),
@@ -119,13 +131,6 @@ class EditorScreen : Screen
         Kind("Buildings", "Gate", "model", "gate", Vec3(-4.9f, -4.9f, -0.4f), Vec3(4.9f, 4.9f, 0.4f), 4),
         Kind("Buildings", "Wall", "model", "wall", Vec3(-2, 0, -0.2f), Vec3(2, 2.5f, 0.2f), 1),
         Kind("Buildings", "Column", "model", "column", Vec3(-0.55f, 0, -0.55f), Vec3(0.55f, 3.9f, 0.55f), 3),
-        Kind("Platforms", "Platform", "model", "platform", Vec3(-2, 0, -2), Vec3(2, 0.53f, 2), 1),
-        Kind("Platforms", "Round one", "model", "platform-round", Vec3(-2, 0, -2), Vec3(2, 0.5f, 2), 1),
-        Kind("Platforms", "Moving one", "moving", "platform", Vec3(-2, 0, -2), Vec3(2, 0.53f, 2), 1),
-        Kind("Platforms", "Lift", "lift", "platform-round", Vec3(-2, 0, -2), Vec3(2, 0.5f, 2), 1),
-        Kind("Platforms", "Ramp", "model", "ramp", Vec3(-1.5f, 0, -2.5f), Vec3(1.5f, 2, 2.5f), 4),
-        Kind("Platforms", "Stairs", "model", "stairs", Vec3(-1.5f, 0, -2), Vec3(1.5f, 2, 2), 4),
-        Kind("Platforms", "Bridge", "model", "bridge", Vec3(-1.4f, -0.23f, -5), Vec3(1.4f, 1.1f, 5), 4),
         Kind("Caves", "Way down", "model", "cave-mouth", Vec3(-3.4f, -5, -4), Vec3(3.4f, 4.4f, 4.9f), 4),
         Kind("Caves", "Mine", "model", "cave-mouth-mine", Vec3(-3.4f, -5, -4), Vec3(3.4f, 4.4f, 4.9f), 4),
         Kind("Caves", "Tunnel", "model", "cave-tunnel", Vec3(-2.6f, 0, -4), Vec3(2.6f, 3.6f, 4), 4),
@@ -146,7 +151,7 @@ class EditorScreen : Screen
         Kind("Others", "Engine", "sound", "global:sound/engine.wav", Vec3(-0.4f, -0.4f, -0.4f), Vec3(0.4f, 0.4f, 0.4f)),
         Kind("Others", "Light", "glow", "", Vec3(-0.4f, -0.4f, -0.4f), Vec3(0.4f, 0.4f, 0.4f))
     };
-    array<string> groups = { "Everything", "Nature", "Buildings", "Platforms", "Caves", "Shapes", "Others", "Mine" };
+    array<string> groups = { "Everything", "Platforms", "Roads", "Nature", "Buildings", "Caves", "Shapes", "Others", "Mine" };
     int group = 0;
     array<uint> listed;
     array<string> pictures = { "" }, pictureNames = { "None" };   // for things, and for the sky
@@ -392,14 +397,14 @@ class EditorScreen : Screen
         @roadLabel = track.label("", "plain");
         track.button("New road", WidgetEvent(this.onRoadNew));
         track.button("Next road", WidgetEvent(this.onRoadNext));
-        @roadClosed = track.toggle("Goes round", true, WidgetEvent(this.onRoad));
+        @roadClosed = track.toggle("Goes round", false, WidgetEvent(this.onRoad));
         track.label("How wide", "small");
         @roadWidth = track.slider(7, 3, 16, WidgetEvent(this.onRoad));
         roadWidth.step = 1;
         track.button("Shape the land", WidgetEvent(this.onRoadLand));
         track.button("Take a point back", WidgetEvent(this.onRoadBack));
         track.button("Delete road", WidgetEvent(this.onRoadDelete));
-        track.paragraph("Press on the land for each point. With Drive, Play is a race against the clock.", "small");
+        track.paragraph("Press on the land for each point; drag one to move it; press on the road to put one between. With Drive, Play is a race against the clock.", "small");
 
         sides.space();
         Widget@ other = sides.panel();
@@ -1443,7 +1448,7 @@ class EditorScreen : Screen
         {
             Road@ r = Road();
             r.width = clamp(float(all[i]["width"].number(7)), 2, 20);
-            r.closed = all[i]["closed"].flag(true);
+            r.closed = all[i]["closed"].flag(false);
             for (uint k = 0; k < all[i]["points"].count && k < 64; k++)
                 r.points.insertLast(all[i]["points"][k].vec3());
             roads.insertLast(r);
@@ -1472,8 +1477,14 @@ class EditorScreen : Screen
             for (uint k = 0; k < 6; k++)
             {
                 Vec3 p = at + side * (offsets[k] * r.width);
-                float y = Space::height(p.x, p.z);
-                p.y = (y < -1000 ? at.y : y) + 0.09f;
+                // The highest that is near, so that no bump of the land between comes through.
+                float y = -10000;
+                for (int q = 0; q < 9; q++)
+                {
+                    float h = Space::height(p.x + (q % 3 - 1) * 1.1f, p.z + (q / 3 - 1) * 1.1f);
+                    y = h > y ? h : y;
+                }
+                p.y = (y < -1000 ? at.y : y) + 0.1f + float(roads.findByRef(r)) * 0.012f;
                 bool kerb = k == 0 || k == 5;
                 m.vertex(p, Vec3(0, 1, 0), kerb && (i / 2) % 2 == 0 ? Color(0.92f, 0.92f, 0.9f) : kerb ? tints[k] : tints[k]);
             }
@@ -1497,7 +1508,7 @@ class EditorScreen : Screen
     {
         Road@ r = roadNow();
         roadLabel.text = r is null ? "No road yet" : "Road " + (road + 1) + " of " + roads.length() + ": " + r.points.length() + " points";
-        roadClosed.checked = r is null || r.closed;
+        roadClosed.checked = r !is null && r.closed;
         roadWidth.value = r is null ? 7.0f : r.width;
     }
 
@@ -1581,8 +1592,64 @@ class EditorScreen : Screen
         changed("land");
     }
 
+    int held = -1;   // a point of the road that is being moved
+
+    // Takes the nearest point, if one is near: true if it did.
+    bool takePoint(const Vec3 &in p)
+    {
+        Road@ r = roadNow();
+        held = -1;
+        for (uint i = 0; r !is null && i < r.points.length(); i++)
+            if (Vec3(r.points[i].x - p.x, 0, r.points[i].z - p.z).length() < 2.5f && (held < 0 || (r.points[i] - p).length() < (r.points[uint(held)] - p).length()))
+                held = int(i);
+        return held >= 0;
+    }
+
+    void movePoint(const Vec3 &in p)
+    {
+        Road@ r = roadNow();
+        if (r is null || held < 0)
+            return;
+        r.points[uint(held)] = Vec3(floor(p.x * 2 + 0.5f) * 0.5f, 0, floor(p.z * 2 + 0.5f) * 0.5f);
+        makeRoad(r);
+    }
+
+    void putPoint()
+    {
+        if (held < 0)
+            return;
+        held = -1;
+        changed("road");
+    }
+
+    // On the road between two points, it goes between them; elsewhere at the end.
     void addPoint(const Vec3 &in p)
     {
+        Road@ r0 = roadNow();
+        if (r0 !is null && r0.points.length() >= 2 && r0.points.length() < 64)
+        {
+            int at = 0;
+            if (r0.distance(p, at) < r0.width * 0.5f)
+            {
+                // Which points it is between, as the path goes.
+                uint before = 0;
+                for (uint i = 1; i < r0.points.length(); i++)
+                {
+                    int there = 0;
+                    r0.distance(r0.points[i], there);
+                    if (there <= at)
+                        before = i;
+                }
+                if (before + 1 < r0.points.length() || r0.closed)
+                {
+                    r0.points.insertAt(before + 1, Vec3(floor(p.x * 2 + 0.5f) * 0.5f, 0, floor(p.z * 2 + 0.5f) * 0.5f));
+                    makeRoad(r0);
+                    held = int(before) + 1;
+                    hop.play(0.15f, 0, 1.6f);
+                    return;
+                }
+            }
+        }
         if (roadNow() is null)
             onRoadNew(null);
         Road@ r = roadNow();
@@ -1725,6 +1792,32 @@ class EditorScreen : Screen
         }
         if (k.collider > 0)
             setCollider(j, k.collider);
+        if (k.group == "Roads")
+        {
+            // On a grid of 8 metres, the land flat under it; and on from the chosen one, where it is a road too.
+            Vec3 at(floor(p.x / 8 + 0.5f) * 8, 0, floor(p.z / 8 + 0.5f) * 8);
+            float turned = 0;
+            if (chosen >= 0 && kindOf(things[uint(chosen)].json).group == "Roads")
+            {
+                Json@ c = things[uint(chosen)].json;
+                turned = angles(c).y;
+                at = worldPlace(c) + spun(Vec3(0, 0, -8), turned);
+            }
+            else
+                at.y = Space::height(at.x, at.z);
+            for (int q = 0; q < 9; q++)
+                Space::level(at.x + (q % 3 - 1) * 3.5f, at.z + (q / 3 - 1) * 3.5f, 5, at.y - 0.05f, 1);
+            landText = Space::landEdits;
+            place();
+            j.set("place", Vec3(at.x, at.y, at.z));
+            j.set("angles", Vec3(0, turned, 0));
+            j.set("shadow", false);
+            things.insertLast(Thing(j));
+            make(things.length() - 1);
+            select(int(things.length()) - 1);
+            changed("add");
+            return;
+        }
         if (cave)
         {
             Vec3 at, turned;
@@ -2319,8 +2412,15 @@ class EditorScreen : Screen
                 return;
             }
             aim(ahead);
+            if (held >= 0 && hasSpot)
+                movePoint(spot);
             if (Input::pressed("accept") && hasSpot)
-                addPoint(spot);
+            {
+                if (held >= 0)
+                    putPoint();
+                else if (!takePoint(spot))
+                    addPoint(spot);
+            }
             if (Input::pressed("cancel"))
                 onRoadBack(null);
             return;
@@ -2499,7 +2599,15 @@ class EditorScreen : Screen
             hasSpot = false;
             if (overView(mouse))
                 aim(Space::ray(mouse));
-            if (pressed && hasSpot)
+            if (held >= 0)
+            {
+                if (Input::mouseDown(0) && hasSpot)
+                    movePoint(spot);
+                else if (!Input::mouseDown(0))
+                    putPoint();
+                return;
+            }
+            if (pressed && hasSpot && !takePoint(spot))
                 addPoint(spot);
             return;
         }
@@ -2710,7 +2818,7 @@ class EditorScreen : Screen
                     Vec2 at;
                     p.y = Space::height(p.x, p.z) + 0.2f;
                     if (Space::toScreen(p, at))
-                        c.circle(at.x, at.y, 6, i == 0 ? Color(0.4f, 1, 0.5f) : Color(1, 0.9f, 0.4f));
+                        c.circle(at.x, at.y, int(i) == held ? 9 : 6, int(i) == held ? White : i == 0 ? Color(0.4f, 1, 0.5f) : Color(1, 0.9f, 0.4f));
                 }
             if (chosen >= 0 && !sculpting && !roading)
             {
@@ -2738,7 +2846,7 @@ class EditorScreen : Screen
             }
             string text = playing && hero !is null ? (way == 1 ? (racing ? "Lap " + formatFloat(lap, "", 0, 1) + (best > 0 ? "      Best " + formatFloat(best, "", 0, 2) : "") + "      " : "") + "Cancel goes back to editing" : "Accept jumps      Right trigger throws a ball      Cancel goes back to editing")
                 : playing ? "Accept throws a ball      Cancel goes back to editing"
-                : roading ? "Accept adds a point      Cancel takes one back      Alternate brings the panels back"
+                : roading ? held >= 0 ? "Accept puts the point down" : "Accept adds a point, or takes one      Cancel takes the last back      Alternate brings the panels back"
                 : sculpting ? brushes[uint(brush)] + "      Hold Accept to change the land      Cancel or shoulders for another brush"
                 : carrying ? "Accept puts it down      Shoulders turn it      Cancel puts it back"
                 : "Accept takes what is in the middle      Alternate brings the panels back";
