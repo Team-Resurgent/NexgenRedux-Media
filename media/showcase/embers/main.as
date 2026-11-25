@@ -36,6 +36,8 @@ class EmbersScreen : Screen
         for (uint i = 0; i < things.length(); i++)
             things[i].destroy();
         things.resize(0);
+        // Snow falls for a long time, and would leave no room for anything else.
+        Scene::clearParticles();
         next = 0;
         bool dark = kind != 3;
         Space::sky(dark ? Color(0.02f, 0.025f, 0.06f) : Color(0.3f, 0.36f, 0.46f), dark ? Color(0.07f, 0.07f, 0.13f) : Color(0.5f, 0.56f, 0.64f));

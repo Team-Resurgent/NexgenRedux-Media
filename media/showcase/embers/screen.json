@@ -3,6 +3,6 @@
   "description": "Fire, smoke, snow and sparks in space",
   "category": "3D",
   "order": 198,
-  "demo": "wait:2 right wait:2 accept wait:1 accept wait:1 right wait:2 right wait:2 right wait:2",
-  "seconds": 15
+  "demo": "wait:1.6 right wait:1 accept wait:1 accept wait:1 right wait:2.6 right wait:2.6 right wait:2 accept wait:1 accept wait:2",
+  "seconds": 19
 }

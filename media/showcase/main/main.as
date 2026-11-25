@@ -128,7 +128,7 @@ class MainScreen : Screen
             float y = top + float(i / columns) * (tileH + gap) - scroll;
             if (y > 720 || y + tileH < top - 40)
                 continue;
-            float appear = smooth(shown * 2 - float(i) * 0.06f);
+            float appear = smooth(shown * 2 - clamp((y - top) / 720, 0, 0.9f) - float(i % columns) * 0.03f);
             drawTile(c, tiles[i], x, y + (1 - appear) * 40, i == chosen, appear);
         }
         c.pop();
