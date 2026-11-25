@@ -1,4 +1,5 @@
 // A signal that is breaking up.
+// xbox: glitch
 // values[0].x: how badly.
 float hash(float2 p)
 {

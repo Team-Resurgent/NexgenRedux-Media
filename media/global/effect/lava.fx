@@ -1,4 +1,5 @@
 // Rock that has not set. values[0].x: how hot.
+// xbox: lava
 float hash2(float2 p)
 {
     return frac(sin(dot(p, float2(12.9898, 78.233))) * 43758.5453);

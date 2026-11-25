@@ -1,4 +1,5 @@
 // Large squares, and few colours.
+// xbox: pixels
 // values[0].x: how many across; values[0].y: how many steps of each colour.
 float4 effect(float2 uv, float4 color)
 {

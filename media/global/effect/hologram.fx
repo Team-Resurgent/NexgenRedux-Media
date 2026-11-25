@@ -1,4 +1,5 @@
 // Light in the shape of something. values[0]: its colour.
+// xbox: hologram
 float4 paint(float4 color, float2 uv, float3 place, float3 normal, inout float glow)
 {
     float lines = 0.55 + 0.45 * sin(place.y * 70.0 - time * 6.0);

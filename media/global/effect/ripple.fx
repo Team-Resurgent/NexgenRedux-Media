@@ -1,4 +1,5 @@
 // As if seen through water.
+// xbox: ripple
 // values[0].x: how deep.
 float4 effect(float2 uv, float4 color)
 {

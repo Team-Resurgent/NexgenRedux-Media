@@ -3,6 +3,6 @@
   "description": "Effects of your own, on things and over the whole picture",
   "category": "Effects",
   "order": 94,
-  "demo": "wait:1.5 right wait:1.2 right wait:1.2 right wait:1.2 right wait:1.2 right wait:1.2 right wait:1.2 right wait:0.8 down wait:1.6 down wait:2.4 down wait:1.6 accept wait:1",
-  "seconds": 19
+  "demo": "wait:1.5 right wait:1.2 right wait:1.2 right wait:1.2 right wait:1.2 right wait:1.2 right wait:1.2 right wait:0.8 down wait:1.6 down wait:4 down wait:1.8 accept wait:1",
+  "seconds": 21
 }

@@ -1,4 +1,5 @@
 // Warm lights, cool shadows and darker corners.
+// xbox: grade
 // values[0].x: how strongly; values[0].y: how dark the corners.
 float4 effect(float2 uv, float4 color)
 {

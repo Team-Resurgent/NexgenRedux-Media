@@ -16,7 +16,7 @@ class ShadersScreen : Screen
     uint picture = 0, surface = 0;
     bool spill = true;
     Entity@ hero;
-    float at = 0;
+    float at = 0, since = 0;
 
     ShadersScreen()
     {
@@ -96,8 +96,10 @@ class ShadersScreen : Screen
         if (Input::repeated("down")) surface = (surface + 1) % count;
         if (Input::repeated("up")) surface = (surface + count - 1) % count;
         if (Input::pressed("accept")) spill = !spill;
+        since += dt;
         if (surface != before)
         {
+            since = 0;
             hero.effect(surface == 0 ? null : surfaces[surface - 1]);
             hero.blend = surface == 1 ? BlendAdd : BlendNone;
             if (surface == 3)
@@ -107,7 +109,7 @@ class ShadersScreen : Screen
         hero.turn(Vec3(0, 1, 0), dt * 24);
         // Values are told to a shader as they change.
         surfaces[0].set(0, 0.12f); surfaces[0].set(1, 0.42f); surfaces[0].set(2, 0.55f);
-        surfaces[1].set(0, clamp(sin(at * 0.9f) * 0.7f + 0.4f, 0, 1));
+        surfaces[1].set(0, clamp(0.5f - cos(since * 1.6f) * 0.55f, 0, 1));
         surfaces[1].set(4, 1); surfaces[1].set(5, 0.5f); surfaces[1].set(6, 0.15f);
         pictures[0].set(0, 1); pictures[0].set(1, 0.6f);
         pictures[2].set(0, 1);
@@ -121,15 +123,14 @@ class ShadersScreen : Screen
     {
         c.designHeight(720);
         Space::draw(c);
-        bool can = true;
-        if (spill)
-            can = c.bloom(0.7f, 0.72f);
-        if (picture > 0)
-            can = c.effect(pictures[picture - 1]) && can;
+        bool blooms = !spill || c.bloom(0.7f, 0.72f);
+        bool shows = picture == 0 || c.effect(pictures[picture - 1]);
+        bool worn = surface == 0 || surfaces[surface - 1].works;
+        string no = "   (not on this GPU)";
         c.roundRect(24, 22, 400, 108, 16, Color(0, 0, 0, 0.45f));
-        c.text(font, "Over the picture: " + pictureNames[picture], 44, 34);
-        c.text(font, "On the robot: " + surfaceNames[surface], 44, 62);
-        c.text(font, "Bloom: " + (spill ? "on" : "off") + (can ? "" : "     (not on this GPU)"), 44, 90);
+        c.text(font, "Over the picture: " + pictureNames[picture] + (shows ? "" : no), 44, 34);
+        c.text(font, "On the robot: " + surfaceNames[surface] + (worn ? "" : no), 44, 62);
+        c.text(font, "Bloom: " + (spill ? "on" : "off") + (blooms ? "" : no), 44, 90);
         c.roundRect(20, 660, c.width - 40, 42, 12, Color(0, 0, 0, 0.45f));
         c.text(font, "Left, right: the picture's     Up, down: the robot's     Accept: bloom", 40, 668);
     }

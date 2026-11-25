@@ -1,4 +1,5 @@
 // Cloth in the wind, held along its left side. values[0].x: how hard it blows.
+// xbox: flag
 #define MOVES
 float3 move(float3 place, float3 normal, float2 uv)
 {

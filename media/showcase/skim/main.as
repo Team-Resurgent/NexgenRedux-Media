@@ -3,6 +3,7 @@
 
 const int Gates = 30;
 const float Between = 62;
+const float Sea = 11.5f;       // how high the ponds stand
 
 Sound@ chime = Assets::sound("global:sound/gate.wav");
 Sound@ bump = Assets::sound("global:sound/hit.wav");
@@ -14,7 +15,7 @@ Vec3 gateAt(int i)
     float z = -float(i + 1) * Between;
     float x = wayX(z);
     float y = Space::height(x, z);
-    return Vec3(x, (y > 0.5f ? y : 0.5f) + 4.4f, z);
+    return Vec3(x, (y > Sea ? y : Sea) + 4.4f, z);
 }
 
 class Racer
@@ -69,8 +70,8 @@ class SkimScreen : Screen
         Scene::load("asset:scene.json");
         music.playMusic(0.35f, 1);
         Space::endlessLand(1234, 2.5f, 26, 0.35f, App::platform == "Original Xbox" ? 2 : 4);
-        Space::landColors(Color(0.8f, 0.72f, 0.5f), Color(0.36f, 0.52f, 0.26f), Color(0.6f, 0.58f, 0.55f), Color(0.46f, 0.41f, 0.36f), 0.8f, 20);
-        Space::water(0, Color(0.12f, 0.4f, 0.52f, 0.85f));
+        Space::landColors(Color(0.8f, 0.72f, 0.5f), Color(0.36f, 0.52f, 0.26f), Color(0.6f, 0.58f, 0.55f), Color(0.46f, 0.41f, 0.36f), Sea + 0.9f, 20);
+        Space::water(Sea, Color(0.16f, 0.42f, 0.55f, 0.82f));
         Space::sky(Color(0.25f, 0.4f, 0.75f), Color(0.95f, 0.75f, 0.6f));
         Space::fog(Color(0.92f, 0.76f, 0.66f), 90, 290);
         Space::sun(Vec3(0.5f, 0.45f, -0.6f), Color(1, 0.82f, 0.62f));
@@ -116,7 +117,7 @@ class SkimScreen : Screen
     float level(const Vec3 &in p)
     {
         float y = Space::height(p.x, p.z);
-        return y > 0.2f ? y : 0.2f;      // over water too
+        return y > Sea + 0.2f ? y : Sea + 0.2f;      // over water too
     }
 
     float chance(int x, int z, int n)
@@ -133,7 +134,7 @@ class SkimScreen : Screen
             float px = (float(x) + chance(x, z, n)) * size, pz = (float(z) + chance(x, z, n + 50)) * size;
             float y = Space::height(px, pz);
             // The way is kept clear.
-            if (y < 1 || abs(px - wayX(pz)) < 17 || Space::normal(px, pz).y < 0.75f)
+            if (y < Sea + 0.8f || abs(px - wayX(pz)) < 17 || Space::normal(px, pz).y < 0.75f)
                 continue;
             Entity@ e = Space::spawn(Vec3(px, y, pz));
             bool stone = n % 4 == 0;
@@ -288,8 +289,8 @@ class SkimScreen : Screen
         float going = flat.length();
         r.jet.emit(r.boosting ? "burn" : "jet", clock > 0 ? 20 + going : 10);
         r.engine.pitch = 0.7f + going * 0.018f + (r.boosting ? 0.25f : 0.0f);
-        if (under <= 0.25f && going > 8)
-            Space::burst("spray", Vec3(r.at.x, 0.1f, r.at.z) - ahead * 1.2f, 2);
+        if (under <= Sea + 0.25f && going > 8)
+            Space::burst("spray", Vec3(r.at.x, Sea + 0.1f, r.at.z) - ahead * 1.2f, 2);
         else if (going > 20)
             Space::burst("dust", Vec3(r.at.x, under + 0.1f, r.at.z) - ahead * 1.6f, 1);
 

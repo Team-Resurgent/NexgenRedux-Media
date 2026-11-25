@@ -1,7 +1,7 @@
 {
   "title": "Launcher",
-  "description": "Titles on the drives of an original Xbox, to run",
+  "description": "Scenes here, and on an original Xbox the titles on its drives",
   "category": "Network",
   "order": 202,
-  "demo": "wait:1 down wait:0.4 down wait:0.4 right wait:0.6 left wait:0.6 down wait:1"
+  "demo": "wait:1 down wait:0.4 down wait:0.4 down wait:0.4 up wait:0.4 down:1.2 wait:1.5"
 }

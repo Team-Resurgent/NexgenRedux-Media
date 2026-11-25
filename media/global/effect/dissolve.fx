@@ -1,4 +1,5 @@
 // Burns away. values[0].x: how far, 0 to 1; values[1]: the colour of the edge.
+// xbox: dissolve
 float hash3(float3 p)
 {
     return frac(sin(dot(p, float3(12.9898, 78.233, 37.719))) * 43758.5453);

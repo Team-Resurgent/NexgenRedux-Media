@@ -1,4 +1,5 @@
 // An old television: a curved glass, lines, and colours that don't quite meet.
+// xbox: tube
 // values[0].x: how strongly.
 float4 effect(float2 uv, float4 color)
 {
