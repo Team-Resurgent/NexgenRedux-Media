@@ -204,6 +204,9 @@ class SkimScreen : Screen
         if (clock > 0)
         {
             Vec3 to = target - r.at;
+            // Each rival has a line of its own.
+            if (!r.human)
+                to.x += (float(r.pad) - 2) * 2.6f;
             float off = atan2(-to.x, -to.z) - r.yaw;
             while (off > 3.14159f) off -= 6.28319f;
             while (off < -3.14159f) off += 6.28319f;
@@ -253,6 +256,14 @@ class SkimScreen : Screen
         {
             r.at.y = under + 0.5f;
             r.climb = r.climb < 0 ? 0.0f : r.climb;
+        }
+        // They keep apart.
+        for (uint i = 0; i < racers.length(); i++)
+        {
+            Vec3 gap = r.at - racers[i].at;
+            float far = gap.length();
+            if (racers[i] !is r && far < 5 && far > 0.01f)
+                r.at += gap * ((5 - far) / far * clamp(dt * 3, 0, 1));
         }
         // Trees and rocks.
         array<Entity@>@ met = Space::within(r.at, 1.2f, 1 << 2);

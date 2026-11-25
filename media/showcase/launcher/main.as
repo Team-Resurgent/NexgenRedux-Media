@@ -156,7 +156,8 @@ class LauncherScreen : Screen
             uint size = Xbox::available ? Xbox::driveSize(drives[i]) : 0, free = Xbox::available ? Xbox::driveFree(drives[i]) : 0;
             meter(c, 344 + float(i) * 68, "Drive " + drives[i], size == 0 ? "-" : formatInt(int(free)) + " MB free", size == 0 ? 0.0f : 1 - float(free) / float(size), Yellow);
         }
-        c.text(font, Xbox::available ? "Kernel " + Xbox::text(XboxKernel) + ", " + Xbox::text(XboxHardware) : App::platform, 860, 570, Color(0.65f, 0.75f, 0.65f));
+        c.text(font, Xbox::available ? "Kernel " + Xbox::text(XboxKernel) : App::platform, 860, 560, Color(0.65f, 0.75f, 0.65f));
+        c.text(font, Xbox::available ? Xbox::text(XboxHardware) : "", 860, 594, Color(0.65f, 0.75f, 0.65f));
         c.text(font, "Up, down: choose     Left, right: drive     Accept: run", 640, 672, Color(0.6f, 0.75f, 0.6f), AlignCenter);
     }
 }
