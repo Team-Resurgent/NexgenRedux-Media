@@ -8,7 +8,7 @@
     "slider": { "base": "control", "minWidth": 120 },
     "choice": { "base": "control", "align": "center", "minWidth": 100 },
     "row": { "base": "row", "size": 20, "padding": [12, 6] },
-    "tab": { "base": "tab", "size": 20, "padding": [12, 6], "minHeight": 38 },
+    "tab": { "base": "tab", "size": 18, "padding": [6, 6], "minHeight": 36 },
     "plain": { "base": "plain", "size": 20 },
     "cell": { "base": "control", "minWidth": 40, "padding": [8, 6], "size": 18 },
     "swatch": { "base": "control", "padding": [6, 6], "minHeight": 34 },

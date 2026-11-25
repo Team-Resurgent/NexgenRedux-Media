@@ -1,14 +1,95 @@
 // A scene editor, written as any screen is. What it makes is a file that Space::load reads.
 
+// Where a cave piece goes on.
+class Exit
+{
+    Vec3 place;
+    Exit(const Vec3 &in p) { place = p; }
+}
+
 class Kind
 {
-    string label, key, name;
+    string group, label, key, name;
     Vec3 low, high;
     float size = 1;            // it starts at
+    int collider = 0;          // it starts with
+    float stem = 0;            // how thick a pill is, if that isn't from its size
     Model@ own;                // until its size is known
-    Kind(const string &in l, const string &in k, const string &in n, const Vec3 &in a, const Vec3 &in b)
+    array<Exit@> exits;        // the first is the way in
+    Kind(const string &in g, const string &in l, const string &in k, const string &in n, const Vec3 &in a, const Vec3 &in b, int c = 0, float thick = 0)
     {
-        label = l; key = k; name = n; low = a; high = b;
+        stem = thick;
+        group = g; label = l; key = k; name = n; low = a; high = b; collider = c;
+    }
+}
+
+// A track: it goes through its points, and lies on the land.
+class Road
+{
+    array<Vec3> points;
+    float width = 7;
+    bool closed = true;
+    Entity@ entity;
+    array<Vec3> path;
+
+    Vec3 point(int i)
+    {
+        int n = int(points.length());
+        return points[uint(closed ? (i % n + n) % n : i < 0 ? 0 : i >= n ? n - 1 : i)];
+    }
+
+    // Smooth, and about 2 metres from one to the next.
+    void follow()
+    {
+        path.resize(0);
+        int n = int(points.length());
+        if (n < 2)
+            return;
+        int parts = closed && n > 2 ? n : n - 1;
+        for (int i = 0; i < parts && path.length() < 900; i++)
+        {
+            Vec3 a = point(i - 1), b = point(i), c = point(i + 1), d = point(i + 2);
+            int steps = int(clamp((c - b).length() * 0.5f, 1, 60));
+            for (int k = 0; k < steps; k++)
+            {
+                float t = float(k) / steps;
+                path.insertLast((b * 2 + (c - a) * t + (a * 2 - b * 5 + c * 4 - d) * (t * t) + (b * 3 - a - c * 3 + d) * (t * t * t)) * 0.5f);
+            }
+        }
+        if (!(closed && n > 2))
+            path.insertLast(points[uint(n - 1)]);
+    }
+
+    Vec3 at(int i)
+    {
+        int n = int(path.length());
+        return path[uint(closed ? (i % n + n) % n : i < 0 ? 0 : i >= n ? n - 1 : i)];
+    }
+
+    Vec3 side(int i)
+    {
+        Vec3 way = at(i + 1) - at(i - 1);
+        way.y = 0;
+        return way.length() > 0.001f ? way.normalized().cross(Vec3(0, 1, 0)) : Vec3(1, 0, 0);
+    }
+
+    // How far a place is from it, and where along it that is.
+    float distance(const Vec3 &in p, int &out index)
+    {
+        float best = 1e9f;
+        index = 0;
+        for (uint i = 0; i < path.length(); i++)
+        {
+            Vec3 d = path[i] - p;
+            d.y = 0;
+            float far = d.dot(d);
+            if (far < best)
+            {
+                best = far;
+                index = int(i);
+            }
+        }
+        return sqrt(best);
     }
 }
 
@@ -24,27 +105,51 @@ class EditorScreen : Screen
     Font@ font = Assets::font("global:freesans.sfn", 20);
     string file = "asset:scene.json";
     array<Kind@> kinds = {
-        Kind("House", "model", "house", Vec3(-3.5f, -0.4f, -3.1f), Vec3(3.5f, 6, 4.2f)),
-        Kind("Well", "model", "well", Vec3(-1.2f, -0.4f, -1), Vec3(1.2f, 3.2f, 1)),
-        Kind("Lantern", "model", "lantern", Vec3(-0.3f, -0.2f, -0.3f), Vec3(0.3f, 3.4f, 0.3f)),
-        Kind("Campfire", "model", "campfire", Vec3(-0.9f, -0.1f, -0.9f), Vec3(0.9f, 0.5f, 0.9f)),
-        Kind("Gate", "model", "gate", Vec3(-4.9f, -4.9f, -0.4f), Vec3(4.9f, 4.9f, 0.4f)),
-        Kind("Oak", "model", "oak", Vec3(-1.8f, -0.4f, -1.9f), Vec3(2, 5.1f, 1.9f)),
-        Kind("Pine", "model", "pine", Vec3(-1.7f, -0.4f, -1.8f), Vec3(1.7f, 6, 1.7f)),
-        Kind("Bush", "model", "bush", Vec3(-0.9f, -0.2f, -0.9f), Vec3(1, 0.8f, 0.6f)),
-        Kind("Rock", "model", "rock", Vec3(-1, -0.3f, -1), Vec3(1, 0.9f, 1.1f)),
-        Kind("Mushroom", "model", "mushroom", Vec3(-0.3f, -0.1f, -0.3f), Vec3(0.3f, 0.6f, 0.3f)),
-        Kind("Crystal", "model", "crystal", Vec3(-0.6f, -0.1f, -0.6f), Vec3(0.7f, 1.2f, 0.3f)),
-        Kind("Robot", "model", "robot", Vec3(-0.5f, 0, -0.3f), Vec3(0.5f, 2.1f, 0.3f)),
-        Kind("Skimmer", "model", "skimmer", Vec3(-1.5f, -0.3f, -1.8f), Vec3(1.5f, 0.9f, 2)),
-        Kind("Box", "shape", "box", Vec3(-0.5f, -0.5f, -0.5f), Vec3(0.5f, 0.5f, 0.5f)),
-        Kind("Ball", "shape", "sphere", Vec3(-0.5f, -0.5f, -0.5f), Vec3(0.5f, 0.5f, 0.5f)),
-        Kind("Cylinder", "shape", "cylinder", Vec3(-0.5f, -0.5f, -0.5f), Vec3(0.5f, 0.5f, 0.5f)),
-        Kind("Cone", "shape", "cone", Vec3(-0.5f, -0.5f, -0.5f), Vec3(0.5f, 0.5f, 0.5f)),
-        Kind("Ring", "shape", "torus", Vec3(-0.5f, -0.2f, -0.5f), Vec3(0.5f, 0.2f, 0.5f)),
-        Kind("Capsule", "shape", "capsule", Vec3(-0.5f, -1, -0.5f), Vec3(0.5f, 1, 0.5f)),
-        Kind("Light", "glow", "", Vec3(-0.4f, -0.4f, -0.4f), Vec3(0.4f, 0.4f, 0.4f))
+        Kind("Nature", "Oak", "model", "oak", Vec3(-1.8f, -0.4f, -1.9f), Vec3(2, 5.1f, 1.9f), 3, 0.35f),
+        Kind("Nature", "Pine", "model", "pine", Vec3(-1.7f, -0.4f, -1.8f), Vec3(1.7f, 6, 1.7f), 3, 0.3f),
+        Kind("Nature", "Bush", "model", "bush", Vec3(-0.9f, -0.2f, -0.9f), Vec3(1, 0.8f, 0.6f)),
+        Kind("Nature", "Rock", "model", "rock", Vec3(-1, -0.3f, -1), Vec3(1, 0.9f, 1.1f), 2),
+        Kind("Nature", "Mushroom", "model", "mushroom", Vec3(-0.3f, -0.1f, -0.3f), Vec3(0.3f, 0.6f, 0.3f)),
+        Kind("Nature", "Crystal", "model", "crystal", Vec3(-0.6f, -0.1f, -0.6f), Vec3(0.7f, 1.2f, 0.3f), 1),
+        Kind("Nature", "Pool", "water", "", Vec3(-0.5f, -0.5f, -0.5f), Vec3(0.5f, 0.5f, 0.5f)),
+        Kind("Buildings", "House", "model", "house", Vec3(-3.5f, -0.4f, -3.1f), Vec3(3.5f, 6, 4.2f), 1),
+        Kind("Buildings", "Well", "model", "well", Vec3(-1.2f, -0.4f, -1), Vec3(1.2f, 3.2f, 1), 1),
+        Kind("Buildings", "Lantern", "model", "lantern", Vec3(-0.3f, -0.2f, -0.3f), Vec3(0.3f, 3.4f, 0.3f), 3),
+        Kind("Buildings", "Campfire", "model", "campfire", Vec3(-0.9f, -0.1f, -0.9f), Vec3(0.9f, 0.5f, 0.9f)),
+        Kind("Buildings", "Gate", "model", "gate", Vec3(-4.9f, -4.9f, -0.4f), Vec3(4.9f, 4.9f, 0.4f), 4),
+        Kind("Buildings", "Wall", "model", "wall", Vec3(-2, 0, -0.2f), Vec3(2, 2.5f, 0.2f), 1),
+        Kind("Buildings", "Column", "model", "column", Vec3(-0.55f, 0, -0.55f), Vec3(0.55f, 3.9f, 0.55f), 3),
+        Kind("Platforms", "Platform", "model", "platform", Vec3(-2, 0, -2), Vec3(2, 0.53f, 2), 1),
+        Kind("Platforms", "Round one", "model", "platform-round", Vec3(-2, 0, -2), Vec3(2, 0.5f, 2), 1),
+        Kind("Platforms", "Moving one", "moving", "platform", Vec3(-2, 0, -2), Vec3(2, 0.53f, 2), 1),
+        Kind("Platforms", "Lift", "lift", "platform-round", Vec3(-2, 0, -2), Vec3(2, 0.5f, 2), 1),
+        Kind("Platforms", "Ramp", "model", "ramp", Vec3(-1.5f, 0, -2.5f), Vec3(1.5f, 2, 2.5f), 4),
+        Kind("Platforms", "Stairs", "model", "stairs", Vec3(-1.5f, 0, -2), Vec3(1.5f, 2, 2), 4),
+        Kind("Platforms", "Bridge", "model", "bridge", Vec3(-1.4f, -0.23f, -5), Vec3(1.4f, 1.1f, 5), 4),
+        Kind("Caves", "Way down", "model", "cave-mouth", Vec3(-3.4f, -5, -4), Vec3(3.4f, 4.4f, 4.9f), 4),
+        Kind("Caves", "Mine", "model", "cave-mouth-mine", Vec3(-3.4f, -5, -4), Vec3(3.4f, 4.4f, 4.9f), 4),
+        Kind("Caves", "Tunnel", "model", "cave-tunnel", Vec3(-2.6f, 0, -4), Vec3(2.6f, 3.6f, 4), 4),
+        Kind("Caves", "Bend", "model", "cave-bend", Vec3(-2.6f, 0, -2.6f), Vec3(4, 3.6f, 4), 4),
+        Kind("Caves", "Slope", "model", "cave-slope", Vec3(-2.6f, -5, -4), Vec3(2.6f, 3.6f, 4), 4),
+        Kind("Caves", "Room", "model", "cave-room", Vec3(-8, 0, -8), Vec3(8, 4.9f, 8), 4),
+        Kind("Caves", "End", "model", "cave-end", Vec3(-2.6f, 0, -1), Vec3(2.6f, 3.6f, 4), 4),
+        Kind("Shapes", "Box", "shape", "box", Vec3(-0.5f, -0.5f, -0.5f), Vec3(0.5f, 0.5f, 0.5f), 1),
+        Kind("Shapes", "Ball", "shape", "sphere", Vec3(-0.5f, -0.5f, -0.5f), Vec3(0.5f, 0.5f, 0.5f), 2),
+        Kind("Shapes", "Cylinder", "shape", "cylinder", Vec3(-0.5f, -0.5f, -0.5f), Vec3(0.5f, 0.5f, 0.5f), 1),
+        Kind("Shapes", "Cone", "shape", "cone", Vec3(-0.5f, -0.5f, -0.5f), Vec3(0.5f, 0.5f, 0.5f), 1),
+        Kind("Shapes", "Ring", "shape", "torus", Vec3(-0.5f, -0.2f, -0.5f), Vec3(0.5f, 0.2f, 0.5f)),
+        Kind("Shapes", "Capsule", "shape", "capsule", Vec3(-0.5f, -1, -0.5f), Vec3(0.5f, 1, 0.5f), 3),
+        Kind("Others", "Robot", "model", "robot", Vec3(-0.5f, 0, -0.3f), Vec3(0.5f, 2.1f, 0.3f), 3),
+        Kind("Others", "Skimmer", "model", "skimmer", Vec3(-1.5f, -0.3f, -1.8f), Vec3(1.5f, 0.9f, 2), 1),
+        Kind("Others", "Waves", "sound", "global:sound/waves.wav", Vec3(-0.4f, -0.4f, -0.4f), Vec3(0.4f, 0.4f, 0.4f)),
+        Kind("Others", "Fire", "sound", "global:sound/fire.wav", Vec3(-0.4f, -0.4f, -0.4f), Vec3(0.4f, 0.4f, 0.4f)),
+        Kind("Others", "Engine", "sound", "global:sound/engine.wav", Vec3(-0.4f, -0.4f, -0.4f), Vec3(0.4f, 0.4f, 0.4f)),
+        Kind("Others", "Light", "glow", "", Vec3(-0.4f, -0.4f, -0.4f), Vec3(0.4f, 0.4f, 0.4f))
     };
+    array<string> groups = { "Everything", "Nature", "Buildings", "Platforms", "Caves", "Shapes", "Others", "Mine" };
+    int group = 0;
+    array<uint> listed;
+    array<string> pictures = { "" }, pictureNames = { "None" };   // for things, and for the sky
     array<Model@> models;
     uint builtIn = 0;          // how many kinds there are besides the player's own
     Widget@ addList;
@@ -52,13 +157,25 @@ class EditorScreen : Screen
         Color(0.38f, 0.75f, 0.36f), Color(0.3f, 0.75f, 0.85f), Color(0.3f, 0.48f, 0.95f), Color(0.66f, 0.4f, 0.9f), Color(0.95f, 0.5f, 0.72f) };
     array<string> grounds = { "Flat", "Hills", "Island" };
     array<string> hours = { "Day", "Evening", "Night" };
-    array<string> brushes = { "Raise", "Lower", "Smooth", "Level", "Paint", "Wipe paint" };
+    array<string> brushes = { "Raise", "Lower", "Smooth", "Level", "Paint", "Wipe paint", "Hole", "Close hole" };
     array<string> tools = { "Move", "Turn", "Size" };
 
     array<Thing@> things;
     array<Entity@> thrown;
     int chosen = -1, under = -1;
     int ground = 0, hour = 0, tool = 0;
+    array<string> acrosses = { "64 m", "128 m", "256 m", "512 m" };
+    int across = 1;            // of those
+    bool edges = true;
+    Json sky;                  // what is different from the time of day's own
+    array<Road@> roads;
+    int road = -1;
+    array<string> colliders = { "None", "Box", "Sphere", "Pill", "Exact" };
+    array<string> ways = { "Walk", "Drive", "Fly" };
+    int way = 0;
+    string sceneName = "Village";
+    Json scenes;
+    Widget@ popup;
     int made = -1;             // the ground there is now
     string landText;           // what was done to it by hand
     int brush = 0;
@@ -103,7 +220,31 @@ class EditorScreen : Screen
     Widget@ range;
     Widget@ rangeRow;
     Widget@ onLand;
-    Widget@ solid;
+    Widget@ groupChoice;
+    Widget@ acrossChoice;
+    Widget@ edgeToggle;
+    Widget@ skyChoice;
+    Widget@ sunTurn;
+    Widget@ sunHigh;
+    Widget@ fogFrom;
+    Widget@ fogTo;
+    Widget@ waterToggle;
+    Widget@ waterHigh;
+    Widget@ roadLabel;
+    Widget@ roadClosed;
+    Widget@ roadWidth;
+    Widget@ rangeLabel;
+    Widget@ lookRow;
+    Widget@ skinChoice;
+    Widget@ colliderChoice;
+    Widget@ moves;
+    Widget@ moveRow;
+    Widget@ seconds;
+    array<Widget@> movers;
+    Model@ carModel;
+    Model@ heroModel;
+    Sound@ splash;
+    Sound@ hop;
     Widget@ falls;
     Widget@ glows;
     Widget@ toolButton;
@@ -116,7 +257,16 @@ class EditorScreen : Screen
     EditorScreen()
     {
         for (uint i = 0; i < kinds.length(); i++)
-            models.insertLast(kinds[i].key == "model" ? Assets::model("global:model/" + kinds[i].name + ".glb") : null);
+        {
+            Kind@ k = kinds[i];
+            bool model = k.key == "model" || k.key == "moving" || k.key == "lift";
+            models.insertLast(model ? Assets::model("global:model/" + k.name + ".glb") : null);
+            giveExits(k);
+        }
+        @carModel = Assets::model("global:model/skimmer.glb");
+        @heroModel = Assets::model("global:model/robot.glb");
+        @splash = Assets::sound("global:sound/splash.wav");
+        @hop = Assets::sound("global:sound/whoosh.wav");
         builtIn = kinds.length();
         most = App::freeKilobytes > 0 && App::freeKilobytes < 64000 ? 12 : 40;
     }
@@ -126,11 +276,10 @@ class EditorScreen : Screen
         Ui::theme("asset:theme.json");
         findOwn();
         build();
-        Json j;
         string error;
-        if (!j.parse(Assets::read(file), error))
+        if (!scenes.parse(Assets::read("asset:scenes.json"), error))
             Ui::toast(error);
-        read(j);
+        openLast();
         eye.y += Space::height(0, 0);
         now = write().write(true);
         select(-1);
@@ -150,6 +299,8 @@ class EditorScreen : Screen
         @redoButton = top.button("Redo", WidgetEvent(this.onRedo));
         top.space();
         @count = top.label("", "plain");
+        top.button("Scenes", WidgetEvent(this.onScenes));
+        top.button(ways[uint(way)], WidgetEvent(this.onWay)).width = 90;
         top.button("Play", WidgetEvent(this.onPlay));
         top.button("Save", WidgetEvent(this.onSave));
 
@@ -158,24 +309,63 @@ class EditorScreen : Screen
         sides.align = PlaceStretch;
         Widget@ first = sides.panel();
         first.style = "side";
-        first.width = 240;
+        first.width = 286;
         @tabs = first.tabs();
         tabs.grow = 1;
         Widget@ add = tabs.tab("Add");
-        Widget@ list = @addList = add.list(kinds.length(), 42, WidgetRow(this.fill));
+        @groupChoice = add.choice(groups, group, WidgetEvent(this.onGroup));
+        Widget@ list = @addList = add.list(0, 42, WidgetRow(this.fill));
+        listKinds();
         list.grow = 1;
         list.onClick(WidgetEvent(this.onAdd));
         Widget@ scene = tabs.tab("Scene");
-        scene.label("Ground", "small");
-        @groundChoice = scene.choice(grounds, 0, WidgetEvent(this.onGround));
-        scene.label("Time", "small");
-        @hourChoice = scene.choice(hours, 0, WidgetEvent(this.onHour));
-        scene.toggle("Snap", true, WidgetEvent(this.onSnap));
-        scene.button("As saved", WidgetEvent(this.onRevert));
-        scene.button("Clear", WidgetEvent(this.onClear));
+        Widget@ things = scene.scroll(8);
+        things.grow = 1;
+        things.label("Ground", "small");
+        @groundChoice = things.choice(grounds, 0, WidgetEvent(this.onGround));
+        things.label("How large", "small");
+        bool small = App::freeKilobytes > 0 && App::freeKilobytes < 64000;
+        if (small)
+            acrosses.removeLast();
+        @acrossChoice = things.choice(acrosses, across, WidgetEvent(this.onAcross));
+        @edgeToggle = things.toggle("Walls at its edge", true, WidgetEvent(this.onEdges));
+        things.toggle("Snap", true, WidgetEvent(this.onSnap));
+        things.toggle("Wireframe", false, WidgetEvent(this.onLines));
+        things.button("As saved", WidgetEvent(this.onRevert));
+        things.button("Clear", WidgetEvent(this.onClear));
         if (!App::development)
-            scene.button("Start again", WidgetEvent(this.onFresh));
-        scene.toggle("Wireframe", false, WidgetEvent(this.onLines));
+            things.button("Start again", WidgetEvent(this.onFresh));
+
+        Widget@ above = tabs.tab("Sky").scroll(8);
+        above.grow = 1;
+        above.label("Time", "small");
+        @hourChoice = above.choice(hours, 0, WidgetEvent(this.onHour));
+        above.label("Picture", "small");
+        @skyChoice = above.choice(pictureNames, 0, WidgetEvent(this.onSkyPicture));
+        above.label("The sun: which way, how high", "small");
+        @sunTurn = above.slider(0, 0, 345, WidgetEvent(this.onSky));
+        sunTurn.step = 15;
+        @sunHigh = above.slider(45, 5, 90, WidgetEvent(this.onSky));
+        sunHigh.step = 5;
+        above.label("Fog: where from, where to", "small");
+        @fogFrom = above.slider(60, 0, 300, WidgetEvent(this.onSky));
+        fogFrom.step = 5;
+        @fogTo = above.slider(170, 20, 500, WidgetEvent(this.onSky));
+        fogTo.step = 10;
+        Widget@ mists = above.grid(5, 6);
+        for (uint i = 0; i < colors.length(); i++)
+        {
+            Widget@ b = mists.button("", WidgetEvent(this.onMist));
+            b.style = "swatch";
+            b.tag = int(i);
+            Widget@ c = b.custom(WidgetDraw(this.swatch));
+            c.height = 18;
+            c.grow = 1;
+        }
+        above.button("Its own colours", WidgetEvent(this.onSkyFresh));
+        @waterToggle = above.toggle("Sea", false, WidgetEvent(this.onWater));
+        @waterHigh = above.slider(0, -8, 12, WidgetEvent(this.onWater));
+        waterHigh.step = 0.5f;
         Widget@ earth = tabs.tab("Land");
         @brushChoice = earth.choice(brushes, 0, WidgetEvent(this.onBrush));
         earth.label("Size", "small");
@@ -197,6 +387,19 @@ class EditorScreen : Screen
         }
         earth.button("As it was made", WidgetEvent(this.onLandFresh));
         earth.paragraph("Hold on the land to change it.", "small");
+
+        Widget@ track = tabs.tab("Road");
+        @roadLabel = track.label("", "plain");
+        track.button("New road", WidgetEvent(this.onRoadNew));
+        track.button("Next road", WidgetEvent(this.onRoadNext));
+        @roadClosed = track.toggle("Goes round", true, WidgetEvent(this.onRoad));
+        track.label("How wide", "small");
+        @roadWidth = track.slider(7, 3, 16, WidgetEvent(this.onRoad));
+        roadWidth.step = 1;
+        track.button("Shape the land", WidgetEvent(this.onRoadLand));
+        track.button("Take a point back", WidgetEvent(this.onRoadBack));
+        track.button("Delete road", WidgetEvent(this.onRoadDelete));
+        track.paragraph("Press on the land for each point. With Drive, Play is a race against the clock.", "small");
 
         sides.space();
         Widget@ other = sides.panel();
@@ -224,7 +427,7 @@ class EditorScreen : Screen
         @size = inspector.slider(1, 0.1f, 6, WidgetEvent(this.onSize));
         size.step = 0.1f;
         @rangeRow = inspector.column(6);
-        rangeRow.label("Reach of its light", "small");
+        @rangeLabel = rangeRow.label("", "small");
         @range = rangeRow.slider(8, 2, 24, WidgetEvent(this.onRange));
         range.step = 1;
         Widget@ swatches = inspector.grid(5, 6);
@@ -237,16 +440,99 @@ class EditorScreen : Screen
             c.height = 22;
             c.grow = 1;
         }
+        @lookRow = inspector.column(6);
+        lookRow.label("Picture", "small");
+        @skinChoice = lookRow.choice(pictureNames, 0, WidgetEvent(this.onSkin));
+        lookRow.label("Collider", "small");
+        @colliderChoice = lookRow.choice(colliders, 0, WidgetEvent(this.onCollider));
         @onLand = inspector.toggle("On the land", true, WidgetEvent(this.onToggle));
-        @solid = inspector.toggle("Solid", false, WidgetEvent(this.onToggle));
         @falls = inspector.toggle("Falls", false, WidgetEvent(this.onToggle));
         @glows = inspector.toggle("Glows", false, WidgetEvent(this.onToggle));
+        @moves = inspector.toggle("Moves to and fro", false, WidgetEvent(this.onToggle));
+        @moveRow = inspector.column(6);
+        moveRow.label("How far: across, up, along", "small");
+        Widget@ far = moveRow.row(6);
+        for (uint i = 0; i < 3; i++)
+        {
+            Widget@ f = far.field("", "", WidgetEvent(this.onMove));
+            f.style = "cell";
+            f.numeric = true;
+            f.grow = 1;
+            f.onDone(WidgetEvent(this.onMove));
+            movers.insertLast(f);
+        }
+        moveRow.label("Seconds there and back", "small");
+        @seconds = moveRow.slider(6, 1, 30, WidgetEvent(this.onMove));
+        seconds.step = 1;
         Widget@ two = inspector.row(8);
         Widget@ copy = two.button("Copy", WidgetEvent(this.onCopy));
         copy.grow = 1;
         Widget@ remove = two.button("Delete", WidgetEvent(this.onDelete));
         remove.grow = 1;
         list.focus();
+    }
+
+    // Ends that nothing is on are walled off. They are only here: a game has its own.
+    array<Entity@> caps;
+    Model@ capModel = Assets::model("global:model/cave-cap.glb");
+
+    void closeEnds()
+    {
+        for (uint i = 0; i < caps.length(); i++)
+            caps[i].destroy();
+        caps.resize(0);
+        array<Vec3> ends, ways_;
+        array<uint> whose;
+        for (uint i = 0; i < things.length(); i++)
+        {
+            Kind@ k = kindOf(things[i].json);
+            Vec3 base = worldPlace(things[i].json), a = angles(things[i].json);
+            for (uint e = isMouth(k) ? 1 : 0; e < k.exits.length(); e++)
+            {
+                ends.insertLast(base + spun(k.exits[e].place, a.y));
+                ways_.insertLast(spun(Vec3(k.exits[e].place.x, 0, k.exits[e].place.z).normalized(), a.y));
+                whose.insertLast(i);
+            }
+        }
+        for (uint i = 0; i < ends.length() && caps.length() < 40; i++)
+        {
+            bool open = true;
+            for (uint n = 0; n < ends.length() && open; n++)
+                open = whose[n] == whose[i] || (ends[n] - ends[i]).length() > 0.6f;
+            if (!open)
+                continue;
+            Entity@ c = Space::spawn(ends[i]);
+            c.model(capModel);
+            c.angles = Vec3(0, atan2(-ways_[i].x, -ways_[i].z) * 57.29578f, 0);
+            c.twoSided = true;
+            c.exact(0, 0);
+            c.wall = true;
+            caps.insertLast(c);
+        }
+    }
+
+    bool isMouth(Kind@ k) { return k.name.findFirst("cave-mouth") >= 0; }
+
+    // By its name, so that other entrances, tunnels and rooms join as well: "cave-mouth-ice", "cave-room-2".
+    void giveExits(Kind@ k)
+    {
+        int at = k.name.findFirst("cave-");
+        if (at < 0)
+            return;
+        string n = k.name.substr(uint(at) + 5);
+        k.group = "Caves";
+        bool big = n.findFirst("room") == 0, falls_ = n.findFirst("slope") == 0 || n.findFirst("mouth") == 0;
+        k.exits.insertLast(Exit(Vec3(0, 0, big ? 8 : 4)));
+        if (n.findFirst("bend") == 0)
+            k.exits.insertLast(Exit(Vec3(4, 0, 0)));
+        else if (n.findFirst("end") != 0)
+            k.exits.insertLast(Exit(Vec3(0, falls_ ? -5 : 0, big ? -8 : -4)));
+        if (big)
+        {
+            k.exits.insertLast(Exit(Vec3(8, 0, 0)));
+            k.exits.insertLast(Exit(Vec3(-8, 0, 0)));
+        }
+        k.collider = 4;
     }
 
     // --- Models that the player brought ---
@@ -262,7 +548,7 @@ class EditorScreen : Screen
 
     void findOwn()
     {
-        array<string> folders = { "asset:model/", "own:" };
+        array<string> folders = { "asset:model/", "asset:picture/", "asset:sound/", "global:picture/", "own:" };
         for (uint f = 0; f < folders.length(); f++)
         {
             array<string>@ files = Assets::list(folders[f]);
@@ -271,16 +557,40 @@ class EditorScreen : Screen
         }
     }
 
-    void addOwn(const string &in path, const string &in file)
+    bool ends(const string &in file, const array<string> &in endings)
     {
-        if (!isModel(file) || kinds.length() >= builtIn + 60)
-            return;
-        for (uint i = 0; i < kinds.length(); i++)
-            if (kinds[i].key == "own" && kinds[i].name == path)
-                return;
+        for (uint i = 0; i < endings.length(); i++)
+            if (file.length() > endings[i].length() && file.substr(file.length() - endings[i].length()) == endings[i])
+                return true;
+        return false;
+    }
+
+    // True if it is something new.
+    bool addOwn(const string &in path, const string &in file)
+    {
         string label = file.substr(0, file.findLast("."));
-        kinds.insertLast(Kind(label.length() > 18 ? label.substr(0, 17) + "..." : label, "own", path, Vec3(-0.5f, -0.5f, -0.5f), Vec3(0.5f, 0.5f, 0.5f)));
-        @kinds[kinds.length() - 1].own = Assets::model(path);
+        label = label.length() > 18 ? label.substr(0, 17) + "..." : label;
+        if (ends(file, array<string> = { ".png", ".jpg", ".jpeg", ".tga", ".bmp" }))
+        {
+            if (pictures.find(path) >= 0 || pictures.length() >= 40)
+                return false;
+            pictures.insertLast(path);
+            pictureNames.insertLast(label);
+            return true;
+        }
+        bool sound = ends(file, array<string> = { ".wav", ".ogg", ".mp3" });
+        if ((!sound && !isModel(file)) || kinds.length() >= builtIn + 60)
+            return false;
+        for (uint i = 0; i < kinds.length(); i++)
+            if (kinds[i].name == path)
+                return false;
+        kinds.insertLast(Kind("Mine", label, sound ? "sound" : "own", path, Vec3(-0.5f, -0.5f, -0.5f), Vec3(0.5f, 0.5f, 0.5f)));
+        if (!sound)
+        {
+            @kinds[kinds.length() - 1].own = Assets::model(path);
+            giveExits(kinds[kinds.length() - 1]);
+        }
+        return true;
     }
 
     // As they arrive: how big each is. Those made in other units are brought to a size that can be seen.
@@ -298,7 +608,7 @@ class EditorScreen : Screen
                 Vec3 s = k.high - k.low;
                 float longest = s.x > s.y ? s.x : s.y;
                 longest = s.z > longest ? s.z : longest;
-                if (longest > 15 || longest < 0.2f)
+                if (k.exits.length() == 0 && (longest > 15 || longest < 0.2f))
                     k.size = 3 / (longest > 0.0001f ? longest : 1.0f);
             }
             else
@@ -314,20 +624,36 @@ class EditorScreen : Screen
     void takeDropped()
     {
         array<string>@ files = Assets::dropped();
-        uint had = kinds.length();
+        uint added = 0;
         for (uint i = 0; i < files.length(); i++)
-            addOwn("own:" + files[i], files[i]);
-        if (kinds.length() == had)
+            added += addOwn("own:" + files[i], files[i]) ? 1 : 0;
+        if (files.length() == 0)
+            return;
+        if (added == 0)
         {
-            if (files.length() > 0)
-                Ui::toast("Nothing new to add in that");
+            Ui::toast("Nothing new to add in that");
             return;
         }
-        addList.count = kinds.length();
-        Ui::toast(kinds[had].label + (kinds.length() > had + 1 ? " and others are" : " is") + " at the end of the list");
+        skinChoice.items(pictureNames);
+        skyChoice.items(pictureNames);
+        group = 7;
+        groupChoice.chosen = 7;
+        listKinds();
+        Ui::toast(added == 1 ? "One more of your own" : "" + added + " more of your own");
+        show();
     }
 
-    void fill(Widget@ row, int i) { row.label(kinds[uint(i)].label); }
+    void listKinds()
+    {
+        listed.resize(0);
+        for (uint i = 0; i < kinds.length(); i++)
+            if (group == 0 || kinds[i].group == groups[uint(group)])
+                listed.insertLast(i);
+        addList.count = listed.length();
+    }
+    void onGroup(Widget@ w) { group = w.chosen; listKinds(); }
+
+    void fill(Widget@ row, int i) { row.label(kinds[listed[uint(i)]].label); }
 
     void swatch(Canvas@ c, Widget@ w)
     {
@@ -343,12 +669,14 @@ class EditorScreen : Screen
             c.circle(p.x + s.x * 0.5f, p.y + s.y * 0.5f, 4, White);
     }
 
-    bool sculpting { get { return tabs.chosen == 2 && !playing; } }
+    bool sculpting { get { return tabs.chosen == 3 && !playing; } }
+    bool roading { get { return tabs.chosen == 4 && !playing; } }
 
     // What the panel says, from what is chosen.
     void show()
     {
-        count.text = "" + things.length() + " things" + (dirty ? " *" : "") + "  " ;
+        showRoad();
+        count.text = sceneName + ":  " + things.length() + " things" + (dirty ? " *" : "") + "  " ;
         undoButton.enabled = before.length() > 0;
         redoButton.enabled = after.length() > 0;
         toolButton.text = tools[uint(tool)];
@@ -364,16 +692,28 @@ class EditorScreen : Screen
         places[2].text = number(p.z);
         turn.value = wrapped(angles(j).y);
         size.value = sizes(j).x;
-        rangeRow.visible = j.has("light");
-        range.value = float(j["range"].number(8));
+        bool sound = j.has("sound");
+        rangeRow.visible = j.has("light") || sound;
+        rangeLabel.text = sound ? "How far it is heard" : "Reach of its light";
+        range.value = float(sound ? j["reach"].number(12) : j["range"].number(8));
         onLand.checked = j["onLand"].flag();
-        solid.checked = j["wall"].flag();
         falls.checked = j["mass"].number() > 0;
         glows.checked = j["glowing"].number() > 0;
-        bool thing = !j.has("glow");
-        solid.visible = thing;
-        falls.visible = thing;
-        glows.visible = thing;
+        bool thing = !j.has("glow") && !sound, water = j["name"].text() == "water";
+        lookRow.visible = thing && !water;
+        falls.visible = thing && !water;
+        glows.visible = thing && !water;
+        moves.visible = thing && !water;
+        moves.checked = j.has("moves");
+        moveRow.visible = thing && j.has("moves");
+        Vec3 far = j["moves"].vec3();
+        movers[0].text = number(far.x);
+        movers[1].text = number(far.y);
+        movers[2].text = number(far.z);
+        seconds.value = float(j["seconds"].number(6));
+        colliderChoice.chosen = colliderOf(j);
+        int picture = pictures.find(j["skin"].text());
+        skinChoice.chosen = picture < 0 ? 0 : picture;
     }
 
     string number(float v) { return formatFloat(floor(v * 100 + 0.5f) / 100, "", 0, 2); }
@@ -384,7 +724,14 @@ class EditorScreen : Screen
     void onUndo(Widget@ w) { undo(); }
     void onRedo(Widget@ w) { redo(); }
     void onPlay(Widget@ w) { play(true); }
-    void onAdd(Widget@ w) { add(uint(w.chosen)); }
+    void onAdd(Widget@ w)
+    {
+        if (w.chosen >= 0 && uint(w.chosen) < listed.length())
+            add(listed[uint(w.chosen)]);
+    }
+    void onWay(Widget@ w) { way = (way + 1) % int(ways.length()); w.text = ways[uint(way)]; }
+    void onAcross(Widget@ w) { across = w.chosen; landText = ""; land(); place(); changed("across"); }
+    void onEdges(Widget@ w) { edges = w.checked; Space::edges = edges; changed("edges"); }
     void onGround(Widget@ w) { ground = w.chosen; land(); place(); changed("ground"); }
     void onLines(Widget@ w) { Space::lines = w.checked; }
     void onBrush(Widget@ w) { brush = w.chosen; }
@@ -450,7 +797,9 @@ class EditorScreen : Screen
     void onFresh(Widget@ w) { Ui::dialog("Start again", "Go back to the first scene? What was saved is lost. Undo brings back what is here now.", array<string> = { "Start again", "Keep" }, WidgetAnswer(this.fresh)); }
     void fresh(int answer)
     {
-        if (answer == 0)
+        if (answer == 0 && file != "asset:scene.json")
+            clear(0);
+        else if (answer == 0)
         {
             Assets::forget(file);
             onRevert(null);
@@ -495,9 +844,79 @@ class EditorScreen : Screen
     {
         if (chosen < 0)
             return;
-        things[uint(chosen)].json.set("range", w.value);
+        Json@ j = things[uint(chosen)].json;
+        j.set(j.has("sound") ? "reach" : "range", w.value);
         make(uint(chosen));
         changed("range", false);
+    }
+
+    void onSkin(Widget@ w)
+    {
+        if (chosen < 0)
+            return;
+        Json@ j = things[uint(chosen)].json;
+        if (w.chosen > 0)
+            j.set("skin", pictures[uint(w.chosen)]);
+        else
+            j.remove("skin");
+        make(uint(chosen));
+        changed("skin");
+    }
+
+    void onCollider(Widget@ w)
+    {
+        if (chosen < 0)
+            return;
+        setCollider(things[uint(chosen)].json, w.chosen);
+        make(uint(chosen));
+        changed("collider");
+    }
+
+    void onMove(Widget@ w)
+    {
+        if (chosen < 0)
+            return;
+        Json@ j = things[uint(chosen)].json;
+        j.set("moves", Vec3(parseFloat(movers[0].text), parseFloat(movers[1].text), parseFloat(movers[2].text)));
+        j.set("seconds", seconds.value);
+        changed("moves", false);
+    }
+
+    // --- Colliders ---
+
+    int colliderOf(Json@ j) { return j.has("cube") ? 1 : j.has("sphere") ? 2 : j.has("capsule") ? 3 : j["exact"].flag() ? 4 : 0; }
+
+    void setCollider(Json@ j, int which)
+    {
+        array<string> all = { "cube", "sphere", "capsule", "exact", "colliderAt", "wall" };
+        for (uint i = 0; i < all.length(); i++)
+            j.remove(all[i]);
+        Kind@ k = kindOf(j);
+        Vec3 wide = k.high - k.low, middle = (k.high + k.low) * 0.5f;
+        float round = wide.x > wide.z ? wide.x : wide.z;
+        if (which == 1)
+            j.set("cube", wide);
+        else if (which == 2)
+            j.set("sphere", (round > wide.y ? round : wide.y) * 0.5f);
+        else if (which == 3)
+        {
+            float thick = k.stem > 0 ? k.stem * 2 : round;
+            Json size;
+            size.add(thick * 0.5f);
+            size.add(wide.y > thick ? wide.y : thick);
+            j.set("capsule", size);
+        }
+        else if (which == 4)
+            j.set("exact", true);
+        if (which == 0)
+        {
+            j.remove("mass");
+            return;
+        }
+        if (which != 4 && middle.length() > 0.001f)
+            j.set("colliderAt", middle);
+        if (!j.has("mass"))
+            j.set("wall", true);
     }
 
     void onColor(Widget@ w)
@@ -527,19 +946,31 @@ class EditorScreen : Screen
             j.set("place", p);
             j.set("onLand", onLand.checked);
         }
-        setIf(j, "wall", solid.checked);
-        setNumberIf(j, "mass", falls.checked, 2);
+        if (falls.checked != (j["mass"].number() > 0))
+        {
+            setNumberIf(j, "mass", falls.checked, 2);
+            setNumberIf(j, "bounce", falls.checked, j["shape"].text() == "sphere" ? 0.5f : 0.1f);
+            int which = colliderOf(j);
+            setCollider(j, falls.checked && (which == 0 || which == 4) ? j["shape"].text() == "sphere" ? 2 : 1 : which);
+        }
+        if (moves.checked != j.has("moves"))
+        {
+            if (moves.checked)
+            {
+                j.set("moves", Vec3(8, 0, 0));
+                j.set("seconds", 6);
+                if (colliderOf(j) == 0)
+                    setCollider(j, 1);
+            }
+            else
+            {
+                j.remove("moves");
+                j.remove("seconds");
+            }
+        }
         setNumberIf(j, "glowing", glows.checked, 0.8f);
         make(uint(chosen));
         changed("toggle");
-    }
-
-    void setIf(Json@ j, const string &in key, bool on)
-    {
-        if (on)
-            j.set(key, true);
-        else
-            j.remove(key);
     }
 
     void setNumberIf(Json@ j, const string &in key, bool on, float value)
@@ -556,11 +987,15 @@ class EditorScreen : Screen
 
     Kind@ kindOf(Json@ j)
     {
-        string model = j["model"].text(), shape = j["shape"].text();
+        string model = j["model"].text(), shape = j["shape"].text(), sound = j["sound"].text();
+        if (j["name"].text() == "water")
+            shape = "";
         for (uint i = 0; i < kinds.length(); i++)
         {
             Kind@ k = kinds[i];
-            if (k.key == "own" ? model == k.name : k.key == "model" ? model == "global:model/" + k.name + ".glb" : k.key == "shape" && shape == k.name)
+            bool same = k.key == "own" ? model == k.name : k.key == "model" ? model == "global:model/" + k.name + ".glb" : k.key == "sound" ? sound == k.name && sound != ""
+                : k.key == "shape" ? shape == k.name : k.key == "water" && j["name"].text() == "water";
+            if (same)
                 return k;
         }
         return kinds[builtIn - 1];
@@ -571,11 +1006,15 @@ class EditorScreen : Screen
     {
         if (j.has("glow"))
             return Vec3(1, 1, 1) * float(j["glow"].number(1));
+        if (j.has("sound"))
+            return Vec3(0.8f, 0.8f, 0.8f);
         return j["size"].isNumber ? Vec3(1, 1, 1) * float(j["size"].number()) : j["size"].vec3(Vec3(1, 1, 1));
     }
     void resize(Json@ j, Vec3 s)
     {
         s = Vec3(clamp(s.x, 0.0005f, 400), clamp(s.y, 0.0005f, 400), clamp(s.z, 0.0005f, 400));
+        if (j.has("sound"))
+            return;
         if (j.has("glow"))
             j.set("glow", s.x);
         else
@@ -595,6 +1034,25 @@ class EditorScreen : Screen
         Json all;
         all.set("ground", ground);
         all.set("hour", hour);
+        all.set("across", across);
+        all.set("edges", edges);
+        if (sky.count > 0)
+            all.set("sky", sky);
+        if (roads.length() > 0)
+        {
+            Json tracks;
+            for (uint i = 0; i < roads.length(); i++)
+            {
+                Json one, points;
+                one.set("width", roads[i].width);
+                one.set("closed", roads[i].closed);
+                for (uint k = 0; k < roads[i].points.length(); k++)
+                    points.add(roads[i].points[k]);
+                one.set("points", points);
+                tracks.add(one);
+            }
+            all.set("roads", tracks);
+        }
         if (landText != "")
             all.set("land", landText);
         Json list;
@@ -613,8 +1071,15 @@ class EditorScreen : Screen
         chosen = -1;
         ground = int(clamp(float(all["ground"].number()), 0, 2));
         hour = int(clamp(float(all["hour"].number()), 0, 2));
+        across = int(clamp(float(all["across"].number(1)), 0, float(acrosses.length()) - 1));
+        edges = all["edges"].flag(true);
+        Json empty;
+        sky.copy(all["sky"].isNull ? empty : all["sky"]);
         groundChoice.chosen = ground;
+        acrossChoice.chosen = across;
+        edgeToggle.checked = edges;
         hourChoice.chosen = hour;
+        readRoads(all["roads"]);
         landText = all["land"].text();
         land();
         light();
@@ -622,8 +1087,15 @@ class EditorScreen : Screen
         for (uint i = 0; i < list.count; i++)
         {
             things.insertLast(Thing(list[i]));
+            Json@ j = things[i].json;
+            // Those from before there were others.
+            if ((j["wall"].flag() || j["mass"].number() > 0) && colliderOf(j) == 0)
+                setCollider(j, j["shape"].text() == "sphere" ? 2 : 1);
             make(i);
         }
+        for (uint i = 0; i < roads.length(); i++)
+            makeRoad(roads[i]);
+        closeEnds();
         show();
     }
 
@@ -635,38 +1107,24 @@ class EditorScreen : Screen
             t.entity.destroy();
         Json j;
         j.copy(t.json);
-        Kind@ k = kindOf(j);
-        Vec3 s = sizes(j);
-        Vec3 wide((k.high.x - k.low.x) * s.x, (k.high.y - k.low.y) * s.y, (k.high.z - k.low.z) * s.z);
-        Vec3 middle((k.high.x + k.low.x) * 0.5f * s.x, (k.high.y + k.low.y) * 0.5f * s.y, (k.high.z + k.low.z) * 0.5f * s.z);
-        if (!playing)
+        if (playing)
         {
-            array<string> still = { "mass", "walker", "gravity", "wall", "sphere", "cube", "capsule", "behaviour", "group", "hits", "colliderAt", "friction", "bounce", "drag" };
-            for (uint n = 0; n < still.length(); n++)
-                j.remove(still[n]);
             @t.entity = Space::make(j);
-            t.entity.cube(j.has("glow") ? Vec3(1, 1, 1) : wide, 1, 0);
-            t.entity.colliderAt = j.has("glow") ? Vec3() : middle;
             return;
         }
-        @t.entity = Space::make(j);
-        if (j["wall"].flag() || j["mass"].number() > 0)
+        Kind@ k = kindOf(j);
+        array<string> still = { "mass", "walker", "gravity", "wall", "sphere", "cube", "capsule", "exact", "behaviour", "group", "hits", "colliderAt", "friction", "bounce", "drag", "moves", "seconds", "pathTime", "sound", "reach", "volume" };
+        for (uint n = 0; n < still.length(); n++)
+            j.remove(still[n]);
+        if (t.json.has("sound"))
         {
-            if (j["shape"].text() == "sphere")
-                t.entity.sphere(wide.x * 0.5f, 0, 0);
-            else
-                t.entity.cube(wide, 0, 0);
-            t.entity.colliderAt = middle;
-            t.entity.wall = true;
-            if (j["mass"].number() > 0)
-            {
-                t.entity.wall = false;
-                t.entity.mass = float(j["mass"].number());
-                t.entity.gravity = 1;
-                t.entity.friction = 0.6f;
-                t.entity.bounce = j["shape"].text() == "sphere" ? 0.5f : 0.1f;
-            }
+            j.set("glow", 0.8f);
+            j.set("color", Color(0.35f, 0.7f, 1, 0.8f));
         }
+        @t.entity = Space::make(j);
+        bool soft = t.json.has("glow") || t.json.has("sound");
+        t.entity.cube(soft ? Vec3(1, 1, 1) : k.high - k.low, 1, 0);
+        t.entity.colliderAt = soft ? Vec3() : (k.high + k.low) * 0.5f;
     }
 
     // Puts its entity where it is.
@@ -686,9 +1144,11 @@ class EditorScreen : Screen
     // Made only when it is another, as that takes a while; what was done by hand is put back each time.
     void land()
     {
-        if (made != ground)
+        int wanted = ground * 10 + across;
+        if (made != wanted)
             makeGround();
-        made = ground;
+        made = wanted;
+        Space::edges = edges;
         if (!Space::restoreLand(landText))
         {
             landText = "";
@@ -698,31 +1158,443 @@ class EditorScreen : Screen
 
     void makeGround()
     {
+        uint squares = uint(32) << uint(across);
         if (ground == 0)
         {
-            Space::land(1, 64, 2, 0.001f);
+            Space::land(1, squares, 2, 0.001f);
             Space::landColors(Color(0.42f, 0.56f, 0.34f), Color(0.42f, 0.56f, 0.34f), Color(0.42f, 0.56f, 0.34f), Color(0.4f, 0.4f, 0.4f), -1, 1);
+            return;
         }
-        else
-        {
-            Space::land(ground == 1 ? 7 : 12, 64, 2, ground == 1 ? 7 : 12, 0.45f, ground == 2);
-            Space::landColors(Color(0.78f, 0.7f, 0.48f), Color(0.36f, 0.52f, 0.28f), Color(0.5f, 0.56f, 0.36f), Color(0.45f, 0.42f, 0.4f), ground == 2 ? 0.8f : -20, 7);
-            // Room to build on.
-            Space::flatten(0, 0, 24, ground == 2 ? 2.5f : Space::height(0, 0));
-        }
-        Space::water(ground == 2 ? 0.0f : -60, Color(0.16f, 0.4f, 0.5f, 0.8f));
+        Space::land(ground == 1 ? 7 : 12, squares, 2, ground == 1 ? 7 : 12, 0.45f, ground == 2);
+        Space::landColors(Color(0.78f, 0.7f, 0.48f), Color(0.36f, 0.52f, 0.28f), Color(0.5f, 0.56f, 0.36f), Color(0.45f, 0.42f, 0.4f), ground == 2 ? 0.8f : -20, 7);
+        // Room to build on.
+        Space::flatten(0, 0, across == 0 ? 14.0f : 24.0f, ground == 2 ? 2.5f : Space::height(0, 0));
     }
 
     void light()
     {
         Color top = hour == 0 ? Color(0.25f, 0.5f, 0.85f) : hour == 1 ? Color(0.25f, 0.24f, 0.45f) : Color(0.015f, 0.02f, 0.06f);
         Color low = hour == 0 ? Color(0.72f, 0.83f, 0.92f) : hour == 1 ? Color(0.95f, 0.6f, 0.4f) : Color(0.07f, 0.09f, 0.17f);
+        Vec3 sun = hour == 1 ? Vec3(0.8f, 0.3f, -0.4f) : Vec3(0.45f, 0.8f, 0.4f);
+        if (sky.has("mist"))
+            low = sky["mist"].color();
+        sunTurn.value = wrapped(floor(atan2(sun.x, sun.z) * 57.29578f / 15 + 0.5f) * 15);
+        sunHigh.value = floor(atan2(sun.y, sqrt(sun.x * sun.x + sun.z * sun.z)) * 57.29578f / 5 + 0.5f) * 5;
+        if (sky.has("sunHigh"))
+        {
+            sunTurn.value = float(sky["sunTurn"].number());
+            sunHigh.value = float(sky["sunHigh"].number());
+            float a = sunTurn.value * 0.0174533f, h = sunHigh.value * 0.0174533f;
+            sun = Vec3(sin(a) * cos(h), sin(h), cos(a) * cos(h));
+        }
+        fogFrom.value = float(sky["fogFrom"].number(60));
+        fogTo.value = float(sky["fogTo"].number(170));
+        bool sea = sky["sea"].flag(ground == 2);
+        waterToggle.checked = sea;
+        waterHigh.value = float(sky["seaHigh"].number(0));
+        int picture = pictures.find(sky["picture"].text());
+        skyChoice.chosen = picture < 0 ? 0 : picture;
+        @skyPicture = sky["picture"].text() == "" ? null : Assets::texture(sky["picture"].text());
+        Space::skyPicture(skyPicture);
         Space::sky(top, low);
-        Space::fog(low, 60, 170);
-        Space::farthest(180);
-        Space::sun(hour == 1 ? Vec3(0.8f, 0.3f, -0.4f) : Vec3(0.45f, 0.8f, 0.4f), hour == 0 ? Color(0.95f, 0.9f, 0.8f) : hour == 1 ? Color(0.9f, 0.5f, 0.3f) : Color(0.16f, 0.2f, 0.32f));
+        Space::fog(low, fogFrom.value, fogTo.value > fogFrom.value + 5 ? fogTo.value : fogFrom.value + 5);
+        Space::farthest((fogTo.value > fogFrom.value ? fogTo.value : fogFrom.value) + 15);
+        Space::sun(sun, hour == 0 ? Color(0.95f, 0.9f, 0.8f) : hour == 1 ? Color(0.9f, 0.5f, 0.3f) : Color(0.16f, 0.2f, 0.32f));
         Space::ambient(hour == 0 ? Color(0.42f, 0.46f, 0.55f) : hour == 1 ? Color(0.34f, 0.3f, 0.4f) : Color(0.12f, 0.14f, 0.24f), hour == 0 ? Color(0.25f, 0.24f, 0.2f) : Color(0.1f, 0.09f, 0.1f));
         Space::shadows(hour == 2 ? 0.35f : 0.6f, 34);
+        Space::water(sea ? waterHigh.value : -200.0f, Color(0.16f, 0.4f, 0.5f, 0.8f));
+    }
+    Texture@ skyPicture;
+
+    void onSky(Widget@ w)
+    {
+        if (w is sunTurn || w is sunHigh)
+        {
+            sky.set("sunTurn", sunTurn.value);
+            sky.set("sunHigh", sunHigh.value);
+        }
+        else
+        {
+            sky.set("fogFrom", fogFrom.value);
+            sky.set("fogTo", fogTo.value);
+        }
+        light();
+        changed("sky", false);
+    }
+    void onMist(Widget@ w) { sky.set("mist", colors[uint(w.tag)]); light(); changed("mist"); }
+    void onSkyFresh(Widget@ w)
+    {
+        Json empty;
+        sky.copy(empty);
+        light();
+        changed("sky");
+    }
+    void onSkyPicture(Widget@ w)
+    {
+        if (w.chosen > 0)
+            sky.set("picture", pictures[uint(w.chosen)]);
+        else
+            sky.remove("picture");
+        light();
+        changed("picture");
+    }
+    void onWater(Widget@ w)
+    {
+        sky.set("sea", waterToggle.checked);
+        sky.set("seaHigh", waterHigh.value);
+        light();
+        changed("sea", false);
+    }
+
+    // --- Scenes ---
+
+    string path(const string &in name) { return "asset:" + name + ".json"; }
+
+    int sceneNow()
+    {
+        for (uint i = 0; i < scenes["scenes"].count; i++)
+            if (path(scenes["scenes"][i]["file"].text()) == file)
+                return int(i);
+        return 0;
+    }
+
+    void openLast()
+    {
+        int last = int(scenes["last"].number());
+        openScene(last >= 0 && last < int(scenes["scenes"].count) ? last : 0);
+    }
+
+    void openScene(int which)
+    {
+        Json@ one = scenes["scenes"][uint(which)];
+        file = path(one["file"].text("scene"));
+        sceneName = one["name"].text("Village");
+        Json j;
+        string error;
+        if (!j.parse(Assets::read(file), error))
+            Ui::toast(error);
+        read(j);
+        before.resize(0);
+        after.resize(0);
+        now = write().write(true);
+        dirty = false;
+        select(-1);
+    }
+
+    void keepScenes(int last)
+    {
+        scenes.set("last", last);
+        Assets::write("asset:scenes.json", scenes.write());
+    }
+
+    int wantScene = -1;
+    void goTo(int which)
+    {
+        wantScene = which;
+        if (dirty)
+            Ui::dialog("Not saved", sceneName + " has changed since it was saved.", array<string> = { "Save", "Don't save", "Stay" }, WidgetAnswer(this.onLeave));
+        else
+            onLeave(1);
+    }
+    void onLeave(int answer)
+    {
+        if (answer < 0 || answer == 2)
+            return;
+        if (answer == 0)
+            onSave(null);
+        if (popup !is null)
+            popup.close();
+        @popup = null;
+        openScene(wantScene);
+        keepScenes(wantScene);
+    }
+
+    void onScenes(Widget@ w)
+    {
+        @popup = Ui::popup();
+        popup.label("Scenes", "heading");
+        Widget@ all = popup.scroll(6);
+        all.height = 250;
+        all.width = 380;
+        int here = sceneNow();
+        for (uint i = 0; i < scenes["scenes"].count; i++)
+        {
+            Widget@ b = all.button(scenes["scenes"][i]["name"].text() + (int(i) == here ? "  (open)" : ""), WidgetEvent(this.onScene));
+            b.tag = int(i);
+        }
+        Widget@ row = popup.row(8);
+        row.button("New", WidgetEvent(this.onNew)).grow = 1;
+        row.button("Copy", WidgetEvent(this.onCopyScene)).grow = 1;
+        Widget@ other = popup.row(8);
+        other.button("Rename", WidgetEvent(this.onRename)).grow = 1;
+        other.button("Delete", WidgetEvent(this.onDeleteScene)).grow = 1;
+        popup.button("Close", WidgetEvent(this.onClosePopup));
+    }
+    void onClosePopup(Widget@ w) { if (popup !is null) popup.close(); @popup = null; }
+    void onScene(Widget@ w) { goTo(w.tag); }
+
+    int naming = 0;   // 0 a new one, 1 a copy, 2 another name
+    Widget@ nameField;
+    void askName(int what, const string &in text)
+    {
+        naming = what;
+        onClosePopup(null);
+        @popup = Ui::popup();
+        popup.label(what == 0 ? "A new scene" : what == 1 ? "A copy" : "Another name", "heading");
+        @nameField = popup.field(text, "Its name");
+        nameField.width = 340;
+        Widget@ row = popup.row(8);
+        row.button("All right", WidgetEvent(this.onNamed)).grow = 1;
+        row.button("Cancel", WidgetEvent(this.onClosePopup)).grow = 1;
+    }
+    void onNew(Widget@ w)
+    {
+        if (dirty)
+        {
+            Ui::toast("Save this one first");
+            return;
+        }
+        askName(0, "Scene " + (scenes["scenes"].count + 1));
+    }
+    void onCopyScene(Widget@ w) { askName(1, sceneName + " 2"); }
+    void onRename(Widget@ w) { askName(2, sceneName); }
+
+    void onNamed(Widget@ w)
+    {
+        string name = nameField.text;
+        if (name.length() > 30)
+            name = name.substr(0, 30);
+        if (name == "")
+            return;
+        onClosePopup(null);
+        if (naming == 2)
+        {
+            scenes["scenes"][uint(sceneNow())].set("name", name);
+            sceneName = name;
+            keepScenes(sceneNow());
+            show();
+            return;
+        }
+        if (scenes["scenes"].count >= 12)
+        {
+            Ui::toast("That is enough scenes");
+            return;
+        }
+        // The first number that no other has.
+        string named;
+        for (int n = 2; named == ""; n++)
+        {
+            named = "scene" + n;
+            for (uint i = 0; i < scenes["scenes"].count; i++)
+                if (scenes["scenes"][i]["file"].text() == named)
+                    named = "";
+        }
+        Json fresh, one;
+        if (naming == 0)
+        {
+            fresh.set("ground", 1);
+            fresh.set("hour", 0);
+        }
+        else
+            fresh.copy(write());
+        if (!Assets::write(path(named), fresh.write()))
+        {
+            Ui::toast("It couldn't be made");
+            return;
+        }
+        one.set("name", name);
+        one.set("file", named);
+        scenes["scenes"].add(one);
+        int last = int(scenes["scenes"].count) - 1;
+        openScene(last);
+        keepScenes(last);
+        Ui::toast(name);
+    }
+
+    void onDeleteScene(Widget@ w)
+    {
+        if (scenes["scenes"].count < 2)
+        {
+            Ui::toast("There must be one");
+            return;
+        }
+        Ui::dialog("Delete", "Delete " + sceneName + "? This can't be undone.", array<string> = { "Delete", "Keep" }, WidgetAnswer(this.deleteScene));
+    }
+    void deleteScene(int answer)
+    {
+        if (answer != 0)
+            return;
+        onClosePopup(null);
+        Assets::forget(file);
+        scenes["scenes"].remove(uint(sceneNow()));
+        openScene(0);
+        keepScenes(0);
+    }
+
+    // --- Roads ---
+
+    void readRoads(Json@ all)
+    {
+        for (uint i = 0; i < roads.length(); i++)
+            if (roads[i].entity !is null)
+                roads[i].entity.destroy();
+        roads.resize(0);
+        for (uint i = 0; i < all.count && i < 8; i++)
+        {
+            Road@ r = Road();
+            r.width = clamp(float(all[i]["width"].number(7)), 2, 20);
+            r.closed = all[i]["closed"].flag(true);
+            for (uint k = 0; k < all[i]["points"].count && k < 64; k++)
+                r.points.insertLast(all[i]["points"][k].vec3());
+            roads.insertLast(r);
+        }
+        if (road >= int(roads.length()))
+            road = int(roads.length()) - 1;
+    }
+
+    // Lies on the land as it is now.
+    void makeRoad(Road@ r)
+    {
+        if (r.entity !is null)
+            r.entity.destroy();
+        @r.entity = null;
+        r.follow();
+        int n = int(r.path.length());
+        if (n < 2)
+            return;
+        Mesh@ m = Mesh();
+        array<float> offsets = { -0.5f, -0.46f, -0.2f, 0.2f, 0.46f, 0.5f };
+        array<Color> tints = { Color(0.8f, 0.25f, 0.22f), Color(0.23f, 0.24f, 0.26f), Color(0.23f, 0.24f, 0.26f), Color(0.23f, 0.24f, 0.26f), Color(0.23f, 0.24f, 0.26f), Color(0.8f, 0.25f, 0.22f) };
+        int rows = r.closed && r.points.length() > 2 ? n + 1 : n;
+        for (int i = 0; i < rows; i++)
+        {
+            Vec3 at = r.at(i), side = r.side(i);
+            for (uint k = 0; k < 6; k++)
+            {
+                Vec3 p = at + side * (offsets[k] * r.width);
+                float y = Space::height(p.x, p.z);
+                p.y = (y < -1000 ? at.y : y) + 0.09f;
+                bool kerb = k == 0 || k == 5;
+                m.vertex(p, Vec3(0, 1, 0), kerb && (i / 2) % 2 == 0 ? Color(0.92f, 0.92f, 0.9f) : kerb ? tints[k] : tints[k]);
+            }
+        }
+        for (int i = 0; i + 1 < rows; i++)
+            for (uint k = 0; k < 5; k++)
+            {
+                uint a = uint(i) * 6 + k, b = a + 1, c = a + 6, d = a + 7;
+                m.triangle(a, d, b);
+                m.triangle(a, c, d);
+            }
+        @r.entity = Space::spawn(Vec3());
+        r.entity.mesh(m);
+        r.entity.twoSided = true;
+        r.entity.shadow = false;
+    }
+
+    Road@ roadNow() { return road >= 0 && road < int(roads.length()) ? roads[uint(road)] : null; }
+
+    void showRoad()
+    {
+        Road@ r = roadNow();
+        roadLabel.text = r is null ? "No road yet" : "Road " + (road + 1) + " of " + roads.length() + ": " + r.points.length() + " points";
+        roadClosed.checked = r is null || r.closed;
+        roadWidth.value = r is null ? 7.0f : r.width;
+    }
+
+    void onRoadNew(Widget@ w)
+    {
+        if (roads.length() >= 8)
+        {
+            Ui::toast("That is enough roads");
+            return;
+        }
+        roads.insertLast(Road());
+        road = int(roads.length()) - 1;
+        showRoad();
+    }
+    void onRoadNext(Widget@ w)
+    {
+        road = roads.length() > 0 ? (road + 1) % int(roads.length()) : -1;
+        showRoad();
+    }
+    void onRoad(Widget@ w)
+    {
+        Road@ r = roadNow();
+        if (r is null)
+            return;
+        r.closed = roadClosed.checked;
+        r.width = roadWidth.value;
+        makeRoad(r);
+        changed("road", false);
+    }
+    void onRoadBack(Widget@ w)
+    {
+        Road@ r = roadNow();
+        if (r is null || r.points.length() == 0)
+            return;
+        r.points.removeLast();
+        makeRoad(r);
+        changed("road");
+    }
+    void onRoadDelete(Widget@ w)
+    {
+        Road@ r = roadNow();
+        if (r is null)
+            return;
+        if (r.entity !is null)
+            r.entity.destroy();
+        roads.removeAt(uint(road));
+        road = int(roads.length()) - 1;
+        changed("road");
+    }
+
+    // The land under it is brought to its height, which is smooth.
+    void onRoadLand(Widget@ w)
+    {
+        Road@ r = roadNow();
+        if (r is null || r.path.length() < 2)
+            return;
+        int n = int(r.path.length());
+        array<float> heights(n), wanted(n);
+        for (int i = 0; i < n; i++)
+            heights[uint(i)] = Space::height(r.path[uint(i)].x, r.path[uint(i)].z);
+        for (int i = 0; i < n; i++)
+        {
+            float sum = 0, count = 0;
+            for (int k = -8; k <= 8; k++)
+            {
+                int at = r.closed ? ((i + k) % n + n) % n : i + k < 0 ? 0 : i + k >= n ? n - 1 : i + k;
+                if (heights[uint(at)] > -1000)
+                {
+                    sum += heights[uint(at)];
+                    count += 1;
+                }
+            }
+            wanted[uint(i)] = count > 0 ? sum / count : 0;
+        }
+        for (int i = 0; i < n; i++)
+            Space::level(r.path[uint(i)].x, r.path[uint(i)].z, r.width * 0.95f + 2, wanted[uint(i)], 0.9f);
+        landText = Space::landEdits;
+        place();
+        for (uint i = 0; i < roads.length(); i++)
+            makeRoad(roads[i]);
+        changed("land");
+    }
+
+    void addPoint(const Vec3 &in p)
+    {
+        if (roadNow() is null)
+            onRoadNew(null);
+        Road@ r = roadNow();
+        if (r is null || r.points.length() >= 64)
+        {
+            Ui::toast("That is enough points");
+            return;
+        }
+        r.points.insertLast(Vec3(floor(p.x * 2 + 0.5f) * 0.5f, 0, floor(p.z * 2 + 0.5f) * 0.5f));
+        makeRoad(r);
+        changed("road");
+        hop.play(0.15f, 0, 1.6f);
     }
 
     // --- Undoing ---
@@ -730,6 +1602,7 @@ class EditorScreen : Screen
     // Once for each change. What goes on changing, such as a slider, is one.
     void changed(const string &in key, bool apart = true)
     {
+        closeEnds();
         string text = write().write(true);
         if (text == now)
         {
@@ -807,7 +1680,10 @@ class EditorScreen : Screen
         if (!onGround(eye, ahead, p) || (p - eye).length() > 40)
             p = eye + Vec3(ahead.x, 0, ahead.z).normalized() * 14;
         Json j;
-        if (k.key == "model")
+        bool built = k.key == "model" || k.key == "moving" || k.key == "lift";
+        bool cave = k.group == "Caves";
+        float y = built ? 0.0f : k.key == "own" ? -k.low.y * k.size : k.key == "shape" ? -k.low.y : 1.5f;
+        if (built)
             j.set("model", "global:model/" + k.name + ".glb");
         else if (k.key == "own")
         {
@@ -820,6 +1696,20 @@ class EditorScreen : Screen
             j.set("shape", k.name);
             j.set("color", Color(0.97f, 0.62f, 0.2f));
         }
+        else if (k.key == "water")
+        {
+            j.set("shape", "box");
+            j.set("name", "water");
+            j.set("size", Vec3(8, 1, 8));
+            j.set("color", Color(0.16f, 0.45f, 0.6f, 0.65f));
+            j.set("shine", 0.8f);
+            y = -0.3f;
+        }
+        else if (k.key == "sound")
+        {
+            j.set("sound", k.name);
+            j.set("reach", 14);
+        }
         else
         {
             j.set("glow", 1.2f);
@@ -827,12 +1717,126 @@ class EditorScreen : Screen
             j.set("light", Color(1, 0.75f, 0.45f));
             j.set("range", 9);
         }
-        j.set("place", snapped(Vec3(p.x, k.key == "model" ? 0.0f : k.key == "own" ? -k.low.y * k.size : k.key == "shape" ? -k.low.y : 1.5f, p.z)));
+        if (k.key == "moving" || k.key == "lift")
+        {
+            j.set("moves", k.key == "lift" ? Vec3(0, 6, 0) : Vec3(8, 0, 0));
+            j.set("seconds", 6);
+            y = 1;
+        }
+        if (k.collider > 0)
+            setCollider(j, k.collider);
+        if (cave)
+        {
+            Vec3 at, turned;
+            if (!join(k, at, turned))
+            {
+                at = Vec3(floor(p.x / 4 + 0.5f) * 4, 0, floor(p.z / 4 + 0.5f) * 4);
+                at.y = floor(Space::height(at.x, at.z) * 4) * 0.25f;
+            }
+            j.set("place", at);
+            j.set("angles", turned);
+            things.insertLast(Thing(j));
+            make(things.length() - 1);
+            select(int(things.length()) - 1);
+            if (isMouth(k))
+                openMouth(at, turned.y);
+            else
+                cover(k, at, turned.y);
+            changed("add");
+            return;
+        }
+        j.set("place", snapped(Vec3(p.x, y, p.z)));
         j.set("onLand", true);
         things.insertLast(Thing(j));
         make(things.length() - 1);
         select(int(things.length()) - 1);
         changed("add");
+    }
+
+    // Where the next piece goes: on from the first way out of the chosen one that nothing is on.
+    bool join(Kind@ k, Vec3 &out at, Vec3 &out turned)
+    {
+        if (chosen < 0)
+            return false;
+        Kind@ from = kindOf(things[uint(chosen)].json);
+        if (from.group != "Caves")
+            return false;
+        Thing@ t = things[uint(chosen)];
+        Vec3 base = worldPlace(t.json), a = angles(t.json);
+        for (uint i = 0; i < from.exits.length(); i++)
+        {
+            Vec3 local = from.exits[i].place;
+            Vec3 out_ = base + spun(local, a.y);
+            // A way down is gone into from the land.
+            if (i == 0 && isMouth(from))
+                continue;
+            bool taken = false;
+            for (uint n = 0; n < things.length() && !taken; n++)
+            {
+                if (int(n) == chosen)
+                    continue;
+                Kind@ o = kindOf(things[n].json);
+                for (uint e = 0; e < o.exits.length(); e++)
+                    taken = taken || (worldPlace(things[n].json) + spun(o.exits[e].place, angles(things[n].json).y) - out_).length() < 0.6f;
+            }
+            if (taken)
+                continue;
+            Vec3 way_ = spun(Vec3(local.x, 0, local.z).normalized(), a.y);
+            // Its own way in is towards z.
+            turned = Vec3(0, wrapped(floor(atan2(-way_.x, -way_.z) * 57.29578f + 0.5f)), 0);
+            at = out_ - spun(k.exits[0].place, turned.y);
+            at = Vec3(floor(at.x * 4 + 0.5f) * 0.25f, floor(at.y * 4 + 0.5f) * 0.25f, floor(at.z * 4 + 0.5f) * 0.25f);
+            return true;
+        }
+        return false;
+    }
+
+    Vec3 spun(const Vec3 &in v, float degrees)
+    {
+        float a = degrees * 0.0174533f;
+        return Vec3(v.x * cos(a) + v.z * sin(a), v.y, v.z * cos(a) - v.x * sin(a));
+    }
+
+    // Lets the land be gone under there.
+    void openMouth(const Vec3 &in at, float turned)
+    {
+        for (int i = -2; i <= 1; i++)
+        {
+            Vec3 p = at + spun(Vec3(0, 0, i * 3), turned);
+            Space::level(p.x, p.z, 9, at.y, 1);
+        }
+        for (int i = 0; i <= 1; i++)
+        {
+            Vec3 p = at + spun(Vec3(0, 0, i * 2), turned);
+            Space::hole(p.x, p.z, 1.5f, true);
+        }
+        Vec3 front = at + spun(Vec3(0, 0, 6), turned);
+        Space::level(front.x, front.z, 6, at.y, 0.9f);
+        landText = Space::landEdits;
+    }
+
+    // Banks the land up where it would come through a roof.
+    void cover(Kind@ k, const Vec3 &in at, float turned)
+    {
+        bool did = false;
+        for (float x = k.low.x; x <= k.high.x + 0.1f; x += (k.high.x - k.low.x) / 4)
+            for (float z = k.low.z; z <= k.high.z + 0.1f; z += (k.high.z - k.low.z) / 4)
+            {
+                Vec3 p = at + spun(Vec3(x, 0, z), turned);
+                float roof = at.y + k.high.y + 0.5f - (k.name.findFirst("cave-slope") >= 0 ? clamp((4 - z) / 8, 0, 1) * 5 : 0.0f);
+                float y = Space::height(p.x, p.z);
+                // Not one that stands on the land.
+                if (y > at.y && y < roof)
+                {
+                    Space::level(p.x, p.z, 5, roof + 0.3f, 1);
+                    did = true;
+                }
+            }
+        if (did)
+        {
+            landText = Space::landEdits;
+            place();
+        }
     }
 
     void copy()
@@ -865,9 +1869,245 @@ class EditorScreen : Screen
         for (uint i = 0; i < thrown.length(); i++)
             thrown[i].destroy();
         thrown.resize(0);
+        if (hero !is null)
+            hero.destroy();
+        if (ship !is null)
+            ship.destroy();
+        @hero = null;
+        @ship = null;
         for (uint i = 0; i < things.length(); i++)
             make(i);
         shownFor = 0;
+        if (on && way < 2)
+            enterPlay();
+    }
+
+    // --- Walking and driving ---
+
+    Entity@ hero;
+    Entity@ ship;              // what is seen of the one that is driven: it hovers, and lies as the land does
+    Vec3 shipUp(0, 1, 0);
+    float bank = 0;
+    float heroYaw = 0, speed = 0, lap = 0, best = 0, sinceThrow = 0;
+    int nextMark = 0;
+    Vec3 safe;
+    bool racing = false;
+
+    void enterPlay()
+    {
+        Vec3 p, ahead = look();
+        if (!onGround(eye, ahead, p) || (p - eye).length() > 60)
+        {
+            p = eye + Vec3(ahead.x, 0, ahead.z).normalized() * 4;
+            float y = Space::height(p.x, p.z);
+            p.y = y > -1000 ? y : eye.y;
+        }
+        heroYaw = yaw;
+        racing = false;
+        lap = 0;
+        best = 0;
+        nextMark = 1;
+        speed = 0;
+        for (uint i = 0; i < roads.length() && way == 1 && !racing; i++)
+        {
+            Road@ r = roads[i];
+            if (r.path.length() < 8)
+                continue;
+            road = int(i);
+            p = r.path[0];
+            p.y = Space::height(p.x, p.z);
+            Vec3 d = r.at(1) - r.at(0);
+            heroYaw = atan2(d.x, -d.z) * 57.29578f;
+            racing = true;
+        }
+        safe = p + Vec3(0, 0.4f, 0);
+        @hero = Space::spawn(safe);
+        if (way == 1)
+        {
+            @ship = Space::spawn(safe);
+            ship.model(carModel);
+            ship.shine = 0.4f;
+            ship.size = Vec3(0.75f, 0.75f, 0.75f);
+            shipUp = Vec3(0, 1, 0);
+        }
+        else
+            hero.model(heroModel);
+        hero.capsule(way == 1 ? 0.75f : 0.35f, 1.6f, 1);
+        hero.colliderAt = Vec3(0, 0.8f, 0);
+        hero.walker = true;
+        hero.mass = way == 1 ? 200 : 60;
+        hero.angles = Vec3(0, 180 - heroYaw, 0);
+        yaw = heroYaw;
+        pitch = -14;
+    }
+
+    // How high the water is there, or far below.
+    float waterAt(const Vec3 &in p)
+    {
+        float y = waterToggle.checked ? waterHigh.value : -1000.0f;
+        for (uint i = 0; i < things.length(); i++)
+        {
+            Json@ j = things[i].json;
+            if (j["name"].text() != "water")
+                continue;
+            Vec3 d = spun(p - worldPlace(j), -angles(j).y), s = sizes(j);
+            float top = s.y * 0.5f;
+            if (abs(d.x) < s.x * 0.5f && abs(d.z) < s.z * 0.5f && d.y < top + 0.5f && d.y > -top - 3 && worldPlace(j).y + top > y)
+                y = worldPlace(j).y + top;
+        }
+        return y;
+    }
+
+    void playOne(float dt)
+    {
+        sinceThrow += dt;
+        Vec2 stick = Input::move;
+        Vec3 m = hero.motion;
+        Vec3 p = hero.place;
+        float water = waterAt(p);
+        bool swimming = p.y < water - 1;
+        if (way == 1)
+        {
+            Vec2 triggers = Input::padTriggers(0);
+            float go = clamp(triggers.y - triggers.x - stick.y, -1, 1);
+            bool offRoad = false;
+            Road@ r = racing ? roadNow() : null;
+            int at = 0;
+            if (r !is null)
+                offRoad = r.distance(p, at) > r.width * 0.55f;
+            float most = swimming ? 4.0f : offRoad ? 12.0f : 26.0f;
+            speed += (go > 0 ? go * 13 : go * (speed > 0 ? 26 : 8)) * dt;
+            speed -= speed * (go == 0 ? 0.7f : 0.15f) * dt;
+            if (speed > most)
+                speed -= (speed - most) * clamp(3 * dt, 0, 1);
+            speed = clamp(speed, -7, 30);
+            // Walls stop it.
+            float really = Vec3(m.x, 0, m.z).length();
+            if (abs(speed) > 4 && really < abs(speed) * 0.5f && shownFor > 0.6f)
+                speed *= 0.7f;
+            heroYaw += stick.x * clamp(speed * 0.14f, -1, 1) * (speed > 14 ? 75 : 105) * dt;
+            float a = heroYaw * 0.0174533f;
+            Vec3 ahead(sin(a), 0, -cos(a));
+            float grip = clamp((hero.onGround ? 7 : 1) * dt, 0, 1);
+            m.x += (ahead.x * speed - m.x) * grip;
+            m.z += (ahead.z * speed - m.z) * grip;
+            float turn_ = stick.x * clamp(speed * 0.1f, -1, 1);
+            bank += (turn_ - bank) * clamp(6 * dt, 0, 1);
+            yaw += wrapAngle(heroYaw - yaw) * clamp(4 * dt, 0, 1);
+            if (r !is null)
+                race(r, at, dt);
+        }
+        else
+        {
+            float a = yaw * 0.0174533f;
+            Vec3 ahead(sin(a), 0, -cos(a)), side(cos(a), 0, sin(a));
+            Vec3 wanted = (side * stick.x - ahead * stick.y) * 6;
+            float grip = clamp((hero.onGround ? 12 : 3) * dt, 0, 1);
+            m.x += (wanted.x - m.x) * grip;
+            m.z += (wanted.z - m.z) * grip;
+            if (swimming)
+            {
+                m.y += (clamp((water - 1.1f - p.y) * 3, -1, 2.5f) - m.y) * clamp(8 * dt, 0, 1);
+                m.x *= 0.96f;
+                m.z *= 0.96f;
+            }
+            if (Input::pressed("accept") && (hero.onGround || swimming))
+            {
+                m.y = 6.4f;
+                hop.play(0.35f);
+            }
+            float going = Vec3(m.x, 0, m.z).length();
+            if (wanted.length() > 0.3f)
+                hero.face(wanted, clamp(12 * dt, 0, 1));
+            hero.animate(!hero.onGround && !swimming && abs(m.y) > 1.5f ? "jump" : going > 4 ? "run" : going > 0.5f || swimming ? "walk" : "idle");
+            hero.animationSpeed = going > 4 ? going / 6 : going > 0.5f ? going / 2.4f : 1;
+            if ((Input::padTriggers(0).y > 0.6f || (Input::mouseDown(0) && Input::hasMouse)) && sinceThrow > 0.4f)
+            {
+                sinceThrow = 0;
+                throwBall();
+            }
+        }
+        hero.motion = m;
+        if (ship !is null)
+            float_(dt);
+        if (p.y < -60)
+        {
+            hero.place = safe;
+            hero.motion = Vec3();
+            speed = 0;
+        }
+        // Behind it, and not through anything.
+        Vec3 from = hero.place + Vec3(0, 1.5f, 0);
+        float away = way == 1 ? 7.5f : 4.6f;
+        Vec3 wantedEye = from - look() * away + Vec3(0, way == 1 ? 1.2f : 0.4f, 0);
+        Vec3 hit, normal;
+        if (Space::raycast(from, wantedEye, hit, normal, 0xFFFD))
+            wantedEye = hit + normal * 0.2f;
+        eye = wantedEye;
+        Space::camera(eye, from + look() * 4, 62);
+    }
+
+    // Higher than the land under any of it, and tipped as the land is.
+    void float_(float dt)
+    {
+        Vec3 base = hero.place;
+        float a = heroYaw * 0.0174533f;
+        Vec3 ahead(sin(a), 0, -cos(a)), side(cos(a), 0, sin(a));
+        float nose = under_(base + ahead * 1.5f), tail = under_(base - ahead * 1.5f), right = under_(base + side * 1.3f), left_ = under_(base - side * 1.3f);
+        Vec3 up(0, 1, 0);
+        if (hero.onGround)
+            up = (Vec3(0, 1, 0) - ahead * ((nose - tail) / 3) - side * ((right - left_) / 2.6f)).normalized();
+        shipUp = (shipUp + (up - shipUp) * clamp(9 * dt, 0, 1)).normalized();
+        float highest = base.y;
+        array<float> all = { (nose + tail) * 0.5f, (right + left_) * 0.5f };
+        for (uint i = 0; i < all.length() && hero.onGround; i++)
+            highest = all[i] > highest ? all[i] : highest;
+        float y = highest + 0.6f + sin(App::time * 3) * 0.05f;
+        Vec3 was = ship.place;
+        // Where it is at once, but gently up and down.
+        float gentle = was.y + (y - was.y) * clamp(14 * dt, 0, 1);
+        ship.place = Vec3(base.x, abs(y - was.y) > 3 ? y : gentle, base.z);
+        float pitch_ = -atan2(-(shipUp.x * ahead.x + shipUp.z * ahead.z), shipUp.y) * 57.29578f;
+        // Its own right is the other way, as it faces along z.
+        float roll_ = atan2(shipUp.x * side.x + shipUp.z * side.z, shipUp.y) * 57.29578f + bank * 22;
+        ship.angles = Vec3(pitch_, 180 - heroYaw, roll_);
+    }
+
+    // What is under a place, near the height of the one that drives.
+    float under_(const Vec3 &in p)
+    {
+        Vec3 hit, normal;
+        if (Space::raycast(p + Vec3(0, 1.8f, 0), p - Vec3(0, 2.5f, 0), hit, normal, 0xFFFD))
+            return hit.y;
+        return p.y;
+    }
+
+    float wrapAngle(float a)
+    {
+        a = wrapped(a);
+        return a > 180 ? a - 360 : a;
+    }
+
+    // Four marks, in order, and then the line.
+    void race(Road@ r, int at, float dt)
+    {
+        lap += dt;
+        int n = int(r.path.length());
+        int mark = nextMark * n / 4;
+        bool last = nextMark == 4;
+        int gap = last ? (at < n / 8 ? 0 : n) : at >= mark && at < mark + n / 8 ? 0 : n;
+        if (!r.closed && last)
+            gap = at >= n - 3 ? 0 : n;
+        if (gap != 0)
+            return;
+        nextMark++;
+        if (last)
+        {
+            best = best == 0 || lap < best ? lap : best;
+            Ui::toast("Lap: " + formatFloat(lap, "", 0, 2) + " s");
+            lap = 0;
+            nextMark = 1;
+        }
     }
 
     void throwBall()
@@ -877,7 +2117,7 @@ class EditorScreen : Screen
             thrown[0].destroy();
             thrown.removeAt(0);
         }
-        Entity@ e = Space::spawn(eye + look() * 1.5f);
+        Entity@ e = Space::spawn(hero !is null ? hero.place + Vec3(0, 1.4f, 0) + look() : eye + look() * 1.5f);
         e.shape(SolidSphere, colors[2 + thrown.length() % 8]);
         e.size = Vec3(0.7f, 0.7f, 0.7f);
         e.sphere(0.35f, 0, 0);
@@ -941,10 +2181,15 @@ class EditorScreen : Screen
     {
         Vec3 ahead = look();
         Vec3 right = ahead.cross(Vec3(0, 1, 0)).normalized();
+        float was = Space::height(eye.x, eye.z);
+        // Through a hole it can go under, and then look about there.
+        bool above = eye.y >= was;
         eye += (right * move.x - ahead * move.y + Vec3(0, up, 0)) * (dt * 12);
-        eye = Vec3(clamp(eye.x, -110, 110), clamp(eye.y, -2, 60), clamp(eye.z, -110, 110));
+        float half = Space::landSize * 0.5f + 20;
+        eye = Vec3(clamp(eye.x, -half, half), clamp(eye.y, -60, 90), clamp(eye.z, -half, half));
         float least = Space::height(eye.x, eye.z) + 0.6f;
-        eye.y = eye.y < least ? least : eye.y;
+        if (above && eye.y < least)
+            eye.y = least;
     }
 
     void turnBy(float x, float y)
@@ -974,16 +2219,18 @@ class EditorScreen : Screen
         bool wasFlying = flying;
         flying = right && (wasFlying || move.x != 0 || move.y != 0);
         bool free = viewing || playing;
+        if (hero !is null)
+            free = false;
         if (free || flying)
             fly(move, free ? triggers.y - triggers.x : 0.0f, dt);
-        if (!Ui::busy && overView(mouse) && Input::wheel != 0)
+        if (!Ui::busy && hero is null && overView(mouse) && Input::wheel != 0)
             eye += look() * (Input::wheel * 1.5f);
         if (Input::mouseDown(2) && Input::hasMouse && !Ui::busy)
         {
             Vec3 side = look().cross(Vec3(0, 1, 0)).normalized();
             eye += side * (-moved.x * 0.03f) + Vec3(0, moved.y * 0.03f, 0);
         }
-        bool panels = !free && !flying;
+        bool panels = !free && !flying && !playing;
         if (Ui::root.visible && !panels)
             @last = Ui::focused;
         if (panels && !Ui::root.visible)
@@ -995,6 +2242,13 @@ class EditorScreen : Screen
         Ui::root.visible = panels;
         Space::camera(eye, eye + look(), 60);
 
+        if (playing && hero !is null)
+        {
+            playOne(dt);
+            if (Input::pressed("cancel") || Input::pressed("alternate"))
+                play(false);
+            return;
+        }
         if (playing)
         {
             if (Input::pressed("accept"))
@@ -1057,6 +2311,20 @@ class EditorScreen : Screen
     void inView(float dt)
     {
         Vec3 ahead = look();
+        if (roading)
+        {
+            if (Input::pressed("alternate") || tapped(5, "Tab"))
+            {
+                enterView(false);
+                return;
+            }
+            aim(ahead);
+            if (Input::pressed("accept") && hasSpot)
+                addPoint(spot);
+            if (Input::pressed("cancel"))
+                onRoadBack(null);
+            return;
+        }
         if (sculpting)
         {
             if (Input::pressed("alternate") || tapped(5, "Tab"))
@@ -1069,7 +2337,7 @@ class EditorScreen : Screen
             if (Input::pressed("cancel") || sooner || later)
             {
                 endStroke();
-                brush = (brush + (sooner ? 5 : 1)) % 6;
+                brush = (brush + (sooner ? brushes.length() - 1 : 1)) % brushes.length();
                 brushChoice.chosen = brush;
             }
             aim(ahead);
@@ -1171,6 +2439,8 @@ class EditorScreen : Screen
             Space::smooth(spot.x, spot.z, brushSize, clamp(s * dt * 25, 0, 1));
         else if (brush == 3)
             Space::level(spot.x, spot.z, brushSize, levelTo, clamp(s * dt * 8, 0, 1));
+        else if (brush >= 6)
+            Space::hole(spot.x, spot.z, brushSize * 0.5f, brush == 6);
         else
             Space::paint(spot.x, spot.z, brushSize, brush == 4 ? brushColor : Color(0, 0, 0, 0), clamp(s * dt * 10, 0, 1));
         // What is near goes with it.
@@ -1189,6 +2459,8 @@ class EditorScreen : Screen
         stroking = false;
         landText = Space::landEdits;
         place();
+        for (uint i = 0; i < roads.length(); i++)
+            makeRoad(roads[i]);
         changed("land");
     }
 
@@ -1200,7 +2472,8 @@ class EditorScreen : Screen
         for (int i = 0; i <= 40; i++)
         {
             float a = i * 0.15708f;
-            float x = spot.x + cos(a) * brushSize, z = spot.z + sin(a) * brushSize;
+            float wideOf = roading ? (roadNow() is null ? 3.5f : roadNow().width * 0.5f) : brush >= 6 ? brushSize * 0.5f : brushSize;
+            float x = spot.x + cos(a) * wideOf, z = spot.z + sin(a) * wideOf;
             float y = Space::height(x, z);
             bool has = y > -1000 && Space::toScreen(Vec3(x, y + 0.1f, z), to);
             if (has && had)
@@ -1210,7 +2483,7 @@ class EditorScreen : Screen
         }
     }
 
-    bool overView(const Vec2 &in p) { return p.y > 82 && p.x > 264 && p.x < wide - 308; }
+    bool overView(const Vec2 &in p) { return p.y > 82 && p.x > 310 && p.x < wide - 308; }
     float wide = 1280;
 
     void withMouse(bool pressed, float dt)
@@ -1218,6 +2491,16 @@ class EditorScreen : Screen
         if (!Input::hasMouse)
         {
             hasSpot = false;
+            return;
+        }
+        if (roading)
+        {
+            hover = -1;
+            hasSpot = false;
+            if (overView(mouse))
+                aim(Space::ray(mouse));
+            if (pressed && hasSpot)
+                addPoint(spot);
             return;
         }
         if (sculpting)
@@ -1358,7 +2641,7 @@ class EditorScreen : Screen
         if (t.entity is null || !t.entity.alive)
             return;
         Kind@ k = kindOf(t.json);
-        bool glow = t.json.has("glow");
+        bool glow = t.json.has("glow") || t.json.has("sound");
         array<Vec2> at(8);
         for (uint i = 0; i < 8; i++)
         {
@@ -1416,12 +2699,28 @@ class EditorScreen : Screen
         Space::draw(c);
         if (!playing)
         {
-            if (sculpting && hasSpot)
+            if ((sculpting || roading) && hasSpot)
                 ring(c);
-            if (viewing && !sculpting && under >= 0 && under != chosen && under < int(things.length()))
+            if (viewing && !sculpting && !roading && under >= 0 && under != chosen && under < int(things.length()))
                 box(c, things[uint(under)], Color(1, 1, 1, 0.5f));
-            if (chosen >= 0 && !sculpting)
+            if (roading && roadNow() !is null)
+                for (uint i = 0; i < roadNow().points.length(); i++)
+                {
+                    Vec3 p = roadNow().points[i];
+                    Vec2 at;
+                    p.y = Space::height(p.x, p.z) + 0.2f;
+                    if (Space::toScreen(p, at))
+                        c.circle(at.x, at.y, 6, i == 0 ? Color(0.4f, 1, 0.5f) : Color(1, 0.9f, 0.4f));
+                }
+            if (chosen >= 0 && !sculpting && !roading)
             {
+                Json@ j = things[uint(chosen)].json;
+                Vec2 one, two;
+                if (j.has("moves") && Space::toScreen(worldPlace(j), one) && Space::toScreen(worldPlace(j) + j["moves"].vec3(), two))
+                {
+                    c.line(one.x, one.y, two.x, two.y, 2, Color(0.5f, 0.9f, 1, 0.8f));
+                    c.ring(two.x, two.y, 7, 2, Color(0.5f, 0.9f, 1));
+                }
                 box(c, things[uint(chosen)], Color(1, 0.75f, 0.25f, 0.9f));
                 if (!viewing)
                     handles(c);
@@ -1430,11 +2729,16 @@ class EditorScreen : Screen
         if (viewing || playing)
         {
             float x = wide * 0.5f;
+            if (hero is null)
+            {
             c.line(x - 11, 360, x - 4, 360, 2, Color(1, 1, 1, 0.8f));
             c.line(x + 4, 360, x + 11, 360, 2, Color(1, 1, 1, 0.8f));
             c.line(x, 349, x, 356, 2, Color(1, 1, 1, 0.8f));
             c.line(x, 364, x, 371, 2, Color(1, 1, 1, 0.8f));
-            string text = playing ? "Accept throws a ball      Cancel goes back to editing"
+            }
+            string text = playing && hero !is null ? (way == 1 ? (racing ? "Lap " + formatFloat(lap, "", 0, 1) + (best > 0 ? "      Best " + formatFloat(best, "", 0, 2) : "") + "      " : "") + "Cancel goes back to editing" : "Accept jumps      Right trigger throws a ball      Cancel goes back to editing")
+                : playing ? "Accept throws a ball      Cancel goes back to editing"
+                : roading ? "Accept adds a point      Cancel takes one back      Alternate brings the panels back"
                 : sculpting ? brushes[uint(brush)] + "      Hold Accept to change the land      Cancel or shoulders for another brush"
                 : carrying ? "Accept puts it down      Shoulders turn it      Cancel puts it back"
                 : "Accept takes what is in the middle      Alternate brings the panels back";

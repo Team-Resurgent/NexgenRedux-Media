@@ -3,6 +3,6 @@
   "description": "Build a place, try it and keep it",
   "category": "3D",
   "order": 199,
-  "demo": "wait:1.5 down:0.1 wait:0.2 down:0.1 wait:0.2 down:0.1 wait:0.3 accept wait:0.8 down:0.1 wait:0.2 down:0.1 wait:0.2 down:0.1 wait:0.3 accept wait:0.8 alternate wait:0.6 accept wait:0.2 left:0.5 wait:0.2 down:0.5 wait:0.3 accept wait:0.4 up:0.5 wait:0.2 alternate wait:0.6 up:1.5 wait:0.2 right wait:0.5 accept wait:0.6 right:0.2 wait:0.2 up:0.5 wait:0.3 accept wait:0.7 accept wait:0.7 accept wait:0.7 accept wait:1.5 cancel wait:1",
+  "demo": "wait:1.5 up:0.1 wait:0.2 right:0.05 wait:0.2 right:0.05 wait:0.2 right:0.05 wait:0.2 right:0.05 wait:0.2 down:0.1 wait:0.3 accept wait:0.6 down:0.1 wait:0.3 accept wait:0.6 down:0.1 wait:0.2 down:0.1 wait:0.2 down:0.1 wait:0.3 accept wait:1 alternate wait:0.4 up:1.2 wait:0.3 left:0.6 right:1.2 wait:0.3 alternate wait:2",
   "seconds": 24
 }
