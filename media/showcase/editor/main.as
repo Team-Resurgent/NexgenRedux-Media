@@ -2088,6 +2088,7 @@ class EditorScreen : Screen
             ship.destroy();
         if (gun !is null)
             gun.destroy();
+        Input::lockMouse(false);
         @hero = null;
         @ship = null;
         @gun = null;
@@ -2319,7 +2320,7 @@ class EditorScreen : Screen
             float a = yaw * 0.0174533f;
             Vec3 ahead = look(), right(cos(a), 0, sin(a));
             gun.place = eyes + ahead * 0.5f + right * 0.2f - Vec3(0, 0.17f, 0) + ahead * (sinceShot < 0.08f ? -0.06f : 0.0f);
-            gun.angles = Vec3(-pitch, -yaw, 0);
+            gun.angles = Vec3(pitch, -yaw, 0);
             return;
         }
         // Behind it, and not through anything.
@@ -2374,10 +2375,10 @@ class EditorScreen : Screen
     void shoot(Vec3 &out m, const Vec3 &in was, const Vec2 &in stick, float dt, bool swimming, float water)
     {
         m = was;
-        Vec2 moved = Input::mouse - lastMouse;
-        lastMouse = Input::mouse;
-        if (Input::hasMouse && shownFor > 0.3f && !Ui::busy)
-            turnBy(moved.x * 0.25f, -moved.y * 0.25f);
+        Vec2 moved = Input::mouseMove;
+        Input::lockMouse(!Ui::busy);
+        if (shownFor > 0.3f && !Ui::busy)
+            turnBy(moved.x * 0.2f, -moved.y * 0.2f);
         float a = yaw * 0.0174533f;
         Vec3 ahead(sin(a), 0, -cos(a)), side(cos(a), 0, sin(a));
         Vec3 wanted = (side * stick.x - ahead * stick.y) * 6.5f;
@@ -2405,7 +2406,7 @@ class EditorScreen : Screen
                 hit = from + along * 200;
             if (e !is null)
                 e.push(along * 9, hit);
-            shotFrom = gun.place + look() * 0.3f;
+            shotFrom = muzzle();
             shotTo = hit;
             shotNow = true;
             bang.play(0.3f, 0, random(0.9f, 1.1f));
@@ -2468,7 +2469,7 @@ class EditorScreen : Screen
         if (last)
         {
             best = best == 0 || lap < best ? lap : best;
-            Ui::toast("Lap: " + formatFloat(lap, "", 0, 2) + " s");
+            level.say("Lap: " + formatFloat(lap, "", 0, 2) + " s", 2.5f);
             lap = 0;
             nextMark = 1;
         }
@@ -2491,6 +2492,12 @@ class EditorScreen : Screen
         e.friction = 0.5f;
         e.motion = look() * 22;
         thrown.insertLast(e);
+    }
+
+    // The end of the gun's barrel, wherever it is pointing.
+    Vec3 muzzle()
+    {
+        return gun is null ? eye + look() : gun.place - gun.forward * 0.29f;
     }
 
     Vec3 look()
@@ -3111,6 +3118,7 @@ class EditorScreen : Screen
             if (way == 3 && sinceShot < 0.07f)
             {
                 Vec2 a_, b_;
+                shotFrom = muzzle();
                 if (Space::toScreen(shotFrom, a_) && Space::toScreen(shotTo, b_))
                     c.line(a_.x, a_.y, b_.x, b_.y, 2, Color(1, 0.9f, 0.5f, 0.8f));
                 Vec2 m_;

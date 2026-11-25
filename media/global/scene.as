@@ -197,6 +197,7 @@ class Level
 
     void clear()
     {
+        messageFor = 0;
         for (uint i = 0; i < made.length(); i++)
             if (made[i] !is null)
                 made[i].destroy();
