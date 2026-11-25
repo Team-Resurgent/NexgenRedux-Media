@@ -915,7 +915,9 @@ class EditorScreen : Screen
             j.set("exact", true);
         if (which == 0)
         {
+            // Kept, so that the kind's own isn't given it again.
             j.remove("mass");
+            j.set("wall", false);
             return;
         }
         if (which != 4 && middle.length() > 0.001f)
@@ -1093,9 +1095,15 @@ class EditorScreen : Screen
         {
             things.insertLast(Thing(list[i]));
             Json@ j = things[i].json;
-            // Those from before there were others.
-            if ((j["wall"].flag() || j["mass"].number() > 0) && colliderOf(j) == 0)
-                setCollider(j, j["shape"].text() == "sphere" ? 2 : 1);
+            // Those from before there were others, and those that never had one: what their kind has. "wall": false
+            // is one that was given none.
+            if (colliderOf(j) == 0 && (j["wall"].flag(true) || j["mass"].number() > 0))
+            {
+                Kind@ k = kindOf(j);
+                int which = k.collider > 0 ? k.collider : j["wall"].flag() || j["mass"].number() > 0 ? (j["shape"].text() == "sphere" ? 2 : 1) : 0;
+                if (which > 0 && !j.has("glow") && !j.has("sound") && j["name"].text() != "water")
+                    setCollider(j, which);
+            }
             make(i);
         }
         for (uint i = 0; i < roads.length(); i++)
