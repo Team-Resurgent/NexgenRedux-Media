@@ -3,6 +3,6 @@
   "description": "Everything the interface has, in three themes",
   "category": "Interface",
   "order": 116,
-  "demo": "wait:1 down wait:0.3 accept wait:0.5 down wait:0.3 right:0.5 wait:0.3 down wait:0.3 right wait:0.4 right wait:0.4 accept wait:0.7 down wait:0.3 accept wait:0.4 up:0.6 wait:0.2 right wait:0.4 accept wait:0.8 right wait:0.3 accept wait:0.8 down wait:0.4 accept wait:1.2 right wait:0.3 accept wait:0.6",
-  "seconds": 22
+  "demo": "wait:1 accept wait:0.4 down wait:0.2 accept wait:0.4 down wait:0.2 right:0.5 wait:0.3 down wait:0.2 right wait:0.5 up:1.5 wait:0.3 right wait:1.4 right wait:1.4 left wait:0.3 left wait:0.5 down wait:0.2 left:0.8 wait:0.2 up:0.9 wait:0.3 right wait:0.2 right wait:0.2 right wait:0.2 accept wait:0.6 down wait:0.3 accept wait:1.4 accept wait:0.5 right wait:0.3 accept wait:1.2 cancel wait:0.8",
+  "seconds": 23
 }

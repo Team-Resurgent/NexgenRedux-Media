@@ -1,0 +1,7 @@
+{
+  "title": "Transfer",
+  "description": "An original Xbox's drives, over FTP",
+  "category": "Network",
+  "order": 203,
+  "demo": "wait:1.5 accept wait:3 down wait:0.6 up wait:1.5 accept wait:1"
+}

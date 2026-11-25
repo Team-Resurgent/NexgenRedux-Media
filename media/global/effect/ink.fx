@@ -1,4 +1,5 @@
 // Outlines and flat colours, as if drawn.
+// xbox: ink
 float level(float2 uv)
 {
     return dot(picture(uv).rgb, float3(0.299, 0.587, 0.114));
