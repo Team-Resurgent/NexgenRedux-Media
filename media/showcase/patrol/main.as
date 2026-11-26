@@ -28,6 +28,21 @@ class PatrolScreen : Screen
     Texture@ stars = Assets::texture("asset:stars.png");
     Font@ font = Assets::font("global:freesans.sfn", 28);
     Font@ big = Assets::font("global:freesans.sfn", 70);
+    Sound@ laser = Assets::sound("global:sound/laser.wav");
+    Sound@ zap = Assets::sound("global:sound/zap.wav");
+    Sound@ hitSound = Assets::sound("global:sound/hit.wav");
+    Sound@ pop = Assets::sound("global:sound/pop.wav");
+    Sound@ boom = Assets::sound("global:sound/boom.wav");
+    Sound@ gate = Assets::sound("global:sound/gate.wav");
+    Sound@ lose = Assets::sound("global:sound/lose.wav");
+    Sound@ startSound = Assets::sound("global:sound/accept.wav");
+    Sound@ engine = Assets::sound("global:sound/engine.wav");
+    Voice hum;
+
+    // Left of the screen sounds from the left.
+    float pan(float x) { return clamp((x - 640) / 640, -1, 1) * 0.7f; }
+
+    void onEnter() { hum = engine.play(0, 0, 0.6f, true); }
 
     // Fixed pools: nothing is made or thrown away while playing.
     array<Drone> drones(24);
@@ -43,6 +58,7 @@ class PatrolScreen : Screen
 
     void start()
     {
+        startSound.play(0.6f);
         state = 1;
         score = 0;
         lives = 3;
@@ -58,6 +74,8 @@ class PatrolScreen : Screen
     void nextWave()
     {
         wave++;
+        if (wave > 1)
+            gate.play(0.5f);
         waiting = 5 + wave * 2;
         spawnIn = 1.2f;
         banner = 2;
@@ -129,6 +147,7 @@ class PatrolScreen : Screen
 
     void update(float dt)
     {
+        hum.fade(state == 1 ? 0.14f : 0.0f, 0.4f);
         t += dt;
         shake = clamp(shake - dt * 2, 0, 1);
         banner -= dt;
@@ -165,6 +184,7 @@ class PatrolScreen : Screen
             reload = 0.14f;
             shoot(px - 18, py - 20, 0, -760, true);
             shoot(px + 18, py - 20, 0, -760, true);
+            laser.play(0.35f, pan(px), random(0.94f, 1.06f));
         }
     }
 
@@ -194,6 +214,7 @@ class PatrolScreen : Screen
                 float dx = px - d.x, dy = py - d.y;
                 float l = sqrt(dx * dx + dy * dy) + 1;
                 shoot(d.x, d.y + 20, dx / l * 260, dy / l * 260, false);
+                zap.play(0.45f, pan(d.x));
             }
             if (d.y > 780)
                 d.alive = false;
@@ -239,9 +260,15 @@ class PatrolScreen : Screen
                     s.alive = false;
                     d.health--;
                     d.hurt = 1;
+                    if (d.health > 0)
+                        hitSound.play(0.35f, pan(d.x), 1.3f);
                     if (d.health <= 0)
                     {
                         d.alive = false;
+                        if (d.kind == 1)
+                            boom.play(0.6f, pan(d.x), 1.2f);
+                        else
+                            pop.play(0.6f, pan(d.x), random(0.85f, 1.15f));
                         score += d.kind == 1 ? 50 : 10;
                         burst(d.x, d.y, d.kind == 1 ? Purple : Green, 18);
                     }
@@ -256,11 +283,13 @@ class PatrolScreen : Screen
         lives--;
         safe = 2;
         shake = 1;
+        boom.play(0.9f, pan(px));
         burst(px, py, Yellow, 40);
         if (lives <= 0)
         {
             state = 2;
             best = score > best ? score : best;
+            lose.play(0.7f);
         }
     }
 
