@@ -120,6 +120,18 @@ class SkimScreen : Screen
         return y > Sea + 0.2f ? y : Sea + 0.2f;      // over water too
     }
 
+    // The highest ground under a skimmer pointing one way: its middle, nose, tail and wingtips.
+    float hull(const Vec3 &in p, const Vec3 &in ahead)
+    {
+        Vec3 side(-ahead.z, 0, ahead.x);
+        float y = level(p);
+        y = max(y, level(p + ahead * 2.2f));
+        y = max(y, level(p - ahead * 1.8f));
+        y = max(y, level(p + side * 1.9f));
+        y = max(y, level(p - side * 1.9f));
+        return y;
+    }
+
     float chance(int x, int z, int n)
     {
         float v = sin(float(x) * 12.9898f + float(z) * 78.233f + float(n) * 37.719f) * 43758.5453f;
@@ -247,15 +259,17 @@ class SkimScreen : Screen
         Vec3 flat(r.speed.x, 0, r.speed.z);
         // It slides a little before it goes where it points.
         flat = lerp(flat, ahead * top, clamp(dt * (clock > 0 ? 1.9f : 4.0f), 0, 1));
-        // On a cushion of air.
-        float under = level(r.at), aheadLevel = level(r.at + flat * 0.22f);
+        // On a cushion of air, over the highest ground under any part of it: nose, tail and both wings, so that
+        // neither sinks into a slope; and over what is coming.
+        float under = hull(r.at, ahead), aheadLevel = hull(r.at + flat * 0.25f, ahead);
         float wantedY = (under > aheadLevel ? under : aheadLevel) + 1.5f + sin(App::time * 2 + float(r.pad)) * 0.12f;
         r.climb += ((wantedY - r.at.y) * 26 - r.climb * 7) * dt;
         r.speed = Vec3(flat.x, r.climb, flat.z);
         r.at += r.speed * dt;
-        if (r.at.y < under + 0.5f)
+        under = hull(r.at, ahead);
+        if (r.at.y < under + 0.9f)
         {
-            r.at.y = under + 0.5f;
+            r.at.y = under + 0.9f;
             r.climb = r.climb < 0 ? 0.0f : r.climb;
         }
         // They keep apart.
