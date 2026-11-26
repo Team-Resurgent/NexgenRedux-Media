@@ -5,9 +5,12 @@
 //     ...each update: string out = level.update(dt, player);    // the way out that was gone through, if any
 //
 // A thing with a name can be found, shown, hidden and switched on and off. Triggers do what the editor says, and tell the
-// screen too, through onTouch. Ways out lead to another scene, to the arrival of a name there.
+// screen too, through onTouch. Ways out lead to another scene, to the arrival of a name there. Things with a role move by
+// themselves, as ai.as has it: they see, chase and catch whoever update() is given, and tell the screen through onAgent.
+#include "global:ai.as"
 
 funcdef void LevelTouch(const string &in name, Entity@ who);
+funcdef void LevelAgent(const string &in name, const string &in what);
 
 // A track: it goes through its points, and lies on the land.
 class Road
@@ -147,6 +150,9 @@ class Level
     array<string> valueNames, valueTexts;   // for the HUD
     array<float> valueNumbers;
     LevelTouch@ onTouch;
+    LevelAgent@ onAgent;
+    array<Agent@> agents;      // for each thing, or null
+    Crowd crowd;               // all of them
     string file;
     int ground = 1, across = 1, hour = 0;
     bool endless = false;
@@ -184,6 +190,7 @@ class Level
             j.copy(list[i]);
             things.insertLast(j);
             made.insertLast(null);
+            agents.insertLast(null);
             hidden.insertLast(j["hidden"].flag());
             on.insertLast(j["on"].flag(true));
             inside.insertLast(false);
@@ -193,6 +200,7 @@ class Level
             if (!endless)
                 spawn(i);
         closeEnds();
+        navigate();
     }
 
     void clear()
@@ -214,10 +222,12 @@ class Level
         roads.resize(0);
         caps.resize(0);
         changes.resize(0);
+        crowd.clear();
+        agents.resize(0);
     }
 
     // What only the editor and this file know of: the engine is given the rest.
-    array<string> own = { "trigger", "does", "target", "when", "once", "to", "arrive", "arrival", "hidden", "appear", "on", "pool", "message", "noise" };
+    array<string> own = { "trigger", "does", "target", "when", "once", "to", "arrive", "arrival", "hidden", "appear", "on", "pool", "message", "noise", "role", "route", "waypoint", "sight", "speed" };
 
     Entity@ spawn(uint i)
     {
@@ -225,7 +235,7 @@ class Level
         if (made[i] !is null && made[i].alive)
             return made[i];
         @made[i] = null;
-        if (hidden[i] || j.has("trigger") || j.has("arrival") || j.has("to"))
+        if (hidden[i] || j.has("trigger") || j.has("arrival") || j.has("to") || j.has("waypoint"))
             return null;
         Json plain;
         plain.copy(j);
@@ -234,7 +244,59 @@ class Level
         @made[i] = Space::make(plain);
         if (endless && made[i] !is null)
             made[i].streamed = true;
+        if (made[i] !is null && j.has("role"))
+            makeAgent(i);
         return made[i];
+    }
+
+    // Someone who moves by themselves: a role, its route of waypoints, how far it sees and how fast it walks.
+    void makeAgent(uint i)
+    {
+        Json@ j = things[i];
+        if (agents[i] !is null)
+            crowd.remove(agents[i]);
+        Agent@ a = crowd.add(made[i], j["role"].text("wander"));
+        a.sight = float(j["sight"].number(a.sight));
+        a.speed = float(j["speed"].number(a.speed));
+        a.runSpeed = a.speed * 2.1f;
+        a.sprite = j.has("sprite");
+        string route = j["route"].text();
+        for (uint k = 0; k < things.length() && route != ""; k++)
+            if (things[k]["waypoint"].text() == route)
+                a.route.insertLast(placeOf(things[k]));
+        @a.onEvent = AgentEvent(this.agentDid);
+        @agents[i] = a;
+    }
+
+    void agentDid(Agent@ a, const string &in what)
+    {
+        if (onAgent is null)
+            return;
+        for (uint i = 0; i < agents.length(); i++)
+            if (agents[i] is a)
+                onAgent(things[i]["name"].text(), what);
+    }
+
+    // Where things with a role can walk: over the land, or round what there is, as far as 256 squares go.
+    void navigate()
+    {
+        bool any = false;
+        Vec3 low(1e9f, 0, 1e9f), high(-1e9f, 0, -1e9f);
+        for (uint i = 0; i < things.length(); i++)
+        {
+            Vec3 p = placeOf(things[i]);
+            any = any || things[i].has("role");
+            low = Vec3(min(low.x, p.x), 0, min(low.z, p.z));
+            high = Vec3(max(high.x, p.x), 0, max(high.z, p.z));
+        }
+        if (!any)
+            return;
+        float size = max(high.x - low.x, high.z - low.z) + 40;
+        float land = Space::landSize;
+        size = land > 0 && !endless ? min(size, land) : size;
+        Vec3 middle = (low + high) * 0.5f;
+        middle.y = Space::height(middle.x, middle.z);
+        Space::navigate(middle, size, max(1.0f, size / 256), 0.6f);
     }
 
     // --- The land and the sky ---
@@ -568,6 +630,19 @@ class Level
         }
         if (endless)
             stream();
+        // Those that move by themselves look for whoever this is.
+        for (uint i = 0; i < agents.length(); i++)
+            if (agents[i] !is null)
+            {
+                if (made[i] is null || !made[i].alive)
+                {
+                    crowd.remove(agents[i]);
+                    @agents[i] = null;
+                }
+                else
+                    @agents[i].target = who;
+            }
+        crowd.update(dt);
         string goes;
         Vec3 at = who !is null && who.alive ? who.place + Vec3(0, 0.9f, 0) : Vec3(0, -9999, 0);
         for (uint i = 0; i < things.length(); i++)

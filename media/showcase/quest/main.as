@@ -215,9 +215,17 @@ class QuestScreen : Screen
         float away = 6.5f;
         Vec3 back(sin(yaw) * cos(lean), sin(lean), cos(yaw) * cos(lean));
         Vec3 from = look + back * away;
-        Vec3 hit, normal;
-        if (Space::raycast(look, look + back * (away + 0.4f), hit, normal, (1 << 0) | (1 << 2), hero))
-            from = look + back * clamp((hit - look).length() - 0.4f, 1, away);
+        // Kept clear of walls and eaves: along its line, and along lines a little to each side of it and above.
+        float reach = away;
+        for (int i = 0; i < 6; i++)
+        {
+            Vec3 up(0, 0.8f, 0);
+            Vec3 offset = i == 0 ? Vec3() : i == 1 ? side * 0.8f : i == 2 ? side * -0.8f : i == 3 ? up : i == 4 ? side * 0.8f + up : side * -0.8f + up;
+            Vec3 hit, normal;
+            if (Space::raycast(look + offset, look + offset + back * (away + 0.4f), hit, normal, 0xFFFD, hero))
+                reach = min(reach, (hit - look - offset).length() - 0.4f);
+        }
+        from = look + back * clamp(reach, 1, away);
         float least = Space::height(from.x, from.z) + 0.5f;
         from.y = from.y < least ? least : from.y;
         Space::camera(from, look + Vec3(0, 0.3f, 0), 62);

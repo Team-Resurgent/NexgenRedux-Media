@@ -90,6 +90,7 @@ class EditorScreen : Screen
         Kind("Logic", "Way out", "way", "", Vec3(-0.5f, 0, -0.5f), Vec3(0.5f, 1, 0.5f)),
         Kind("Logic", "Arrival", "arrival", "", Vec3(-0.4f, 0, -0.4f), Vec3(0.4f, 1.6f, 0.4f)),
         Kind("Logic", "Trigger", "trigger", "", Vec3(-0.5f, 0, -0.5f), Vec3(0.5f, 1, 0.5f)),
+        Kind("Logic", "Waypoint", "waypoint", "", Vec3(-0.3f, 0, -0.3f), Vec3(0.3f, 0.6f, 0.3f)),
         Kind("Others", "Light", "glow", "", Vec3(-0.4f, -0.4f, -0.4f), Vec3(0.4f, 0.4f, 0.4f))
     };
     array<string> groups = { "Everything", "Platforms", "Roads", "Nature", "Buildings", "Caves", "Shapes", "Logic", "Others", "Mine" };
@@ -454,6 +455,11 @@ class EditorScreen : Screen
         @animationRow = lookRow.column(6);
         animationRow.label("Animation", "small");
         @animationChoice = animationRow.choice(array<string> = { "None" }, 0, WidgetEvent(this.onAnimation));
+        @roleRow = lookRow.column(6);
+        roleRow.label("Moves by itself", "small");
+        @roleChoice = roleRow.choice(roleNames, 0, WidgetEvent(this.onRole));
+        @routeField = roleRow.field("", "Its route: its waypoints' name", WidgetEvent(this.onRole));
+        routeField.onDone(WidgetEvent(this.onRole));
         @startsHidden = lookRow.toggle("Hidden until shown", false, WidgetEvent(this.onToggle));
         @appearChoice = lookRow.choice(appears, 0, WidgetEvent(this.onToggle));
         @onLand = inspector.toggle("On the land", true, WidgetEvent(this.onToggle));
@@ -669,7 +675,7 @@ class EditorScreen : Screen
         onLand.checked = j["onLand"].flag();
         falls.checked = j["mass"].number() > 0;
         glows.checked = j["glowing"].number() > 0;
-        bool logic = j.has("trigger") || j.has("to") || j.has("arrival");
+        bool logic = j.has("trigger") || j.has("to") || j.has("arrival") || j.has("waypoint");
         bool thing = !j.has("glow") && !sound && !logic, water = j["pool"].flag();
         lookRow.visible = thing && !water;
         falls.visible = thing && !water;
@@ -685,7 +691,12 @@ class EditorScreen : Screen
         colliderChoice.chosen = colliderOf(j);
         int picture = pictures.find(j["skin"].text());
         skinChoice.chosen = picture < 0 ? 0 : picture;
-        nameField.text = j.has("arrival") ? j["arrival"].text() : j["name"].text();
+        nameField.text = j.has("arrival") ? j["arrival"].text() : j.has("waypoint") ? j["waypoint"].text() : j["name"].text();
+        roleRow.visible = thing && !water && j.has("model");
+        int role = roleKeys.find(j["role"].text());
+        roleChoice.chosen = role < 0 ? 0 : role;
+        routeField.visible = roleChoice.chosen == 2;
+        routeField.text = j["route"].text();
         bool trigger = j.has("trigger"), goes = j.has("to");
         logicRow.visible = trigger;
         wayRow.visible = goes;
@@ -738,6 +749,27 @@ class EditorScreen : Screen
         animationChoice.chosen = playing_ < 0 ? 0 : playing_;
     }
 
+    // Someone who moves by themselves in a game, as global:ai.as has it; in Play, they look for whoever plays.
+    Widget@ roleRow, roleChoice, routeField;
+    array<string> roleNames = { "No", "Guard", "Patrol", "Wander", "Chase", "Flee", "Follow" };
+    array<string> roleKeys = { "", "guard", "patrol", "wander", "chase", "flee", "follow" };
+    void onRole(Widget@ w)
+    {
+        if (chosen < 0)
+            return;
+        Json@ j = things[uint(chosen)].json;
+        if (roleChoice.chosen == 0)
+            j.remove("role");
+        else
+            j.set("role", roleKeys[uint(roleChoice.chosen)]);
+        routeField.visible = roleChoice.chosen == 2;
+        if (roleChoice.chosen == 2 && routeField.text != "")
+            j.set("route", routeField.text);
+        else
+            j.remove("route");
+        changed("role", false);
+    }
+
     void onName(Widget@ w)
     {
         if (chosen < 0)
@@ -745,6 +777,8 @@ class EditorScreen : Screen
         Json@ j = things[uint(chosen)].json;
         if (j.has("arrival"))
             j.set("arrival", w.text);
+        else if (j.has("waypoint"))
+            j.set("waypoint", w.text);
         else if (w.text == "")
             j.remove("name");
         else
@@ -1088,7 +1122,7 @@ class EditorScreen : Screen
         {
             Kind@ k = kinds[i];
             bool same = k.key == "own" ? model == k.name : k.key == "model" ? model == "global:model/" + k.name + ".glb" : k.key == "sound" ? sound == k.name && sound != ""
-                : k.key == "shape" ? shape == k.name : k.key == "water" ? j["pool"].flag() : k.key == "way" ? j.has("to") : k.key == "arrival" ? j.has("arrival") : k.key == "trigger" && j.has("trigger");
+                : k.key == "shape" ? shape == k.name : k.key == "water" ? j["pool"].flag() : k.key == "way" ? j.has("to") : k.key == "arrival" ? j.has("arrival") : k.key == "waypoint" ? j.has("waypoint") : k.key == "trigger" && j.has("trigger");
             if (same)
                 return k;
         }
@@ -1205,7 +1239,7 @@ class EditorScreen : Screen
             {
                 Kind@ k = kindOf(j);
                 int which = k.collider > 0 ? k.collider : j["wall"].flag() || j["mass"].number() > 0 ? (j["shape"].text() == "sphere" ? 2 : 1) : 0;
-                if (which > 0 && !j.has("glow") && !j.has("sound") && !j["pool"].flag() && !j.has("trigger") && !j.has("to") && !j.has("arrival"))
+                if (which > 0 && !j.has("glow") && !j.has("sound") && !j["pool"].flag() && !j.has("trigger") && !j.has("to") && !j.has("arrival") && !j.has("waypoint"))
                     setCollider(j, which);
             }
             make(i);
@@ -1251,6 +1285,12 @@ class EditorScreen : Screen
             j.set("size", Vec3(0.7f, 1.4f, 0.7f));
             j.set("color", Color(0.4f, 1, 0.5f));
         }
+        if (t.json.has("waypoint"))
+        {
+            j.set("shape", "sphere");
+            j.set("size", Vec3(0.5f, 0.5f, 0.5f));
+            j.set("color", Color(1, 0.55f, 0.2f));
+        }
         for (uint n = 0; n < level.own.length(); n++)
             j.remove(level.own[n]);
         if (logic)
@@ -1262,8 +1302,9 @@ class EditorScreen : Screen
             t.entity.glowing = 0.3f;
         }
         bool soft = t.json.has("glow") || t.json.has("sound");
-        t.entity.cube(soft ? Vec3(1, 1, 1) : logic || t.json.has("arrival") ? Vec3(1, 1, 1) : k.high - k.low, 1, 0);
-        t.entity.colliderAt = soft || logic ? Vec3() : t.json.has("arrival") ? Vec3(0, 0, 0) : (k.high + k.low) * 0.5f;
+        bool marker = t.json.has("arrival") || t.json.has("waypoint");
+        t.entity.cube(soft ? Vec3(1, 1, 1) : logic || marker ? Vec3(1, 1, 1) : k.high - k.low, 1, 0);
+        t.entity.colliderAt = soft || logic ? Vec3() : marker ? Vec3(0, 0, 0) : (k.high + k.low) * 0.5f;
     }
 
     // Puts its entity where it is.
@@ -1900,6 +1941,12 @@ class EditorScreen : Screen
                 j.set("does", "");
                 j.set("when", "enter");
             }
+            y = 0;
+        }
+        else if (k.key == "waypoint")
+        {
+            // Those of one route share its name, and are walked in the order they were added.
+            j.set("waypoint", "route");
             y = 0;
         }
         else if (k.key == "arrival")
@@ -3149,6 +3196,7 @@ class EditorScreen : Screen
                 if (Space::toScreen(shotFrom, m_))
                     c.circle(m_.x, m_.y, 10, Color(1, 0.85f, 0.4f, 0.8f));
             }
+            level.crowd.draw(c, 0.25f);
             level.drawHud(c);
             c.designHeight(720);
         }

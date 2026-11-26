@@ -1,6 +1,6 @@
 {
   "title": "Lost key",
-  "description": "A small game made in the scene editor: find the key, go through the ring, gather the crystals",
+  "description": "A game made in the scene editor: find the key, gather the crystals",
   "category": "3D",
   "order": 200,
   "demo": "wait:1.5 up:2 right+up:1.2 up:2.5 left+up:1 up:2 wait:1",

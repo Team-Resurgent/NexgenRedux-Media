@@ -1,0 +1,52 @@
+{
+  "ground": 1,
+  "hour": 2,
+  "grass": 1.5,
+  "sky": { "fogFrom": 30, "fogTo": 110, "picture": "global:picture/sky-stars.png" },
+  "hud": [
+    { "kind": "big", "name": "gem", "label": "Gem", "corner": 1 },
+    { "kind": "text", "name": "caught", "label": "Caught", "corner": 0 },
+    { "kind": "text", "name": "time", "label": "Time", "corner": 0 }
+  ],
+  "entities": [
+    { "arrival": "start", "place": [0, 0, 24], "onLand": true, "angles": [0, 0, 0] },
+    { "trigger": true, "name": "home", "place": [0, 0, 24], "onLand": true, "size": [5, 3, 5] },
+
+    { "model": "global:model/house.glb", "place": [-10, 0, -6], "onLand": true, "angles": [0, 90, 0], "exact": true, "wall": true },
+    { "model": "global:model/house.glb", "place": [10, 0, -6], "onLand": true, "angles": [0, -90, 0], "exact": true, "wall": true },
+    { "model": "global:model/house.glb", "place": [-12, 0, 11], "onLand": true, "angles": [0, 70, 0], "exact": true, "wall": true },
+    { "model": "global:model/house.glb", "place": [12, 0, 11], "onLand": true, "angles": [0, -70, 0], "exact": true, "wall": true },
+    { "model": "global:model/house.glb", "place": [0, 0, -30], "onLand": true, "angles": [0, 0, 0], "exact": true, "wall": true },
+    { "model": "global:model/well.glb", "place": [0, 0, 5], "onLand": true, "exact": true, "wall": true },
+    { "model": "global:model/wall.glb", "place": [-4, 0, -12], "onLand": true, "angles": [0, 0, 0], "exact": true, "wall": true },
+    { "model": "global:model/wall.glb", "place": [4, 0, -12], "onLand": true, "angles": [0, 0, 0], "exact": true, "wall": true },
+    { "model": "global:model/lantern.glb", "place": [-3, 0, 14], "onLand": true },
+    { "model": "global:model/lantern.glb", "place": [3, 0, -16], "onLand": true },
+    { "glow": 1.4, "color": "#ffc06099", "light": "#ffb34d", "range": 10, "place": [-3, 2.9, 14], "onLand": true },
+    { "glow": 1.4, "color": "#ffc06099", "light": "#ffb34d", "range": 10, "place": [3, 2.9, -16], "onLand": true },
+    { "model": "global:model/pine.glb", "place": [-20, 0, -18], "onLand": true, "sway": 0.02, "impostor": true },
+    { "model": "global:model/pine.glb", "place": [20, 0, -20], "onLand": true, "sway": 0.02, "impostor": true },
+    { "model": "global:model/oak.glb", "place": [-22, 0, 6], "onLand": true, "sway": 0.02, "impostor": true },
+    { "model": "global:model/oak.glb", "place": [22, 0, 4], "onLand": true, "sway": 0.02, "impostor": true },
+
+    { "name": "gem", "model": "global:model/crystal.glb", "color": "#ff5fd2", "size": [0.7, 0.7, 0.7], "place": [0, 0.3, -20], "onLand": true, "light": "#ff5fd2", "range": 6 },
+    { "trigger": true, "name": "get gem", "does": "hide", "target": "gem", "once": true, "message": "Got it! Now back to the start", "place": [0, 0, -20], "onLand": true, "size": [2, 3, 2] },
+
+    { "name": "warden", "model": "global:model/robot.glb", "color": "#ff7a66", "place": [0, 0, -16.5], "onLand": true, "angles": [0, 0, 0], "role": "guard", "sight": 12 },
+    { "name": "west guard", "model": "global:model/robot.glb", "color": "#ff7a66", "place": [-17, 0, -15], "onLand": true, "role": "patrol", "route": "west", "sight": 13 },
+    { "name": "east guard", "model": "global:model/robot.glb", "color": "#ff7a66", "place": [17, 0, 3], "onLand": true, "role": "patrol", "route": "east", "sight": 13 },
+    { "waypoint": "west", "place": [-17, 0, -15], "onLand": true },
+    { "waypoint": "west", "place": [-5, 0, -19], "onLand": true },
+    { "waypoint": "west", "place": [-4, 0, 1], "onLand": true },
+    { "waypoint": "west", "place": [-18, 0, 2], "onLand": true },
+    { "waypoint": "east", "place": [17, 0, 3], "onLand": true },
+    { "waypoint": "east", "place": [5, 0, 1], "onLand": true },
+    { "waypoint": "east", "place": [5, 0, -19], "onLand": true },
+    { "waypoint": "east", "place": [17, 0, -16], "onLand": true },
+
+    { "name": "critter 1", "sprite": "global:picture/sprite-wisp.png", "views": 4, "frames": 2, "glowing": 1, "size": [1.1, 1.1, 1.1], "place": [-6, 0, 18], "onLand": true, "role": "flee", "sight": 9, "speed": 1.6 },
+    { "name": "critter 2", "sprite": "global:picture/sprite-wisp.png", "views": 4, "frames": 2, "glowing": 1, "size": [1.1, 1.1, 1.1], "place": [7, 0, 16], "onLand": true, "role": "flee", "sight": 9, "speed": 1.6 },
+    { "name": "critter 3", "sprite": "global:picture/sprite-wisp.png", "views": 4, "frames": 2, "glowing": 1, "size": [1.1, 1.1, 1.1], "place": [16, 0, -8], "onLand": true, "role": "flee", "sight": 9, "speed": 1.6 },
+    { "name": "buddy", "model": "global:model/robot.glb", "color": "#9fd0ff", "size": [0.6, 0.6, 0.6], "place": [2, 0, 26], "onLand": true, "role": "follow", "speed": 3 }
+  ]
+}
