@@ -202,6 +202,9 @@ class EditorScreen : Screen
     Widget@ fogTo;
     Widget@ waterToggle;
     Widget@ waterHigh;
+    Widget@ seaStyle;
+    array<string> seaStyleNames = { "Calm", "Sea", "Choppy", "Storm", "Cartoon" };
+    array<string> seaStyleKeys = { "calm", "sea", "choppy", "storm", "cartoon" };
     Widget@ roadLabel;
     Widget@ hudKind;
     Widget@ hudName;
@@ -347,6 +350,7 @@ class EditorScreen : Screen
         @waterToggle = above.toggle("Sea", false, WidgetEvent(this.onWater));
         @waterHigh = above.slider(0, -8, 12, WidgetEvent(this.onWater));
         waterHigh.step = 0.5f;
+        @seaStyle = above.choice(seaStyleNames, 1, WidgetEvent(this.onWater));
         Widget@ earth = tabs.tab("Land");
         @brushChoice = earth.choice(brushes, 0, WidgetEvent(this.onBrush));
         earth.label("Size", "small");
@@ -1370,6 +1374,8 @@ class EditorScreen : Screen
         bool sea = sky["sea"].flag(ground == 2);
         waterToggle.checked = sea;
         waterHigh.value = float(sky["seaHigh"].number(0));
+        int styleAt = seaStyleKeys.find(sky["seaStyle"].text("sea"));
+        seaStyle.chosen = styleAt < 0 ? 1 : styleAt;
         int picture = pictures.find(sky["picture"].text());
         skyChoice.chosen = picture < 0 ? 0 : picture;
         level.makeSky(write());
@@ -1411,6 +1417,7 @@ class EditorScreen : Screen
     {
         sky.set("sea", waterToggle.checked);
         sky.set("seaHigh", waterHigh.value);
+        sky.set("seaStyle", seaStyleKeys[uint(seaStyle.chosen)]);
         light();
         changed("sea", false);
     }

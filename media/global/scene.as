@@ -359,6 +359,8 @@ class Level
         Space::shadows(hour == 2 ? 0.35f : 0.6f, 34);
         bool sea = sky["sea"].flag(ground == 2);
         Space::water(sea ? float(sky["seaHigh"].number(0)) : -200.0f, Color(0.16f, 0.4f, 0.5f, 0.8f));
+        // calm, sea, choppy, storm or cartoon
+        Space::waterStyle(sky["seaStyle"].text("sea"));
     }
 
     void readRoads(Json@ all)
