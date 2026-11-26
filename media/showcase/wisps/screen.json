@@ -1,6 +1,6 @@
 {
   "title": "Wisps",
-  "description": "Sprites: pictures that turn to show the side you see them from, in a maze",
+  "description": "Pictures that turn to show the side you see, in a maze",
   "category": "3D",
   "order": 201,
   "demo": "wait:1 up:0.6 wait:2.5 right:0.4 wait:1.5 left:0.8 wait:1.5 right:0.4 up:1.2 wait:2",

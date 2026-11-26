@@ -1,6 +1,6 @@
 {
   "title": "Guards",
-  "description": "Take the gem unseen: guards patrol, look, listen, chase and find a way round",
+  "description": "Take the gem unseen: guards patrol, look, listen and chase",
   "category": "3D",
   "order": 202,
   "demo": "wait:1.5 up:1.5 left+up:1.2 up:2 right:0.5 up:2 wait:1",
