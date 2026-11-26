@@ -1,4 +1,5 @@
-// Volumes, bindings, and whether the stick can move a pointer. The engine keeps them between runs.
+// Volumes, bindings, whether the stick can move a pointer, and where rooms meet on the internet. The engine keeps
+// them between runs.
 
 class SettingsScreen : Screen
 {
@@ -12,8 +13,29 @@ class SettingsScreen : Screen
     uint chosen = 0;
     bool waiting = false;
 
-    uint rows() { return 3 + actions.length() + 2; }
-    uint pointerRow() { return rows() - 2; }
+    Widget@ placeField;
+
+    uint rows() { return 3 + actions.length() + 3; }
+    uint pointerRow() { return rows() - 3; }
+    uint meetingRow() { return rows() - 2; }
+
+    // Typed in front of everything, with a keyboard or the one on the screen.
+    void editMeeting()
+    {
+        Widget@ popup = Ui::popup();
+        popup.label("Meeting place", "heading");
+        popup.label("Where rooms meet on the internet: a name or address, and :port if it isn't 27300. Empty for this network only.");
+        @placeField = popup.field(Net::meetingPlace, "games.example.com");
+        popup.button("Done", WidgetEvent(this.onMeetingDone));
+        placeField.focus();
+    }
+
+    void onMeetingDone(Widget@ w)
+    {
+        Net::meetingPlace = placeField.text;
+        w.parent.close();
+        accept.play(0.7f);
+    }
 
     float volume(uint i)
     {
@@ -31,6 +53,8 @@ class SettingsScreen : Screen
 
     void update(float dt)
     {
+        if (Ui::busy)
+            return;
         if (waiting)
         {
             if (!Input::listening)
@@ -45,6 +69,11 @@ class SettingsScreen : Screen
         if (chosen == pointerRow() && (Input::pressed("accept") || Input::pressed("left") || Input::pressed("right")))
         {
             Input::stickPointer = !Input::stickPointer;
+            accept.play(0.7f);
+        }
+        else if (chosen == meetingRow() && Input::pressed("accept"))
+        {
+            editMeeting();
             accept.play(0.7f);
         }
         else if (chosen < 3)
@@ -72,8 +101,8 @@ class SettingsScreen : Screen
         c.text(big, "Settings", 80, 26);
         for (uint i = 0; i < rows(); i++)
         {
-            float y = 92 + float(i) * 44 + (i >= 3 ? 14.0f : 0.0f);
-            if (i == chosen) c.roundRect(60, y - 4, 1160, 40, 10, Color(0.2f, 0.28f, 0.44f));
+            float y = 90 + float(i) * 40 + (i >= 3 ? 12.0f : 0.0f);
+            if (i == chosen) c.roundRect(60, y - 3, 1160, 37, 10, Color(0.2f, 0.28f, 0.44f));
             if (i < 3)
             {
                 c.text(font, volumes[i], 80, y);
@@ -85,6 +114,11 @@ class SettingsScreen : Screen
             }
             else if (i == rows() - 1)
                 c.text(font, "Put the controls back", 80, y, Yellow);
+            else if (i == meetingRow())
+            {
+                c.text(font, "Meeting place", 80, y);
+                c.text(font, Net::meetingPlace == "" ? "None: this network only" : Net::meetingPlace, 420, y, Color(0.75f, 0.85f, 1));
+            }
             else if (i == pointerRow())
             {
                 c.text(font, "Pointer", 80, y);
@@ -104,5 +138,6 @@ class SettingsScreen : Screen
             }
         }
         c.text(small, "Escape, Start, or holding Back always open the menu, whatever is set here.", 640, 686, Gray, AlignCenter);
+        Ui::draw(c);
     }
 }

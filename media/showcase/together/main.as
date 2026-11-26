@@ -1,5 +1,6 @@
-// A wall to draw on. One player hosts it, and any on the same network who look for it can join. What is
-// drawn is sent for sure; where everyone's pen is, is only sent quickly.
+// A wall to draw on. One player hosts it, and any on the same network who look for it can join; with a meeting
+// place in the settings, anyone on the internet can too. What is drawn is sent for sure; where everyone's pen is,
+// is only sent quickly.
 
 const string Game = "nexgen together";
 
@@ -167,7 +168,7 @@ class TogetherScreen : Screen
         c.text(big, "Together", 30, 18);
         string state;
         if (room.state == RoomIn)
-            state = formatInt(int(room.players)) + " here" + (room.hosting ? ", on your wall at " + Net::address : ", " + formatInt(room.ping(0)) + " ms away");
+            state = formatInt(int(room.players)) + " here" + (room.hosting ? ", on your wall at " + Net::address + (room.met ? " and at " + Net::meetingPlace : "") : ", " + formatInt(room.ping(0)) + " ms away" + (room.relayed(0) ? " by the meeting place" : ""));
         else
             state = room.state == RoomFinding ? "Looking" : room.state == RoomJoining ? "Joining" : room.state == RoomLost ? "That didn't work" : "By yourself";
         c.text(font, state, 1250, 30, Color(0.7f, 0.8f, 0.9f), AlignRight);
@@ -180,7 +181,7 @@ class TogetherScreen : Screen
             for (uint i = 0; i < room.found && i < 6; i++)
             {
                 c.roundRect(410, 250 + float(i) * 38, 460, 34, 8, i == chosen ? Blue : Color(1, 1, 1, 0.08f));
-                c.text(font, room.foundName(i), 424, 253 + float(i) * 38);
+                c.text(font, room.foundName(i) + (room.foundFar(i) ? "  (internet)" : ""), 424, 253 + float(i) * 38);
                 c.text(font, formatInt(int(room.foundPlayers(i))) + " of " + formatInt(int(room.foundMost(i))), 856, 253 + float(i) * 38, Color(0.8f, 0.85f, 0.95f), AlignRight);
             }
         }
