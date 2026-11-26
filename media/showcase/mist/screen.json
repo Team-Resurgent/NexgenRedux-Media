@@ -1,0 +1,8 @@
+{
+  "title": "Mist",
+  "description": "Fog that can be walked into, smoke and fire, from 3D noise",
+  "category": "3D",
+  "order": 204,
+  "demo": "wait:30",
+  "seconds": 22
+}
