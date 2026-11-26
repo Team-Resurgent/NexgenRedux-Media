@@ -1,4 +1,4 @@
-// Text: one scalable font at several sizes, alignment, wrapping and effects letter by letter.
+// Text: one scalable font at several sizes, alignment, wrapping, marked-up text and effects letter by letter.
 
 class TextScreen : Screen
 {
@@ -10,6 +10,9 @@ class TextScreen : Screen
     string story = "Glyphs are drawn once into an atlas, so changing a line of text costs nothing but a few quads. "
         "This paragraph is wrapped to the width of the box beside it, and the box changes width all the time. "
         "Accents work too: caf\xC3\xA9, na\xC3\xAFve, \xC3\x9C" "ber, \xC2\xA3" "5 and \xC2\xA9.";
+
+    string marked = "Rich text marks a few words: [color=orange]a colour[/color], [b]bold[/b], [u]underlined[/u] and "
+        "[s]struck out[/s], or [color=#66ddff]all [b]at [u]once[/u][/b][/color]. It wraps as a [color=pink]paragraph[/color] does.";
 
     void onEnter()
     {
@@ -42,6 +45,9 @@ class TextScreen : Screen
         float width = 420 + 140 * sin(t * 0.7f);
         float height = c.paragraph(body, story, 60, 280, width, Color(0.85f, 0.88f, 0.95f));
         c.rectLine(50, 270, width + 20, height + 20, 2, Color(0.3f, 0.4f, 0.6f));
+
+        // Marked up.
+        c.rich(body, marked, 60, 530, 560, Color(0.85f, 0.88f, 0.95f));
 
         // Letter by letter.
         wave(c, "WAVE", 700, 290);
