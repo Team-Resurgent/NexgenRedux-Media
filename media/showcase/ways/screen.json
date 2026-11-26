@@ -1,0 +1,8 @@
+{
+  "title": "Ways",
+  "description": "Paths to follow, ways round a maze, and smooth noise",
+  "category": "Effects",
+  "order": 103,
+  "demo": "wait:3 accept wait:3 accept wait:3",
+  "seconds": 10
+}
