@@ -2412,14 +2412,15 @@ class EditorScreen : Screen
         float a = heroYaw * 0.0174533f;
         Vec3 ahead(sin(a), 0, -cos(a)), side(cos(a), 0, sin(a));
         float nose = under_(base + ahead * 1.5f), tail = under_(base - ahead * 1.5f), right = under_(base + side * 1.3f), left_ = under_(base - side * 1.3f);
-        Vec3 up(0, 1, 0);
-        if (hero.onGround)
-            up = (Vec3(0, 1, 0) - ahead * ((nose - tail) / 3) - side * ((right - left_) / 2.6f)).normalized();
-        shipUp = (shipUp + (up - shipUp) * clamp(9 * dt, 0, 1)).normalized();
+        float middle = under_(base);
+        // Lying as the ground does under it; more slowly while it is in the air.
+        Vec3 up = (Vec3(0, 1, 0) - ahead * ((nose - tail) / 3) - side * ((right - left_) / 2.6f)).normalized();
+        shipUp = (shipUp + (up - shipUp) * clamp((hero.onGround ? 9 : 3) * dt, 0, 1)).normalized();
+        // Above the ground under its middle and, tipped as it is, under its nose, tail and sides: never in it.
         float highest = base.y;
-        array<float> all = { (nose + tail) * 0.5f, (right + left_) * 0.5f };
-        for (uint i = 0; i < all.length() && hero.onGround; i++)
-            highest = all[i] > highest ? all[i] : highest;
+        array<float> all = { middle, (nose + tail) * 0.5f, (right + left_) * 0.5f, max(max(nose, tail), max(right, left_)) - 0.3f };
+        for (uint i = 0; i < all.length(); i++)
+            highest = max(highest, all[i]);
         float y = highest + 0.6f + sin(App::time * 3) * 0.05f;
         Vec3 was = ship.place;
         // Where it is at once, but gently up and down.
@@ -2431,13 +2432,15 @@ class EditorScreen : Screen
         ship.angles = Vec3(pitch_, 180 - heroYaw, roll_);
     }
 
-    // What is under a place, near the height of the one that drives.
+    // What is under a place: the land, which is known everywhere, or anything standing higher on it. From well above,
+    // so that a slope that rises ahead isn't missed by starting inside it.
     float under_(const Vec3 &in p)
     {
+        float y = Space::height(p.x, p.z);
         Vec3 hit, normal;
-        if (Space::raycast(p + Vec3(0, 1.8f, 0), p - Vec3(0, 2.5f, 0), hit, normal, 0xFFFD))
-            return hit.y;
-        return p.y;
+        if (Space::raycast(p + Vec3(0, 6, 0), p - Vec3(0, 3, 0), hit, normal, 0xFFFD))
+            y = max(y, hit.y);
+        return y > -1000 ? y : p.y;
     }
 
     bool shotNow = false;
