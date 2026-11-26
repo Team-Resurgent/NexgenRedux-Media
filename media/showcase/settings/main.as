@@ -1,4 +1,4 @@
-// Volumes, bindings, whether the stick can move a pointer, and where rooms meet on the internet. The engine keeps
+// Volumes, bindings, whether the stick can move a pointer, whether pads rumble, and where rooms meet on the internet. The engine keeps
 // them between runs.
 
 class SettingsScreen : Screen
@@ -15,8 +15,9 @@ class SettingsScreen : Screen
 
     Widget@ placeField;
 
-    uint rows() { return 3 + actions.length() + 3; }
-    uint pointerRow() { return rows() - 3; }
+    uint rows() { return 3 + actions.length() + 4; }
+    uint pointerRow() { return rows() - 4; }
+    uint rumbleRow() { return rows() - 3; }
     uint meetingRow() { return rows() - 2; }
 
     // Typed in front of everything, with a keyboard or the one on the screen.
@@ -71,6 +72,13 @@ class SettingsScreen : Screen
             Input::stickPointer = !Input::stickPointer;
             accept.play(0.7f);
         }
+        else if (chosen == rumbleRow() && (Input::pressed("accept") || Input::pressed("left") || Input::pressed("right")))
+        {
+            Input::rumbleOn = !Input::rumbleOn;
+            accept.play(0.7f);
+            // So that it can be felt what it is.
+            Input::rumble(0.6f, 0.25f);
+        }
         else if (chosen == meetingRow() && Input::pressed("accept"))
         {
             editMeeting();
@@ -118,6 +126,11 @@ class SettingsScreen : Screen
             {
                 c.text(font, "Meeting place", 80, y);
                 c.text(font, Net::meetingPlace == "" ? "None: this network only" : Net::meetingPlace, 420, y, Color(0.75f, 0.85f, 1));
+            }
+            else if (i == rumbleRow())
+            {
+                c.text(font, "Rumble", 80, y);
+                c.text(font, Input::rumbleOn ? "Pads shake when something happens" : "Off", 420, y, Color(0.75f, 0.85f, 1));
             }
             else if (i == pointerRow())
             {

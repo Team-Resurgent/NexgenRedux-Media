@@ -48,6 +48,7 @@ class Player : Behaviour
         {
             Scene::burst("fire", entity.position, 60);
             game.boomSound.play(0.9f);
+            Input::rumbleMotors(1, 0.7f, 0.6f);
             entity.destroy();
             game.lost();
         }
@@ -115,6 +116,9 @@ class Enemy : Behaviour
         if (health > 0 || !entity.alive) return;
         game.score += worth;
         game.shake = worth > 500 ? 1.0f : 0.25f;
+        // A thud for a big one, a tap for the rest.
+        if (worth > 500) Input::rumbleMotors(1, 0.5f, 0.7f);
+        else Input::rumbleMotors(0, 0.35f, 0.07f);
         game.boomSound.play(worth > 500 ? 1.0f : 0.35f, (entity.x - 640) / 800, random(0.9f, 1.2f));
         Scene::burst("fire", entity.position, worth > 500 ? 200 : 26);
         Scene::burst("smoke", entity.position, worth > 500 ? 40 : 6);
