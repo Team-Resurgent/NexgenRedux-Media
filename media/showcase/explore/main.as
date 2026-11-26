@@ -78,6 +78,7 @@ class ExploreScreen : Screen
     Entity@ camp;
     float strode = 0;           // since the last step
     bool wet = false;
+    bool under = false;         // in the sea, where everything is heard muffled
     array<Entity@> lamps;
     float yaw = 0.5f;           // of the camera, round the robot
     float lean = 0.28f;
@@ -283,6 +284,11 @@ class ExploreScreen : Screen
             Space::burst("drops", Vec3(hero.place.x, 0.05f, hero.place.z), 50);
         }
         wet = paddling;
+        if (swimming != under)
+        {
+            under = swimming;
+            Audio::lowPass(BusEffects, under ? 700 : 20000, 0.4f);
+        }
         sea.fade(clamp(0.5f - look.y * 0.035f, 0, 0.5f), 0.1f);
         if (swimming)
         {

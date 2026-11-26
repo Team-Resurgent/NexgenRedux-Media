@@ -1,4 +1,5 @@
-// Sixteen pads. Where a pad is decides its panning, and holding the second button lowers its pitch.
+// Sixteen pads. Where a pad is decides its panning, and holding the second button lowers its pitch. Fire changes where
+// they are heard: a room, a hall, a canyon, under water or on the radio, by the effects every sound on a bus goes through.
 
 class SoundsScreen : Screen
 {
@@ -13,6 +14,8 @@ class SoundsScreen : Screen
     uint beatStep = 0;
     array<float> levels(90);
     uint at = 0;
+    array<string> places = { "Nowhere in particular", "A small room", "A hall", "A canyon", "Under water", "On the radio" };
+    uint place = 0;
 
     SoundsScreen()
     {
@@ -61,8 +64,24 @@ class SoundsScreen : Screen
             beat = !beat;
             beatStep = 0;
         }
+        if (Input::pressed("fire"))
+        {
+            place = (place + 1) % places.length();
+            hear(place);
+        }
         levels[at] = Audio::level;
         at = (at + 1) % levels.length();
+    }
+
+    // Each place is what the effects bus goes through; the rest is taken away first.
+    void hear(uint where)
+    {
+        Audio::clearEffects();
+        if (where == 1) Audio::reverb(BusEffects, 0.45f, 0.35f);
+        if (where == 2) Audio::reverb(BusEffects, 0.8f, 0.92f);
+        if (where == 3) Audio::echo(BusEffects, 0.55f, 0.42f, 0.35f);
+        if (where == 4) { Audio::lowPass(BusEffects, 550, 0.3f); Audio::reverb(BusEffects, 0.3f, 0.5f); }
+        if (where == 5) { Audio::highPass(BusEffects, 900); Audio::lowPass(BusEffects, 3200); }
     }
 
     void draw(Canvas@ c)
@@ -97,5 +116,6 @@ class SoundsScreen : Screen
         c.text(font, Input::buttons("accept") + " or " + Input::keys("accept") + ": play", 790, 550, Yellow);
         c.text(font, "Hold " + Input::buttons("alternate") + " or " + Input::keys("alternate") + ": lower", 790, 584, Yellow);
         c.text(font, Input::buttons("cancel") + " or " + Input::keys("cancel") + ": drum machine " + (beat ? "off" : "on"), 790, 618, Yellow);
+        c.text(font, Input::buttons("fire") + " or " + Input::keys("fire") + ": " + places[place], 790, 652, Yellow);
     }
 }
