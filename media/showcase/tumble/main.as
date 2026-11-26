@@ -1,4 +1,5 @@
-// Rigid bodies: give a collider some mass, and the engine does the rest.
+// Rigid bodies: give a collider some mass, and the engine does the rest. Joints hold them to each other, or to the
+// world: pinned, hinged, on a rope or on a spring.
 
 class TumbleScreen : Screen
 {
@@ -8,8 +9,13 @@ class TumbleScreen : Screen
     Vec2 aim(0, 0.12f);
     float around = 0;
     int kind = 0;
-    array<string> kinds = { "Wall", "Tower", "Dominoes", "Rain" };
+    array<string> kinds = { "Wall", "Tower", "Dominoes", "Rain", "Swings" };
     array<Entity@> things;
+    // Ropes and springs, drawn as lines: what holds each, where on it, and where in the world the other end is.
+    array<Entity@> tied;
+    array<Vec3> tiedAt;
+    array<Vec3> tiedTo;
+    array<bool> coiled;
     float rain = 0;
     uint dropped = 0;
     Vec2 mouseWas;
@@ -47,11 +53,24 @@ class TumbleScreen : Screen
         return e;
     }
 
+    // `at` is in the thing's own space, where its size is 1.
+    void tie(Entity@ e, const Vec3 &in at, const Vec3 &in to, bool spring)
+    {
+        tied.insertLast(e);
+        tiedAt.insertLast(at);
+        tiedTo.insertLast(to);
+        coiled.insertLast(spring);
+    }
+
     void build()
     {
         for (uint i = 0; i < things.length(); i++)
             things[i].destroy();
         things.resize(0);
+        tied.resize(0);
+        tiedAt.resize(0);
+        tiedTo.resize(0);
+        coiled.resize(0);
         rain = 0;
         dropped = 0;
         if (kind == 0)
@@ -82,6 +101,40 @@ class TumbleScreen : Screen
                     e.push(Vec3(-cos(a) * 1.5f, 0, sin(a) * 1.5f), e.place + Vec3(0, 0.6f, 0));
             }
         }
+        else if (kind == 4)
+        {
+            // Chains, each link pinned to the one above, the top one to the sky.
+            for (int c = 0; c < 3; c++)
+            {
+                float x = -4.5f + float(c) * 1.2f;
+                Entity@ above = null;
+                for (int i = 0; i < 7; i++)
+                {
+                    Vec3 top(x, 6.5f - float(i) * 0.5f, -1);
+                    Entity@ link = block(top - Vec3(0, 0.25f, 0), Vec3(0.12f, 0.46f, 0.12f), hsv(0.55f + float(c) * 0.08f, 0.5f, 0.85f), 0.3f);
+                    link.drag = 0.3f;
+                    Space::join(link, above, top);
+                    @above = link;
+                }
+            }
+            // A door, hinged at its left edge.
+            Entity@ door = block(Vec3(0.6f, 1.1f, 0), Vec3(1.2f, 2.2f, 0.1f), Color(0.55f, 0.36f, 0.22f), 2);
+            door.drag = 0.8f;
+            Space::hinge(door, null, Vec3(0, 1.1f, 0), Vec3(0, 1, 0));
+            block(Vec3(-0.1f, 1.15f, 0), Vec3(0.2f, 2.3f, 0.2f), Color(0.35f, 0.3f, 0.28f), 0);
+            // A weight bobbing on a spring.
+            Entity@ weight = block(Vec3(3, 3, -1), Vec3(0.6f, 0.6f, 0.6f), Color(0.85f, 0.75f, 0.2f), 1);
+            weight.drag = 0.1f;
+            Space::spring(weight, null, Vec3(3, 3.3f, -1), Vec3(3, 6, -1), 40, 0.6f, 2);
+            tie(weight, Vec3(0, 0.5f, 0), Vec3(3, 6, -1), true);
+            // A swing: a plank on two ropes.
+            Entity@ seat = block(Vec3(5.5f, 1.2f, -1), Vec3(1.2f, 0.12f, 0.5f), Color(0.6f, 0.45f, 0.3f), 0.8f);
+            seat.drag = 0.15f;
+            Space::rope(seat, null, Vec3(5.0f, 1.26f, -1), Vec3(5.0f, 6, -1));
+            Space::rope(seat, null, Vec3(6.0f, 1.26f, -1), Vec3(6.0f, 6, -1));
+            tie(seat, Vec3(-0.42f, 0.5f, 0), Vec3(5.0f, 6, -1), false);
+            tie(seat, Vec3(0.42f, 0.5f, 0), Vec3(6.0f, 6, -1), false);
+        }
     }
 
     void update(float dt)
@@ -94,7 +147,7 @@ class TumbleScreen : Screen
         aim = Vec2(clamp(aim.x, -0.6f, 0.6f), clamp(aim.y, -0.1f, 0.5f));
         if (Input::pressed("alternate"))
         {
-            kind = (kind + 1) % 4;
+            kind = (kind + 1) % int(kinds.length());
             build();
         }
         else if (Input::pressed("cancel"))
@@ -162,6 +215,32 @@ class TumbleScreen : Screen
     {
         c.designHeight(720);
         Space::draw(c);
+        for (uint i = 0; i < tied.length(); i++)
+        {
+            Vec3 from = tied[i].toSpace(tiedAt[i]);
+            if (!coiled[i])
+            {
+                Vec2 a, b;
+                if (Space::toScreen(from, a) && Space::toScreen(tiedTo[i], b))
+                    c.line(a.x, a.y, b.x, b.y, 2.5f, Color(0.75f, 0.65f, 0.45f));
+                continue;
+            }
+            // A coil: round and round between its ends.
+            Vec2 was;
+            bool had = false;
+            for (int k = 0; k <= 48; k++)
+            {
+                float t = float(k) / 48;
+                float turn = t * 6.2832f * 9;
+                Vec3 p = from + (tiedTo[i] - from) * t + Vec3(cos(turn) * 0.18f, 0, sin(turn) * 0.18f);
+                Vec2 at;
+                bool has = Space::toScreen(p, at);
+                if (has && had)
+                    c.line(was.x, was.y, at.x, at.y, 2, Color(0.8f, 0.82f, 0.86f));
+                was = at;
+                had = has;
+            }
+        }
         Vec2 at;
         if (Space::toScreen(eye() + direction() * 10, at))
         {

@@ -80,6 +80,7 @@ class ExploreScreen : Screen
     bool wet = false;
     bool under = false;         // in the sea, where everything is heard muffled
     array<Entity@> lamps;
+    Entity@ carried;            // a light the robot holds up in its right hand, by night
     float yaw = 0.5f;           // of the camera, round the robot
     float lean = 0.28f;
     float away = 7;
@@ -220,6 +221,12 @@ class ExploreScreen : Screen
         hero.shine = 0.5f;
         safe = hero.place;
         look = hero.place + Vec3(0, 1.4f, 0);
+
+        // Held in the hand: it goes wherever the hand does, through every walk, jump and wave.
+        @carried = Space::spawn(Vec3());
+        carried.attach(hero, "hand.r");
+        carried.place = Vec3(0, -0.12f, 0);
+        carried.glow(0.6f, Color(0.6f, 0.9f, 1, 0));
     }
 
     Entity@ place(Model@ model, const Vec3 &in at, float turn, float size)
@@ -394,6 +401,8 @@ class ExploreScreen : Screen
         Space::ambient(lerp(Color(0.1f, 0.13f, 0.22f), Color(0.42f, 0.48f, 0.56f), day), lerp(Color(0.05f, 0.05f, 0.08f), Color(0.26f, 0.24f, 0.2f), day));
         float t = App::time;
         camp.light(Color(1.8f, 0.9f, 0.35f), (4 + darkness * 5) * (1 + sin(t * 11) * 0.05f + sin(t * 17.3f) * 0.04f));
+        carried.color = Color(0.6f, 0.9f, 1, darkness * 0.8f);
+        carried.light(Color(0.5f * darkness, 0.8f * darkness, 1.0f * darkness), 7);
         for (uint i = 0; i < lamps.length(); i++)
         {
             float glow = darkness * (0.93f + sin(App::time * 9 + float(i) * 2) * 0.07f);
