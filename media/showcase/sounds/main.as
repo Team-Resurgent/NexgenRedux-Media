@@ -1,5 +1,6 @@
-// Sixteen pads. Where a pad is decides its panning, and holding the second button lowers its pitch. Fire changes where
-// they are heard: a room, a hall, a canyon, under water or on the radio, by the effects every sound on a bus goes through.
+// Sixteen pads. Where a pad is decides its panning, and holding the second button lowers its pitch. The right trigger, or
+// R, changes where they are heard: a room, a hall, a canyon, under water or on the radio, by the effects every sound on a
+// bus goes through.
 
 class SoundsScreen : Screen
 {
@@ -16,6 +17,7 @@ class SoundsScreen : Screen
     uint at = 0;
     array<string> places = { "Nowhere in particular", "A small room", "A hall", "A canyon", "Under water", "On the radio" };
     uint place = 0;
+    bool wasNext = false;
 
     SoundsScreen()
     {
@@ -64,11 +66,14 @@ class SoundsScreen : Screen
             beat = !beat;
             beatStep = 0;
         }
-        if (Input::pressed("fire"))
+        // Not an action of its own, as the others are taken: the right trigger, or R; or fire where it isn't also accept.
+        bool next = Input::padTriggers(0).y > 0.5f || Input::key("R") || (Input::held("fire") && !Input::held("accept"));
+        if (next && !wasNext)
         {
             place = (place + 1) % places.length();
             hear(place);
         }
+        wasNext = next;
         levels[at] = Audio::level;
         at = (at + 1) % levels.length();
     }
@@ -116,6 +121,6 @@ class SoundsScreen : Screen
         c.text(font, Input::buttons("accept") + " or " + Input::keys("accept") + ": play", 790, 550, Yellow);
         c.text(font, "Hold " + Input::buttons("alternate") + " or " + Input::keys("alternate") + ": lower", 790, 584, Yellow);
         c.text(font, Input::buttons("cancel") + " or " + Input::keys("cancel") + ": drum machine " + (beat ? "off" : "on"), 790, 618, Yellow);
-        c.text(font, Input::buttons("fire") + " or " + Input::keys("fire") + ": " + places[place], 790, 652, Yellow);
+        c.text(font, "Right trigger or R: " + places[place], 790, 652, Yellow);
     }
 }
