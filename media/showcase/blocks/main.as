@@ -196,15 +196,15 @@ class BlocksScreen : Screen
         Vec2 triggers = Input::padTriggers(0);
         bool left = Input::mouseDown(0), right = Input::mouseDown(1);
         bool digging = (left && !wasLeft) || (triggers.y > 0.5f && wasTriggers.y <= 0.5f) || Input::pressed("alternate");
-        bool building = (right && !wasRight) || (triggers.x > 0.5f && wasTriggers.x <= 0.5f);
+        bool building = (right && !wasRight) || (triggers.x > 0.5f && wasTriggers.x <= 0.5f) || Input::pressed("fire");
         // Held, again and again.
-        bool holding = left || right || triggers.x > 0.5f || triggers.y > 0.5f || Input::held("alternate");
+        bool holding = left || right || triggers.x > 0.5f || triggers.y > 0.5f || Input::held("alternate") || Input::held("fire");
         again = holding ? again - dt : 0.35f;
         if (again < 0)
         {
             again = 0.2f;
             digging = left || triggers.y > 0.5f || Input::held("alternate");
-            building = right || triggers.x > 0.5f;
+            building = right || triggers.x > 0.5f || Input::held("fire");
         }
         wasLeft = left;
         wasRight = right;

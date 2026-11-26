@@ -3,6 +3,6 @@
   "description": "A world of blocks to dig and build in, made from a number",
   "category": "3D",
   "order": 205,
-  "demo": "wait:1.5 up:1.2 accept up:0.8 wait:0.5 alternate wait:0.4 alternate wait:0.4 alternate wait:0.6 right:0.5 up:1.5 accept up:1 alternate wait:0.5 left:0.6 up:2 wait:1",
-  "seconds": 16
+  "demo": "wait:1.5 up:1.2 accept up:0.8 wait:0.5 fire wait:0.35 fire wait:0.35 fire wait:0.35 fire wait:0.5 right:0.25 fire wait:0.35 fire wait:0.35 fire wait:0.5 right:0.25 fire wait:0.35 fire wait:0.35 fire wait:0.6 left:0.8 alternate wait:0.4 alternate wait:0.4 alternate wait:0.6 right:0.5 up:1.5 accept up:1 fire wait:0.35 fire wait:0.35 fire wait:0.5 left:0.6 up:2 wait:1",
+  "seconds": 22
 }
