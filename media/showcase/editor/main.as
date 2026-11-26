@@ -364,6 +364,8 @@ class EditorScreen : Screen
             c.height = 22;
             c.grow = 1;
         }
+        earth.label("Grass", "small");
+        @grassChoice = earth.choice(grassNames, 0, WidgetEvent(this.onGrass));
         earth.button("As it was made", WidgetEvent(this.onLandFresh));
         earth.paragraph("Hold on the land to change it.", "small");
 
@@ -803,6 +805,13 @@ class EditorScreen : Screen
     }
     void onWay(Widget@ w) { way = (way + 1) % int(ways.length()); w.text = ways[uint(way)]; }
     void onAcross(Widget@ w) { across = w.chosen; landText = ""; land(); place(); changed("across"); }
+    // How thick the grass grows where the land is green.
+    Widget@ grassChoice;
+    array<string> grassNames = { "No grass", "Some grass", "Grass", "Thick grass" };
+    array<float> grassAmounts = { 0, 1, 2.5f, 4.5f };
+    int grassAt = 0;
+    void onGrass(Widget@ w) { grassAt = w.chosen; made = -1; land(); changed("grass"); }
+
     void onEdges(Widget@ w) { edges = w.checked; Space::edges = edges; changed("edges"); }
     void onGround(Widget@ w) { ground = w.chosen; acrossChoice.enabled = ground != 3; land(); place(); changed("ground"); }
     void onLines(Widget@ w) { Space::lines = w.checked; }
@@ -1121,6 +1130,8 @@ class EditorScreen : Screen
         all.set("hour", hour);
         all.set("across", across);
         all.set("edges", edges);
+        if (grassAt > 0)
+            all.set("grass", grassAmounts[uint(grassAt)]);
         if (sky.count > 0)
             all.set("sky", sky);
         if (roads.length() > 0)
@@ -1160,6 +1171,11 @@ class EditorScreen : Screen
         hour = int(clamp(float(all["hour"].number()), 0, 2));
         across = int(clamp(float(all["across"].number(1)), 0, float(acrosses.length()) - 1));
         edges = all["edges"].flag(true);
+        grassAt = 0;
+        for (uint i = 0; i < grassAmounts.length(); i++)
+            if (abs(float(all["grass"].number()) - grassAmounts[i]) < 0.01f)
+                grassAt = int(i);
+        grassChoice.chosen = grassAt;
         Json empty;
         sky.copy(all["sky"].isNull ? empty : all["sky"]);
         groundChoice.chosen = ground;
@@ -1918,6 +1934,9 @@ class EditorScreen : Screen
         float sway = k.name == "oak" || k.name == "pine" ? 0.02f : k.name == "bush" ? 0.05f : k.name == "grass" ? 0.15f : 0.0f;
         if (sway > 0)
             j.set("sway", sway);
+        // Far away, trees are pictures of themselves.
+        if (k.name == "oak" || k.name == "pine")
+            j.set("impostor", true);
         if (k.group == "Roads")
         {
             // On a grid of 8 metres, the land flat under it; and on from the chosen one, where it is a road too.

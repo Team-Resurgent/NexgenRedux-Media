@@ -104,6 +104,10 @@ class ExploreScreen : Screen
         Space::flatten(0, 0, 44, 3);
         Space::farthest(320);
         Space::shadows(0.65f, 32);
+        // Grass near the camera, and far trees as pictures of themselves. Less of both where there is less memory.
+        bool small = App::platform == "Original Xbox";
+        Space::grass(grass, small ? 0.6f : 2.5f, small ? 16 : 38);
+        Space::impostors = small ? 45 : 70;
 
         // A village, round a well.
         float y = Space::height(0, 0);
@@ -169,6 +173,7 @@ class ExploreScreen : Screen
                 bool high = p.y > 7 + random(-2, 2);
                 Entity@ tree = place(trees[high ? 0 : 1], p, random(0, 360), random(0.8f, 1.5f));
                 tree.sway = 0.02f;
+                tree.impostor = true;
                 tree.capsule(0.3f, 4, 2);
                 tree.colliderAt = Vec3(0, 2, 0);
                 tree.wall = true;
@@ -182,10 +187,6 @@ class ExploreScreen : Screen
                 stone.colliderAt = Vec3(0, 0.2f, 0);
                 stone.wall = true;
             }
-            // Grass, more of it near the village.
-            for (int g = 0; g < 3; g++)
-                if (spot(p, 0.6f, 12, 0.8f, 6, g == 0 ? 130 : 45))
-                    place(grass, p, random(0, 360), random(0.8f, 1.6f)).sway = 0.15f;
             if (i % 5 == 0 && spot(p, 1, 12, 0.85f, 18))
                 place(mushroom, p, random(0, 360), random(0.5f, 1.1f));
             if (i % 12 == 0 && spot(p, 1, 12, 0.8f, 10))

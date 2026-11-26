@@ -262,6 +262,11 @@ class Level
                 Space::flatten(0, 0, across == 0 ? 14.0f : 24.0f, ground == 2 ? 2.5f : Space::height(0, 0));
         }
         Space::edges = !endless && all["edges"].flag(true);
+        // Grass near the camera, and far trees as pictures of themselves; less of both where memory is short.
+        bool small = App::freeKilobytes > 0 && App::freeKilobytes < 64000;
+        float grass = float(all["grass"].number());
+        Space::grass(grass > 0 ? Assets::model("global:model/grass.glb") : null, grass * (small ? 0.25f : 1.0f), small ? 16 : 36);
+        Space::impostors = small ? 45 : 75;
         Space::restoreLand(all["land"].text());
     }
 

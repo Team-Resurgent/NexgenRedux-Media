@@ -23,6 +23,7 @@ class ForestScreen : Screen
             Entity@ e = Space::spawn(Vec3(x, Space::height(x, z), z));
             e.model(random(0, 1) < 0.65f ? pine : oak);
             e.sway = 0.02f;
+            e.impostor = true;
             float size = random(0.8f, 1.7f);
             e.size = Vec3(size, size * random(0.9f, 1.2f), size);
             e.angles = Vec3(0, random(0, 360), 0);
@@ -32,6 +33,8 @@ class ForestScreen : Screen
         Space::sun(Vec3(0.6f, 0.6f, 0.4f), Color(1, 0.93f, 0.78f));
         Space::farthest(200);
         Space::shadows(0.6f, 40);
+        // Far trees are pictures of themselves: the same look, at a small part of the cost.
+        Space::impostors = 70;
     }
 
     void update(float dt)
