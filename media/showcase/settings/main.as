@@ -1,4 +1,4 @@
-// Volumes and bindings. The engine keeps them between runs.
+// Volumes, bindings, and whether the stick can move a pointer. The engine keeps them between runs.
 
 class SettingsScreen : Screen
 {
@@ -12,7 +12,8 @@ class SettingsScreen : Screen
     uint chosen = 0;
     bool waiting = false;
 
-    uint rows() { return 3 + actions.length() + 1; }
+    uint rows() { return 3 + actions.length() + 2; }
+    uint pointerRow() { return rows() - 2; }
 
     float volume(uint i)
     {
@@ -41,7 +42,12 @@ class SettingsScreen : Screen
         }
         if (Input::repeated("up")) { chosen = chosen == 0 ? rows() - 1 : chosen - 1; move.play(0.5f); }
         if (Input::repeated("down")) { chosen = (chosen + 1) % rows(); move.play(0.5f); }
-        if (chosen < 3)
+        if (chosen == pointerRow() && (Input::pressed("accept") || Input::pressed("left") || Input::pressed("right")))
+        {
+            Input::stickPointer = !Input::stickPointer;
+            accept.play(0.7f);
+        }
+        else if (chosen < 3)
         {
             if (Input::repeated("left")) setVolume(chosen, volume(chosen) - 0.05f);
             if (Input::repeated("right")) setVolume(chosen, volume(chosen) + 0.05f);
@@ -66,8 +72,8 @@ class SettingsScreen : Screen
         c.text(big, "Settings", 80, 26);
         for (uint i = 0; i < rows(); i++)
         {
-            float y = 92 + float(i) * 48 + (i >= 3 ? 14.0f : 0.0f);
-            if (i == chosen) c.roundRect(60, y - 4, 1160, 42, 10, Color(0.2f, 0.28f, 0.44f));
+            float y = 92 + float(i) * 44 + (i >= 3 ? 14.0f : 0.0f);
+            if (i == chosen) c.roundRect(60, y - 4, 1160, 40, 10, Color(0.2f, 0.28f, 0.44f));
             if (i < 3)
             {
                 c.text(font, volumes[i], 80, y);
@@ -79,6 +85,11 @@ class SettingsScreen : Screen
             }
             else if (i == rows() - 1)
                 c.text(font, "Put the controls back", 80, y, Yellow);
+            else if (i == pointerRow())
+            {
+                c.text(font, "Pointer", 80, y);
+                c.text(font, Input::stickPointer ? "The stick moves it, where a screen has one" : "Only a mouse moves it", 420, y, Color(0.75f, 0.85f, 1));
+            }
             else
             {
                 string action = actions[i - 3];

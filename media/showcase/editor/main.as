@@ -2642,6 +2642,8 @@ class EditorScreen : Screen
 
     void update(float dt)
     {
+        // While editing, the stick can move a pointer, if the player chose it: in Play it walks.
+        Input::wantsPointer = !playing;
         shownFor += dt;
         measureOwn();
         takeDropped();
