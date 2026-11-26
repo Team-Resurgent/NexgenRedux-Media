@@ -29,6 +29,7 @@ class Thing
 {
     Json@ json;
     Entity@ entity;
+    Kind@ kind;            // what it is, as it was last made
     Thing(Json@ j) { @json = j; }
 }
 
@@ -592,7 +593,7 @@ class EditorScreen : Screen
             models.insertLast(k.own);
             @k.own = null;
             for (uint n = 0; n < things.length(); n++)
-                if (kindOf(things[n].json) is k)
+                if (kindOfThing(n) is k)
                     make(n);
         }
     }
@@ -872,6 +873,7 @@ class EditorScreen : Screen
 
     void onSave(Widget@ w)
     {
+        keepChange();
         if (!Assets::write(file, write().write()))
         {
             Ui::toast("It couldn't be saved");
@@ -1113,6 +1115,15 @@ class EditorScreen : Screen
 
     // --- What there is ---
 
+    // What one of them is: known since it was made, so lists of them don't look it up each time.
+    Kind@ kindOfThing(uint n)
+    {
+        Thing@ t = things[n];
+        if (t.kind is null)
+            @t.kind = kindOf(t.json);
+        return t.kind;
+    }
+
     Kind@ kindOf(Json@ j)
     {
         string model = j["model"].text(), shape = j["shape"].text(), sound = j["sound"].text();
@@ -1254,6 +1265,7 @@ class EditorScreen : Screen
     void make(uint i)
     {
         Thing@ t = things[i];
+        @t.kind = kindOf(t.json);
         if (t.entity !is null)
             t.entity.destroy();
         Json j;
@@ -1423,6 +1435,7 @@ class EditorScreen : Screen
 
     void openScene(int which)
     {
+        keepChange();
         Json@ one = scenes["scenes"][uint(which)];
         file = path(one["file"].text("scene"));
         sceneName = one["name"].text("Village");
@@ -1809,16 +1822,33 @@ class EditorScreen : Screen
 
     // --- Undoing ---
 
-    // Once for each change. What goes on changing, such as a slider, is one.
+    // Once for each change. What goes on changing, such as a slider, is one. The copy for undoing, and the caps on
+    // the ends of caves, are made a frame later, so that a change costs little in the frame it is made, and several
+    // in one frame make one copy.
+    bool waitingChange = false, waitingApart = false;
+    string waitingKey;
+
     void changed(const string &in key, bool apart = true)
     {
+        dirty = true;
+        waitingApart = waitingChange ? waitingApart || apart : apart;
+        waitingKey = key;
+        waitingChange = true;
+        show();
+    }
+
+    // What changed, made into a copy for undoing. Before anything that needs the copy as it is.
+    void keepChange()
+    {
+        if (!waitingChange)
+            return;
+        waitingChange = false;
+        string key = waitingKey;
+        bool apart = waitingApart;
         closeEnds();
         string text = write().write(true);
         if (text == now)
-        {
-            show();
             return;
-        }
         string named = key + chosen;
         if (apart || named != lastKey || App::time - lastAt > 1.5f || before.length() == 0)
         {
@@ -1830,8 +1860,6 @@ class EditorScreen : Screen
         lastAt = App::time;
         now = text;
         after.resize(0);
-        dirty = true;
-        show();
     }
 
     void back(const string &in text)
@@ -1851,6 +1879,7 @@ class EditorScreen : Screen
 
     void undo()
     {
+        keepChange();
         if (before.length() == 0)
             return;
         after.insertLast(now);
@@ -1861,6 +1890,7 @@ class EditorScreen : Screen
 
     void redo()
     {
+        keepChange();
         if (after.length() == 0)
             return;
         before.insertLast(now);
@@ -1989,7 +2019,7 @@ class EditorScreen : Screen
             // On a grid of 8 metres, the land flat under it; and on from the chosen one, where it is a road too.
             Vec3 at(floor(p.x / 8 + 0.5f) * 8, 0, floor(p.z / 8 + 0.5f) * 8);
             float turned = 0;
-            if (chosen >= 0 && kindOf(things[uint(chosen)].json).group == "Roads")
+            if (chosen >= 0 && kindOfThing(uint(chosen)).group == "Roads")
             {
                 Json@ c = things[uint(chosen)].json;
                 turned = angles(c).y;
@@ -2043,7 +2073,7 @@ class EditorScreen : Screen
     {
         if (chosen < 0)
             return false;
-        Kind@ from = kindOf(things[uint(chosen)].json);
+        Kind@ from = kindOfThing(uint(chosen));
         if (from.group != "Caves")
             return false;
         Thing@ t = things[uint(chosen)];
@@ -2060,7 +2090,7 @@ class EditorScreen : Screen
             {
                 if (int(n) == chosen)
                     continue;
-                Kind@ o = kindOf(things[n].json);
+                Kind@ o = kindOfThing(n);
                 for (uint e = 0; e < o.exits.length(); e++)
                     taken = taken || (worldPlace(things[n].json) + spun(o.exits[e].place, angles(things[n].json).y) - out_).length() < 0.6f;
             }
@@ -2150,6 +2180,7 @@ class EditorScreen : Screen
 
     void play(bool on)
     {
+        keepChange();
         for (uint i = 0; i < thrown.length(); i++)
             thrown[i].destroy();
         thrown.resize(0);
@@ -2647,6 +2678,7 @@ class EditorScreen : Screen
     {
         // While editing, the stick can move a pointer, if the player chose it: in Play it walks.
         Input::wantsPointer = !playing;
+        keepChange();
         shownFor += dt;
         measureOwn();
         takeDropped();
