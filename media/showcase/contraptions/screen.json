@@ -1,0 +1,8 @@
+{
+  "title": "Contraptions",
+  "description": "A car on hills, ropes, springs and platforms",
+  "category": "Scene",
+  "order": 183,
+  "demo": "wait:1 right:2.5 wait:0.5 accept wait:0.4 accept wait:0.4 left:1.2 wait:2",
+  "seconds": 10
+}

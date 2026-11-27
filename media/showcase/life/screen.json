@@ -1,0 +1,8 @@
+{
+  "title": "Life",
+  "description": "Pixels from a seed, fingerprinted and saved",
+  "category": "Drawing",
+  "order": 195,
+  "demo": "wait:3 accept wait:3 alternate wait:2",
+  "seconds": 10
+}
