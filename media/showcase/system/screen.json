@@ -1,0 +1,8 @@
+{
+  "title": "System",
+  "description": "The window, the clipboard, and what a machine says of itself",
+  "category": "Interface",
+  "order": 260,
+  "demo": "wait:1.5 down wait:0.5 accept wait:2 accept wait:2",
+  "seconds": 8
+}
