@@ -559,7 +559,7 @@ class EditorScreen : Screen
             pictureNames.insertLast(label);
             return true;
         }
-        bool sound = ends(file, array<string> = { ".wav", ".ogg", ".mp3" });
+        bool sound = ends(file, array<string> = { ".wav", ".ogg" });
         if ((!sound && !isModel(file)) || kinds.length() >= builtIn + 60)
             return false;
         for (uint i = 0; i < kinds.length(); i++)

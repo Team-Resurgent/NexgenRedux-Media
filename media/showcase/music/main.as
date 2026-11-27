@@ -6,7 +6,7 @@ class MusicScreen : Screen
     Font@ font = Assets::font("global:freesans.sfn", 24);
     Font@ big = Assets::font("global:freesans.sfn", 46);
     array<string> titles = { "Night Shift", "Slow Light" };
-    array<Sound@> tunes = { Assets::sound("asset:tune.ogg"), Assets::sound("asset:ambient.mp3") };
+    array<Sound@> tunes = { Assets::sound("asset:tune.ogg"), Assets::sound("asset:ambient.ogg") };
     Playlist@ list = Playlist();
     array<float> peaks(32);
     float beat = 0;

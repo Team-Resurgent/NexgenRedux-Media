@@ -1,0 +1,8 @@
+{
+  "title": "Synth",
+  "description": "Sound made as it plays, and effects to put it through",
+  "category": "Sound",
+  "order": 175,
+  "demo": "wait:1.5 accept wait:1.5 down down accept wait:1.5 fire wait:0.5 alternate down down down down accept wait:1.5 fire wait:1",
+  "seconds": 10
+}
