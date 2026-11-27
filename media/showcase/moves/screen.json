@@ -1,0 +1,8 @@
+{
+  "title": "Moves",
+  "description": "Animations mixed by speed, root motion, layers and heads that look",
+  "category": "3D",
+  "order": 207,
+  "demo": "wait:2 up:1.5 wait:2 accept wait:2 accept down:2 wait:1 alternate wait:1 alternate",
+  "seconds": 14
+}
