@@ -1,6 +1,6 @@
 {
   "title": "Text",
-  "description": "Scalable fonts, alignment, wrapping, rich text and per-letter effects",
+  "description": "Scalable fonts, wrapping, rich text and letter effects",
   "category": "Drawing",
   "order": 20
 }

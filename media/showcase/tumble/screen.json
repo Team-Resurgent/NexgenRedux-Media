@@ -1,6 +1,6 @@
 {
   "title": "Tumble",
-  "description": "Rigid bodies in space: throw balls at things, and at what hangs on chains, ropes, springs and hinges",
+  "description": "Rigid bodies and joints: throw balls at things",
   "category": "3D",
   "order": 191,
   "demo": "wait:1 fire wait:0.7 right:0.2 fire wait:0.7 left:0.4 fire wait:0.8 up:0.1 fire wait:1 accept wait:1 alternate wait:2 alternate wait:0.2 alternate wait:0.2 alternate wait:1.5 fire wait:1 right:0.5 fire wait:1 right:0.4 fire wait:2",

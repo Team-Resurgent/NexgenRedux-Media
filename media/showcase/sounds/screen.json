@@ -1,6 +1,6 @@
 {
   "title": "Sounds",
-  "description": "Pads, pitch, panning, many voices, and rooms, echoes and filters",
+  "description": "Pads, pitch and panning, in rooms, halls and caves",
   "category": "Sound",
   "order": 160,
   "demo": "cancel wait:2 right wait:0.2 accept wait:0.4 down wait:0.2 accept wait:0.4 fire wait:1.6 fire wait:1.6 fire wait:1.6 fire wait:1.6 fire wait:1.6 fire wait:0.6",
