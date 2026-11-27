@@ -18,6 +18,7 @@ class TumbleScreen : Screen
     array<bool> coiled;
     float rain = 0;
     uint dropped = 0;
+    bool wasShapes = false;
     Vec2 mouseWas;
     bool mouseDown = false;
 
@@ -120,7 +121,8 @@ class TumbleScreen : Screen
             // A door, hinged at its left edge.
             Entity@ door = block(Vec3(0.6f, 1.1f, 0), Vec3(1.2f, 2.2f, 0.1f), Color(0.55f, 0.36f, 0.22f), 2);
             door.drag = 0.8f;
-            Space::hinge(door, null, Vec3(0, 1.1f, 0), Vec3(0, 1, 0));
+            // It opens one way only, as far as a wall would let it.
+            Space::hinge(door, null, Vec3(0, 1.1f, 0), Vec3(0, 1, 0), -110, 0);
             block(Vec3(-0.1f, 1.15f, 0), Vec3(0.2f, 2.3f, 0.2f), Color(0.35f, 0.3f, 0.28f), 0);
             // A weight bobbing on a spring.
             Entity@ weight = block(Vec3(3, 3, -1), Vec3(0.6f, 0.6f, 0.6f), Color(0.85f, 0.75f, 0.2f), 1);
@@ -152,6 +154,10 @@ class TumbleScreen : Screen
         }
         else if (Input::pressed("cancel"))
             build();
+        // Not an action of its own, as the others are taken: the left trigger, or C.
+        bool shapes = Input::padTriggers(0).x > 0.5f || Input::key("C");
+        if (shapes && !wasShapes) Space::showShapes = !Space::showShapes;
+        wasShapes = shapes;
         bool clicked = Input::pressed("fire") || Input::pressed("accept");
         if (clicked)
         {
@@ -248,7 +254,7 @@ class TumbleScreen : Screen
             c.circle(at.x, at.y, 3, White);
         }
         c.roundRect(20, 660, c.width - 40, 42, 12, Color(0, 0, 0, 0.45f));
-        c.text(font, "Fire: throw     Alternate: next (" + kinds[kind] + ")     Cancel: build it again", 40, 668);
+        c.text(font, "Fire: throw     Alternate: next (" + kinds[kind] + ")     Cancel: build it again     Left trigger, C: shapes", 40, 668);
         c.text(font, formatInt(int(Space::contacts)) + " contacts", c.width - 40, 668, White, AlignRight);
     }
 }

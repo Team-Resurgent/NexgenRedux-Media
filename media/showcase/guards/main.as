@@ -21,7 +21,7 @@ class GuardsScreen : Screen
     float yaw = 0, lean = 0.45f;
     Vec3 look;
     Vec2 mouseWas;
-    bool wasDown = false;
+    bool wasDown = false, wasShow = false;
 
     void onEnter()
     {
@@ -131,6 +131,14 @@ class GuardsScreen : Screen
         Vec3 way = side * stick.x - ahead * stick.y;
         // Held: creep, and make no sound.
         bool sneaking = Input::held("alternate");
+        // How the guards find their way: the left trigger, or C.
+        bool show = Input::padTriggers(0).x > 0.5f || Input::key("C");
+        if (show && !wasShow)
+        {
+            Space::showNavigation = !Space::showNavigation;
+            Space::showShapes = Space::showNavigation;
+        }
+        wasShow = show;
         Vec3 wanted = way * (sneaking ? 2.2f : 5.5f);
         Vec3 motion = hero.motion;
         float grip = clamp((hero.onGround ? 12 : 3) * dt, 0, 1);
@@ -206,7 +214,7 @@ class GuardsScreen : Screen
             c.alpha = help;
             c.roundRect(c.width * 0.5f - 460, 600, 920, 88, 14, Color(0, 0, 0, 0.5f));
             c.text(font, "Take the gem from behind the walls, and bring it back here", c.width * 0.5f, 610, Color(1, 0.9f, 0.6f), AlignCenter);
-            c.text(font, Input::usingPad ? "Left stick: walk    Hold B: creep quietly    Right stick: look" : "Arrows: walk    Hold Shift: creep quietly    Right button: look", c.width * 0.5f, 648, White, AlignCenter);
+            c.text(font, Input::usingPad ? "Left stick: walk    Hold B: creep quietly    Right stick: look    Left trigger: how they find their way" : "Arrows: walk    Hold Shift: creep quietly    Right button: look    C: how they find their way", c.width * 0.5f, 648, White, AlignCenter);
             c.alpha = 1;
         }
         if (fade > 0)

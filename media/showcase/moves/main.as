@@ -1,5 +1,6 @@
 // Animation beyond one at a time: idle, walk and run mixed by speed, a stride that carries the robot along,
-// a wave over the top half while walking on, and heads that follow a ball.
+// a wave over the top half while walking on, heads that follow a buzzing drone and hands that reach for it. The drone
+// is heard higher coming and lower going: Doppler.
 
 class MovesScreen : Screen
 {
@@ -15,6 +16,7 @@ class MovesScreen : Screen
     float waverAround = 0;
     bool waving = true;
     bool looking = true;
+    bool reaching = false;
     array<string> names = { "idle", "walk", "run" };
     array<float> points = { 0, 1.5f, 4 };
 
@@ -46,6 +48,9 @@ class MovesScreen : Screen
         ball.glowing = 1;
         ball.shadow = false;
         ball.light(Color(1, 0.6f, 0.3f), 5);
+        // Heard from where it is, and bent by how fast it comes and goes: a little more than life, to be plain.
+        ball.sound(Assets::sound("global:sound/engine.wav"), 0.6f, 30, true);
+        Space::doppler = 2.5f;
     }
 
     Entity@ robotAt(const Vec3 &in at)
@@ -88,10 +93,12 @@ class MovesScreen : Screen
         // The ball wanders; the heads follow it, or the stick moves it.
         if (Input::pressed("alternate"))
             looking = !looking;
-        Vec3 at = Vec3(sin(App::time * 0.5f) * 9, 1.4f + sin(App::time * 1.3f) * 0.8f, 2 + cos(App::time * 0.37f) * 3);
+        Vec3 at = Vec3(sin(App::time * 1.1f) * 10, 1.4f + sin(App::time * 1.3f) * 0.8f, 3 + cos(App::time * 0.55f) * 4);
         if (abs(Input::move.x) > 0.3f)
             at.x = ball.place.x + Input::move.x * 6 * dt;
         ball.place = at;
+        if (Input::pressed("fire"))
+            reaching = !reaching;
         array<Entity@> heads = { mixer, strider, waver };
         for (uint i = 0; i < heads.length(); i++)
         {
@@ -99,6 +106,8 @@ class MovesScreen : Screen
                 heads[i].lookAt("head", ball.place);
             else
                 heads[i].lookAway();
+            // The right hand toward it, as far as the arm goes, over whatever it is doing.
+            heads[i].reach("hand.r", ball.place, reaching ? 1.0f : 0.0f);
         }
     }
 
@@ -130,7 +139,7 @@ class MovesScreen : Screen
         if (Space::toScreen(waver.worldPlace + Vec3(0, 2.4f, 0), p))
             label(c, waving ? "waving over walking" : "walking", p);
         c.roundRect(20, 660, c.width - 40, 42, 12, Color(0, 0, 0, 0.45f));
-        c.text(font, "Up, down: faster, slower     Accept: " + (waving ? "stop waving" : "wave") + "     Alternate: " + (looking ? "stop looking" : "look at the ball"), 40, 668);
+        c.text(font, "Up, down: speed   Accept: " + (waving ? "stop waving" : "wave") + "   Alternate: " + (looking ? "stop looking" : "look") + "   Fire: " + (reaching ? "stop reaching" : "reach for it"), 40, 668);
     }
 
     void label(Canvas@ c, const string &in text, const Vec2 &in at)

@@ -96,7 +96,12 @@ class PhysicsScreen : Screen
             }
         }
         if (Input::pressed("cancel")) Screens::replace("physics");
+        // Not an action of its own, as the others are taken: the left trigger, or C.
+        bool shapes = Input::padTriggers(0).x > 0.5f || Input::key("C");
+        if (shapes && !wasShapes) Scene::showShapes = !Scene::showShapes;
+        wasShapes = shapes;
     }
+    bool wasShapes = false;
 
     void draw(Canvas@ c)
     {
@@ -106,6 +111,6 @@ class PhysicsScreen : Screen
         Scene::draw(c);
         c.ring(cursor.x, cursor.y, 14, 3, White);
         c.text(font, formatInt(Scene::count) + " bodies, " + formatInt(Scene::contacts) + " contacts", 40, 20, Gray);
-        c.text(font, "Accept: drop    Alternate: blast    Cancel: start again", 1240, 20, Yellow, AlignRight);
+        c.text(font, "Accept: drop    Alternate: blast    Cancel: start again    Left trigger, C: shapes", 1240, 20, Yellow, AlignRight);
     }
 }

@@ -10,6 +10,7 @@ class ToppleScreen : Screen
     array<string> doing = { "idle", "wave", "dance", "idle", "run" };
     uint next = 0;
     uint thrown = 3;
+    bool wasShapes = false;
     Vec3 eye(0, 7, 11);
 
     void onEnter()
@@ -90,6 +91,9 @@ class ToppleScreen : Screen
             toss(thrown);
         if (Input::pressed("right"))
             thrown = (thrown + 1) % robots.length();
+        bool shapes = Input::padTriggers(0).x > 0.5f || Input::key("C");
+        if (shapes && !wasShapes) Space::showShapes = !Space::showShapes;
+        wasShapes = shapes;
         if (Input::pressed("accept"))
         {
             knock(next);
@@ -130,6 +134,6 @@ class ToppleScreen : Screen
         c.roundRect(24, 22, 300, 44, 14, Color(0, 0, 0, 0.45f));
         c.text(font, formatInt(int(lying)) + " of " + formatInt(int(robots.length())) + " lying down", 44, 31);
         c.roundRect(20, 660, c.width - 40, 42, 12, Color(0, 0, 0, 0.45f));
-        c.text(font, "Accept: knock one over     Alternate: all of them     Fire: throw one about     Right: another to throw", 40, 668);
+        c.text(font, "Accept: knock one over   Alternate: all of them   Fire: throw one about   Right: another   Left trigger, C: shapes", 40, 668);
     }
 }

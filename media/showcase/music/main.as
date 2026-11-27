@@ -1,4 +1,5 @@
-// Music is decoded as it plays. The bars are its spectrum and the circle is its wave.
+// Music is decoded as it plays, from a playlist that goes on to the next by itself, fading one into the other. The bars
+// are its spectrum and the circle is its wave.
 
 class MusicScreen : Screen
 {
@@ -6,30 +7,29 @@ class MusicScreen : Screen
     Font@ big = Assets::font("global:freesans.sfn", 46);
     array<string> titles = { "Night Shift", "Slow Light" };
     array<Sound@> tunes = { Assets::sound("asset:tune.ogg"), Assets::sound("asset:ambient.mp3") };
-    uint playing = 0;
-    Voice voice;
-    bool paused = false;
+    Playlist@ list = Playlist();
     array<float> peaks(32);
     float beat = 0;
     float turn = 0;
 
-    void onEnter() { voice = tunes[0].playMusic(0.9f, 0.5f); }
+    void onEnter()
+    {
+        for (uint i = 0; i < tunes.length(); i++)
+            list.add(tunes[i]);
+        list.volume = 0.9f;
+        list.crossfade = 3;
+        list.play(0.5f);
+    }
 
     void update(float dt)
     {
-        if (Input::pressed("left") || Input::pressed("right"))
-        {
-            // Crossfade.
-            voice.stop(1.2f);
-            playing = 1 - playing;
-            voice = tunes[playing].playMusic(0.9f, 1.2f);
-            paused = false;
-        }
+        // Across, fading one into the other.
+        if (Input::pressed("left"))
+            list.previous(1.2f);
+        if (Input::pressed("right"))
+            list.next(1.2f);
         if (Input::pressed("accept"))
-        {
-            paused = !paused;
-            voice.paused = paused;
-        }
+            list.paused = !list.paused;
         float low = 0;
         for (uint i = 0; i < 4; i++) low += Audio::spectrum(i) / 4;
         beat = low > beat ? low : beat * 0.92f;
@@ -79,9 +79,9 @@ class MusicScreen : Screen
             c.gradient(x, 604, 28, h * 0.25f, fade(color, 0.25f), fade(color, 0));
         }
 
-        c.text(big, titles[playing], 60, 30);
-        float length = tunes[playing].seconds;
-        c.text(font, clock(voice.position) + (length > 0 ? " / " + clock(length) : "") + (paused ? "   paused" : ""), 62, 90, Color(0.7f, 0.75f, 0.9f));
+        c.text(big, titles[list.index], 60, 30);
+        float length = list.seconds;
+        c.text(font, clock(list.position) + (length > 0 ? " / " + clock(length) : "") + (list.paused ? "   paused" : "") + "      " + formatInt(int(list.index + 1)) + " of " + formatInt(int(list.count)), 62, 90, Color(0.7f, 0.75f, 0.9f));
         c.text(font, Input::usingPad ? "Left and right: change tune    A: pause" : "Left and right: change tune    Enter: pause", 640, 672, Color(0.7f, 0.75f, 0.9f), AlignCenter);
     }
 
