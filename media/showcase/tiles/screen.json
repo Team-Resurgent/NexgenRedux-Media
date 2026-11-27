@@ -1,0 +1,8 @@
+{
+  "title": "Tiles",
+  "description": "Terrains that join up with their neighbours",
+  "category": "Sprites",
+  "order": 62,
+  "demo": "wait:0.6 right:0.6 accept right:0.15 accept right:0.15 accept down:0.15 accept down:0.15 accept alternate left:0.15 alternate left:0.15 alternate left:0.15 alternate wait:1",
+  "seconds": 9
+}
