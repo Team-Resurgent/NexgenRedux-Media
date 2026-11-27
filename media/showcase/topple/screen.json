@@ -1,8 +1,8 @@
 {
   "title": "Topple",
-  "description": "Ragdolls: knocked over, falling off ledges, and getting up again",
+  "description": "Ragdolls: knocked over, thrown about, and getting up again",
   "category": "3D",
   "order": 208,
-  "demo": "wait:1.5 accept wait:1 accept wait:1 accept wait:2.5 alternate wait:4",
-  "seconds": 12
+  "demo": "wait:1.5 accept wait:1 accept wait:1 accept wait:1 fire wait:0.9 fire wait:0.9 fire wait:1.5 alternate wait:4",
+  "seconds": 14
 }

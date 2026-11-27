@@ -9,6 +9,7 @@ class ToppleScreen : Screen
     array<float> down;
     array<string> doing = { "idle", "wave", "dance", "idle", "run" };
     uint next = 0;
+    uint thrown = 3;
     Vec3 eye(0, 7, 11);
 
     void onEnter()
@@ -72,8 +73,23 @@ class ToppleScreen : Screen
         down[i] = 3.5f;
     }
 
+    // High into the air, turning over; again while it is still limp, and it goes up again from wherever it is.
+    void toss(uint i)
+    {
+        Entity@ e = robots[i];
+        Vec3 back = Vec3(0, 0, -1) - e.place * 0.15f;
+        e.ragdoll(true, Vec3(random(-2.5f, 2.5f) + back.x, random(7, 9), random(-1, 1.5f) + back.z));
+        // A kick to one end as well, so it spins.
+        e.push(Vec3(random(-40, 40), 0, random(-40, 40)), e.place + Vec3(0, 0.3f, 0));
+        down[i] = 3.5f;
+    }
+
     void update(float dt)
     {
+        if (Input::pressed("fire"))
+            toss(thrown);
+        if (Input::pressed("right"))
+            thrown = (thrown + 1) % robots.length();
         if (Input::pressed("accept"))
         {
             knock(next);
@@ -114,6 +130,6 @@ class ToppleScreen : Screen
         c.roundRect(24, 22, 300, 44, 14, Color(0, 0, 0, 0.45f));
         c.text(font, formatInt(int(lying)) + " of " + formatInt(int(robots.length())) + " lying down", 44, 31);
         c.roundRect(20, 660, c.width - 40, 42, 12, Color(0, 0, 0, 0.45f));
-        c.text(font, "Accept: knock one over     Alternate: knock them all over", 40, 668);
+        c.text(font, "Accept: knock one over     Alternate: all of them     Fire: throw one about     Right: another to throw", 40, 668);
     }
 }
