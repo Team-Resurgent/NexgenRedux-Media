@@ -96,7 +96,7 @@ class LensScreen : Screen
         Space::reflections(on[1] ? 0.55f : 0.0f);
         // Sharp on the robot, wherever the camera is.
         Space::focus(on[2] ? 5.0f : 0.0f, 0.8f, 14, 5, 1.5f);
-        Space::autoExposure(on[3] ? 0.5f : 0.0f);
+        Space::autoExposure(on[3] ? 0.4f : 0.0f);
     }
 
     void update(float dt)
