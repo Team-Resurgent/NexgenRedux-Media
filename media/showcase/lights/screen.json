@@ -1,8 +1,8 @@
 {
-  "title": "Night lights",
-  "description": "Sixteen lights in the dark",
-  "category": "3D",
-  "order": 194,
-  "demo": "wait:2 right:1.5 accept wait:3 left:1 accept wait:2",
-  "seconds": 10
+  "title": "Lights",
+  "description": "Lights on the plane, and the shadows walls cast",
+  "category": "Effects",
+  "order": 104,
+  "demo": "wait:1 right:1.2 down:0.8 right:1.4 up:1.2 right:1 down:1.4 left:2",
+  "seconds": 12
 }

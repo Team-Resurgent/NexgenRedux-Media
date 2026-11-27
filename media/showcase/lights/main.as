@@ -1,90 +1,79 @@
-// Lights that move: sixteen at once, the nearest four on each thing.
-
-class Wisp : Behaviour
-{
-    float at = 0;
-    float reach = 0;
-    Color color;
-
-    Wisp(float at_, float reach_, const Color &in color_)
-    {
-        at = at_;
-        reach = reach_;
-        color = color_;
-    }
-
-    void update(float dt)
-    {
-        at += dt * (0.5f + 2 / reach);
-        entity.place = Vec3(sin(at) * reach, 0.8f + sin(at * 2.3f) * 0.5f, cos(at * 1.1f) * reach);
-        float flicker = 2 + sin(at * 11) * 0.2f;
-        entity.light(Color(color.r * flicker, color.g * flicker, color.b * flicker), 6);
-    }
-}
+// Lights on the plane: a dark dungeon, a lantern that goes where you do, torches that flicker, crystals of colour, and
+// crates and a pillar that turns, all casting shadows. Scene::ambient is the dark; each light adds to it.
 
 class LightsScreen : Screen
 {
     Font@ font = Assets::font("global:freesans.sfn", 22);
-    Model@ crystal = Assets::model("global:model/crystal.glb");
-    Model@ rock = Assets::model("global:model/rock.glb");
-    Model@ mushroom = Assets::model("global:model/mushroom.glb");
-    float around = 0;
-    bool moon = false;
+    Entity@ hero;
+    array<Entity@> torches;
+    array<Entity@> crates;
+    Entity@ pillar;
+    float t = 0;
 
     void onEnter()
     {
-        Mesh@ floor = Mesh();
-        floor.plane(44, 44, 40, Color(0.5f, 0.5f, 0.55f));
-        Space::spawn(Vec3(0, 0, 0)).mesh(floor);
-        for (int i = 0; i < 40; i++)
+        Scene::load("asset:scene.json");
+        Scene::gravity = Vec2(0, 0);
+        Scene::ambient = Color(0.07f, 0.07f, 0.13f);
+        Scene::lightLayer = 5;      // the flames above it glow, unlit
+
+        @hero = Scene::spawn(Vec2(100, 100));
+        hero.disc(13, Color(1, 0.85f, 0.55f));
+        hero.circle(13);
+        hero.solid = true;
+        hero.light(Color(1, 0.86f, 0.62f), 260);
+
+        array<Vec2> places = { Vec2(260, 60), Vec2(1020, 60), Vec2(60, 420), Vec2(1220, 300), Vec2(640, 660), Vec2(420, 300) };
+        for (uint i = 0; i < places.length(); i++)
         {
-            float a = float(i) * 2.4f, r = 1.2f + sqrt(float(i)) * 1.5f;
-            Vec3 p(sin(a) * r, 0, cos(a) * r);
-            Entity@ e = Space::spawn(p);
-            e.angles = Vec3(0, float(i * 77), 0);
-            if (i % 3 == 0)
-            {
-                e.shape(SolidCylinder, Color(0.75f, 0.73f, 0.7f));
-                float tall = 1.5f + float(i % 5) * 0.5f;
-                e.place = p + Vec3(0, tall * 0.5f, 0);
-                e.size = Vec3(0.7f, tall, 0.7f);
-            }
-            else
-            {
-                e.model(i % 3 == 1 ? rock : mushroom);
-                float size = 0.5f + float(i % 4) * 0.2f;
-                e.size = Vec3(size, size, size);
-            }
-            e.shine = 0.4f;
+            Entity@ torch = Scene::spawn(places[i]);
+            torch.disc(7, Color(1, 0.6f, 0.2f));
+            torch.layer = 10;
+            torches.insertLast(torch);
         }
-        for (int i = 0; i < 16; i++)
+        array<Vec2> gems = { Vec2(860, 200), Vec2(680, 330), Vec2(1100, 560) };
+        array<Color> colours = { Color(0.3f, 0.6f, 1), Color(0.4f, 1, 0.5f), Color(1, 0.35f, 0.8f) };
+        for (uint i = 0; i < gems.length(); i++)
         {
-            Color color = hsv(float(i) / 16.0f, 0.7f, 1);
-            Entity@ e = Space::spawn(Vec3(0, 1, 0));
-            e.glow(1, color);
-            e.add(Wisp(float(i) * 1.7f, 1.5f + float(i) * 0.5f, color));
+            Entity@ gem = Scene::spawn(gems[i]);
+            gem.disc(9, colours[i]);
+            gem.layer = 10;
+            gem.light(colours[i], 200);
         }
-        Space::sky(Color(0.01f, 0.01f, 0.04f), Color(0.05f, 0.05f, 0.12f));
-        Space::fog(Color(0.04f, 0.04f, 0.1f), 12, 30);
+        for (int i = 0; i < 3; i++)
+        {
+            Entity@ crate = Scene::spawn(Vec2(520 + float(i) * 120, 420));
+            crate.rect(44, 44, Color(0.55f, 0.4f, 0.25f));
+            crate.box(44, 44);
+            crate.wall = true;
+            crate.occluder = true;
+            crates.insertLast(crate);
+        }
+        @pillar = Scene::spawn(Vec2(860, 380));
+        pillar.rect(140, 20, Color(0.45f, 0.45f, 0.55f));
+        pillar.box(140, 20);
+        pillar.occluder = true;
     }
 
     void update(float dt)
     {
-        around += (Input::move.x * 1.5f + 0.1f) * dt;
-        if (Input::pressed("accept"))
-            moon = !moon;
-        Space::sun(Vec3(0.5f, 0.7f, -0.5f), moon ? Color(0.25f, 0.28f, 0.4f) : Color(0, 0, 0));
-        Space::ambient(Color(0.04f, 0.04f, 0.07f), Color(0.02f, 0.02f, 0.03f));
-        Space::shadows(moon ? 0.7f : 0.0f, 16);
-        Space::camera(Vec3(sin(around) * 9, 4.2f, cos(around) * 9), Vec3(0, 0.7f, 0), 55);
+        t += dt;
+        hero.velocity = Input::move * 230;
+        for (uint i = 0; i < torches.length(); i++)
+        {
+            float flicker = 0.85f + noise(t * 5, float(i) * 9) * 0.25f;
+            torches[i].light(Color(flicker, 0.55f * flicker, 0.2f * flicker), 190 + noise(t * 3, float(i) * 7 + 50) * 20);
+        }
+        for (uint i = 0; i < crates.length(); i++)
+            crates[i].position = Vec2(520 + float(i) * 120 + sin(t * 0.8f + float(i)) * 50, 420 + cos(t * 0.6f + float(i) * 2) * 30);
+        pillar.rotation = t * 40;
     }
 
     void draw(Canvas@ c)
     {
-        c.designHeight(720);
-        Space::draw(c);
-        c.bloom(0.55f, 0.65f);
-        c.roundRect(20, 660, c.width - 40, 42, 12, Color(0, 0, 0, 0.45f));
-        c.text(font, "Left, right: look around     Accept: " + (moon ? "hide the moon" : "bring out the moon"), 40, 668);
+        c.design(1280, 720);
+        c.rect(0, 0, 1280, 720, Color(0.1f, 0.1f, 0.12f));
+        Scene::draw(c);
+        c.text(font, "A lantern, torches and crystals; the walls, crates and pillar cast shadows", 20, 690, Color(0.85f, 0.88f, 1));
     }
 }
