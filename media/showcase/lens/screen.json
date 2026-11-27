@@ -1,0 +1,8 @@
+{
+  "title": "Lens",
+  "description": "Ambient occlusion, reflections, depth of field with bokeh, auto exposure, god rays, decals and frosted glass",
+  "category": "3D",
+  "order": 209,
+  "demo": "wait:1 fire wait:0.4 fire wait:0.4 fire wait:0.4 fire wait:0.8 down down accept wait:2.5 down accept wait:2.5 up up up up accept wait:2",
+  "seconds": 14
+}
