@@ -1,0 +1,8 @@
+{
+  "title": "Video",
+  "description": "A film with its sound, shown on a card too",
+  "category": "Drawing",
+  "order": 197,
+  "demo": "wait:3 accept wait:1 accept wait:2 alternate wait:2",
+  "seconds": 12
+}
