@@ -1,0 +1,7 @@
+{
+  "title": "Arena",
+  "description": "Ships kept alike in every game in the room",
+  "category": "Network",
+  "order": 210,
+  "demo": "wait:1 right:0.6 fire+up:0.5 fire+left:0.8 fire+down+left:0.4 down:0.5 fire+right:0.9 fire+up+right:0.5 wait:1"
+}
