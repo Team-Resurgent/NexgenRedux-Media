@@ -1,0 +1,8 @@
+{
+  "title": "Hub",
+  "description": "A later console home: tiles in a row, smoke behind them",
+  "category": "Interface",
+  "order": 129,
+  "demo": "wait:1.5 right wait:1 right wait:1 right wait:1.2 down wait:1.2 right wait:0.8 up wait:0.8 right wait:1 up wait:0.8 right wait:0.8 right wait:1 down wait:1.5",
+  "seconds": 16
+}

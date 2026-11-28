@@ -40,7 +40,7 @@ class HomeScreen : Screen
     Sound@ yes = Assets::sound("global:sound/accept.wav");
     Sound@ back = Assets::sound("global:sound/back.wav");
     Sound@ whoosh = Assets::sound("global:sound/whoosh.wav");
-    Texture@ avatar = Assets::texture("asset:avatar.png");
+    Texture@ avatar = Assets::texture("global:picture/avatar.png");
     array<string> ids = { "explore", "lens", "moves", "blocks", "forest", "water", "skim", "topple", "quest", "guards", "machines", "curves", "shooter", "mist", "lights", "solids", "platformer", "cracktro" };
     array<Tile@> tiles;
     array<Card@> cards;
@@ -70,7 +70,7 @@ class HomeScreen : Screen
             t.title = ids[i];
             if (t.title[0] >= 97 && t.title[0] <= 122) t.title[0] = t.title[0] - 32;
             t.kind = "Demo";
-            @t.art = Assets::texture("asset:" + ids[i] + ".jpg");
+            @t.art = Assets::texture("global:picture/demos/" + ids[i] + ".jpg");
             for (uint s = 0; s < Screens::count; s++)
                 if (Screens::id(s) == ids[i])
                 {
