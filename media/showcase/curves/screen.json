@@ -1,0 +1,8 @@
+{
+  "title": "Curves and Batches",
+  "description": "Bezier curves, triangulating, sprite batches and pixel fonts",
+  "category": "Drawing",
+  "order": 16,
+  "demo": "wait:1 fire+right:0.6 wait:0.3 accept wait:0.5 fire+up:0.5 wait:2",
+  "seconds": 8
+}

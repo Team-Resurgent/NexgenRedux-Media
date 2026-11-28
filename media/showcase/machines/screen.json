@@ -1,0 +1,8 @@
+{
+  "title": "Machines",
+  "description": "Sprung wheels, a pulley lift, gears and a balloon that follows",
+  "category": "Scene",
+  "order": 184,
+  "demo": "wait:1 right:0.8 wait:0.4 accept wait:0.5 accept wait:0.5 accept wait:0.6 up:0.4 wait:1.5 left:1 wait:2",
+  "seconds": 10
+}
