@@ -242,9 +242,13 @@ class ChannelsScreen : Screen
             float r = 26 + age * 70;
             c.ellipseLine(x, y, r, r * 0.25f, fine, fade(White, 0.6f * a * a));
         }
-        // Its shadow on the floor, over the ripples: dark in the middle, soft at its edge.
-        c.ellipse(x, y + 12, 44, 12, fade(Color(0.25f, 0.25f, 0.28f), 0.45f));
-        c.ellipse(x, y + 12, 36, 9, fade(Color(0.2f, 0.2f, 0.22f), 0.7f));
+        // It floats a little above the floor, rising and settling; its shadow, over the ripples, is smaller and fainter
+        // the higher it is.
+        float rise = (1 - cos(time * 1.4f)) * 4;
+        float under = 1 - rise * 0.03f;
+        c.ellipse(x, y + 12, 44 * under, 12 * under, fade(Color(0.25f, 0.25f, 0.28f), 0.45f * under));
+        c.ellipse(x, y + 12, 36 * under, 9 * under, fade(Color(0.2f, 0.2f, 0.22f), 0.7f * under));
+        y -= rise;
         // The rim: silver, lighter above, darker below.
         // The rim: silver, fading softly away at its outside edge.
         c.glow(x, y - 16, 50, fade(Color(0.95f, 0.96f, 0.98f), 0.75f));
