@@ -53,6 +53,12 @@ class ChannelsScreen : Screen
     Texture@ launchArt;
     float time = 0;
     array<Bubble@> bubbles;
+    // The bubbles' shapes, drawn once each into a small picture: a disc, a fine ring and a thick one. Each bubble is
+    // then a few squares of them, rather than circles of many sides each frame, which the original Xbox can't afford.
+    Texture@ discShape;
+    Texture@ ringShape;
+    Texture@ thickShape;
+    bool shapesMade = false;
     array<float> rings;       // when each ripple began
     float nextRing = 0;
     float RingLife = 4.5f;
@@ -175,22 +181,42 @@ class ChannelsScreen : Screen
             Color tint = Color(1, 0.93f, 0.85f);
             if (b.kind == 0)
             {
-                c.circle(at.x, at.y, b.size, fade(tint, 0.35f * a));
-                c.ring(at.x, at.y, b.size, 1.5f, fade(tint, 0.7f * a));
-                c.ring(at.x, at.y, b.size + 4, 1, fade(tint, 0.3f * a));
-                c.circle(at.x, at.y, max(2.0f, b.size * 0.1f), fade(Color(0.4f, 0.1f, 0.05f), 0.8f * a));
+                shape(c, discShape, at, b.size, fade(tint, 0.35f * a));
+                shape(c, ringShape, at, b.size, fade(tint, 0.7f * a));
+                shape(c, ringShape, at, b.size + 4, fade(tint, 0.3f * a));
+                shape(c, discShape, at, max(2.0f, b.size * 0.1f), fade(Color(0.4f, 0.1f, 0.05f), 0.8f * a));
             }
             else if (b.kind == 1)
-                c.ring(at.x, at.y, b.size, max(1.5f, b.size * 0.22f), fade(tint, 0.6f * a));
+                shape(c, thickShape, at, b.size, fade(tint, 0.6f * a));
             else if (b.kind == 2)
             {
-                c.ring(at.x, at.y, b.size, 1.5f, fade(tint, 0.55f * a));
-                c.ring(at.x, at.y, b.size * 0.6f, 1.5f, fade(tint, 0.45f * a));
-                c.circle(at.x, at.y, b.size * 0.3f, fade(tint, 0.35f * a));
+                shape(c, ringShape, at, b.size, fade(tint, 0.55f * a));
+                shape(c, ringShape, at, b.size * 0.6f, fade(tint, 0.45f * a));
+                shape(c, discShape, at, b.size * 0.3f, fade(tint, 0.35f * a));
             }
             else
-                c.circle(at.x, at.y, b.size * 0.6f, fade(tint, 0.5f * a));
+                shape(c, discShape, at, b.size * 0.6f, fade(tint, 0.5f * a));
         }
+    }
+
+    // One of the shapes, as large as a radius, tinted.
+    void shape(Canvas@ c, Texture@ t, const Vec2 &in at, float radius, const Color &in tint)
+    {
+        float half = radius * 64 / 56;   // the shapes are drawn 56 across a picture 128 wide, with room for their edges
+        c.image(t, at.x - half, at.y - half, half * 2, half * 2, tint);
+    }
+
+    // Draws the three shapes into their pictures, once, before anything else is drawn.
+    void makeShapes(Canvas@ c)
+    {
+        shapesMade = true;
+        @discShape = Assets::picture(128, 128);
+        @ringShape = Assets::picture(128, 128);
+        @thickShape = Assets::picture(128, 128);
+        if (discShape is null || ringShape is null || thickShape is null) return;
+        if (c.beginPicture(discShape)) { c.circle(64, 64, 56, White); c.endPicture(); }
+        if (c.beginPicture(ringShape)) { c.ring(64, 64, 56, 4, White); c.endPicture(); }
+        if (c.beginPicture(thickShape)) { c.ring(64, 64, 56, 13, White); c.endPicture(); }
     }
 
     // The floor: the stage from the Xperience skin (see asset/CREDITS.txt), tinted grey as the skin tints it, raised
@@ -207,12 +233,14 @@ class ChannelsScreen : Screen
     {
         float x = 1150, y = 666;
         // Rings one at a time, at moments of their own, each spreading and fading.
+        // Fine, but never thinner than a pixel and a half of the real screen, or a small one loses them.
+        float fine = max(1.3f, 1.5f * 1280.0f / max(1.0f, float(Window::width)));
         for (uint i = 0; i < rings.length(); i++)
         {
             float age = time - rings[i];
             float a = 1 - age / RingLife;
             float r = 26 + age * 70;
-            c.ellipseLine(x, y, r, r * 0.25f, 1.3f, fade(White, 0.6f * a * a));
+            c.ellipseLine(x, y, r, r * 0.25f, fine, fade(White, 0.6f * a * a));
         }
         c.ellipse(x, y + 12, 40, 10, fade(Black, 0.3f));
         // The rim: silver, lighter above, darker below.
@@ -332,6 +360,7 @@ class ChannelsScreen : Screen
 
     void draw(Canvas@ c)
     {
+        if (!shapesMade) makeShapes(c);
         c.design(1280, 720);
         sky(c);
         floor(c);
